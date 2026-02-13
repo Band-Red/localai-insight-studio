@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const nodeExternals = require('webpack-node-externals');
 
 const commonConfig = {
   mode: 'development',
@@ -34,6 +35,7 @@ module.exports = [
   // إعدادات العملية الرئيسية (Main)
   Object.assign({}, commonConfig, {
     target: 'electron-main',
+    externals: [nodeExternals()],
     entry: {
       main: './src/main/main.ts',
       preload: './src/main/preload.ts',
