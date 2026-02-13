@@ -1,0 +1,101 @@
+/* Previewer CSS Module - مظهر احترافي لواجهة المعاينة */
+
+.previewContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #0c0c12;
+    color: #e2e2e8;
+    border-right: 1px solid #1e1e26;
+    direction: rtl;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background-color: #14141d;
+    border-bottom: 1px solid #22222b;
+}
+
+.titleArea {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.titleText {
+    font-size: 15px;
+    font-weight: 600;
+    color: #00ffcc;
+    letter-spacing: 0.5px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+}
+
+.actionButton {
+    background-color: #1c1c28;
+    border: 1px solid #2d2d3f;
+    color: #8a8a9e;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.actionButton:hover {
+    background-color: #252535;
+    color: #ffffff;
+    border-color: #3f3f5a;
+}
+
+.contentArea {
+    flex: 1;
+    position: relative;
+    background-color: #09090e;
+    overflow: hidden;
+}
+
+.codeWindow {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #d1d1d1;
+    overflow: auto;
+    white-space: pre-wrap;
+}
+
+/* تخصيص شريط التمرير */
+.codeWindow::-webkit-scrollbar {
+    width: 8px;
+}
+
+.codeWindow::-webkit-scrollbar-thumb {
+    background: #1e1e2b;
+    border-radius: 4px;
+}
+
+.statusFooter {
+    padding: 8px 20px;
+    background-color: #11111a;
+    border-top: 1px solid #1e1e26;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.statusLabel {
+    font-size: 11px;
+    color: #52526b;
+    text-transform: uppercase;
+}

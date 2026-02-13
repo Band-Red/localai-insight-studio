@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    /* تحديث moduleResolution لحل تحذير الـ Deprecation */
+    "moduleResolution": "bundler", 
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+
+    /* بديل لـ baseUrl المهجور: استخدام rootDirs أو الاكتفاء بالمسارات النسبية */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    /* لإخفاء التحذيرات مؤقتاً إذا كنت مضطراً لاستخدام الإعدادات القديمة */
+    "ignoreDeprecations": "5.0"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "venv"]
+}

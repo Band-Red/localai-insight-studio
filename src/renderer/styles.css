@@ -1,0 +1,118 @@
+/* * Global Styles - LocalAI Studio V6
+ * نظام التنسيق الموحد الذي يدعم الهوية البصرية والـ RTL
+ */
+
+:root {
+  /* نظام الألوان الأساسي - Dark Mode */
+  --bg-main: #09090b;
+  --bg-sidebar: #121217;
+  --bg-card: #18181b;
+  
+  /* ألوان التمييز (النيون) */
+  --accent: #00ffcc;
+  --accent-glow: rgba(0, 255, 204, 0.3);
+  --accent-dim: rgba(0, 255, 204, 0.1);
+  
+  /* ألوان النصوص */
+  --text-primary: #fafafa;
+  --text-secondary: #71717a;
+  --text-muted: #52525b;
+  
+  /* ألوان الحالة */
+  --danger: #ef4444;
+  --success: #10b981;
+  --info: #3b82f6;
+  --warning: #f59e0b;
+  
+  /* الحدود والظلال */
+  --border: #1f1f23;
+  --border-light: #2a2a3c;
+  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* التنسيقات الأساسية للجسم */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  direction: rtl; /* دعم اللغة العربية افتراضياً */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden; /* لمنع السكرول الخارجي لضمان ثبات الواجهة */
+}
+
+/* حاوية التطبيق الرئيسية */
+#app-root, .app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* تحسينات الروابط والأزرار الافتراضية */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* تخصيص شريط التمرير (Scrollbar) بشكل عصري */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* فئات مساعدة عامة */
+.glass-effect {
+  background: rgba(24, 24, 27, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+.neon-text {
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.neon-border {
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 15px var(--accent-dim);
+}
+
+/* إعدادات التباعد الافتراضية */
+h1, h2, h3, h4, p {
+  margin: 0;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* استعلامات الوسائط لتحسين الاستجابة (Responsive) */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 60px;
+  }
+}

@@ -1,0 +1,115 @@
+/* Emulator CSS Module - المظهر الداكن الموحد */
+
+.emulatorContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #0d0d12;
+    color: #fafafa;
+    overflow: hidden;
+    direction: rtl;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: #16161e;
+    border-bottom: 1px solid #1f1f23;
+    z-index: 10;
+}
+
+.deviceSelectors {
+    display: flex;
+    gap: 10px;
+}
+
+.deviceButton {
+    background-color: #1f1f2e;
+    border: 1px solid #33334d;
+    color: #a0a0b8;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-size: 13px;
+}
+
+.deviceButton:hover {
+    background-color: #2a2a40;
+    color: #fff;
+}
+
+/* استخدام فئة نشطة للتبديل بين الأجهزة */
+.activeButton {
+    background-color: rgba(0, 255, 204, 0.1);
+    border-color: #00ffcc;
+    color: #00ffcc;
+    box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
+}
+
+.actionButtons {
+    display: flex;
+    gap: 12px;
+}
+
+.iconButton {
+    background: transparent;
+    border: none;
+    color: #71717a;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.iconButton:hover {
+    color: #00ffcc;
+    background-color: #1f1f2e;
+}
+
+.viewportArea {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0d0d12 100%);
+    padding: 40px;
+    overflow: auto;
+}
+
+.deviceFrame {
+    background-color: #000;
+    border: 12px solid #222;
+    border-radius: 36px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* محاكاة النوتش العلوي */
+.deviceFrame::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35%;
+    height: 20px;
+    background-color: #222;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    z-index: 5;
+}
+
+.previewIframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #fff;
+}

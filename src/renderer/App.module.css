@@ -1,0 +1,329 @@
+/* * Global Styles - المشروع النهائي (المرحلة السادسة)
+ * تم اعتماد نظام النيون والمظهر الداكن مع دعم كامل للـ RTL
+ */
+
+:root {
+  --bg-main: #09090b;
+  --bg-sidebar: #121217;
+  --accent: #00ffcc;
+  --accent-glow: rgba(0, 255, 204, 0.3);
+  --text-primary: #fafafa;
+  --text-secondary: #71717a;
+  --border: #1f1f23;
+  --card-bg: #18181b;
+  --danger: #ef4444;
+  --success: #10b981;
+  --info: #3b82f6;
+  --warning: #f59e0b;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+  direction: rtl; /* دعم اللغة العربية */
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: 72px;
+  background-color: var(--bg-sidebar);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+  gap: 40px;
+  z-index: 10;
+}
+
+.logo-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-glow {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: var(--accent);
+  filter: blur(20px);
+  opacity: 0.2;
+}
+
+.nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.nav-item {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover, .nav-item.active {
+  background: var(--border);
+  color: var(--accent);
+}
+
+.sidebar-bottom {
+  padding-bottom: 20px;
+}
+
+.offline-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #18181b;
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+}
+
+.offline-toggle.is-offline {
+  color: var(--danger);
+  border-color: #450a0a;
+  background: #2d0606;
+}
+
+/* Main Content Area */
+.main-viewport {
+  flex: 1;
+  overflow: hidden;
+  background: radial-gradient(circle at top right, #111827, #09090b);
+  position: relative;
+}
+
+.dashboard-scroll {
+  height: 100%;
+  overflow-y: auto;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* Header */
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.header-titles h1 {
+  font-size: 28px;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.header-titles p {
+  color: var(--text-secondary);
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+
+.auto-doc-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent);
+  color: var(--bg-main);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auto-doc-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 24px;
+  border-radius: 16px;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  border-color: var(--accent);
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.mini-chart {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.chart-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s ease-in-out;
+}
+
+.chart-fill.bg-blue { background: var(--info); }
+.chart-fill.bg-green { background: var(--success); }
+.chart-fill.bg-purple { background: #a855f7; }
+
+/* Details Layout */
+.details-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.flex-2 { flex: 2; }
+.flex-1 { flex: 1; }
+
+.details-panel {
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.details-panel h3 {
+  margin: 0 0 20px;
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Table Styling */
+.table-container {
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th {
+  text-align: right;
+  color: var(--text-secondary);
+  padding: 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+
+.custom-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+/* Badges */
+.badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-green { color: var(--success); background: rgba(16, 185, 129, 0.1); }
+.badge-blue { color: var(--info); background: rgba(59, 130, 246, 0.1); }
+.badge-purple { color: #a855f7; background: rgba(168, 85, 247, 0.1); }
+
+/* Log List */
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.log-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.log-content p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.log-content small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+/* Alerts */
+.offline-alert {
+  background: rgba(0, 255, 204, 0.03);
+  border: 1px solid rgba(0, 255, 204, 0.1);
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Responsive Optimization (Task 6.3) */
+@media (max-width: 1024px) {
+  .details-row { flex-direction: column; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .dash-header { flex-direction: column; gap: 20px; }
+}
