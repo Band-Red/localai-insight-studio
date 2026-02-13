@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Paperclip, Eraser } from 'lucide-react';
+import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen } from 'lucide-react';
 import './ChatBox.module.css';
 
 interface Message {
@@ -38,23 +38,39 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
     // Simulation of AI response (will be linked to ModelManager later)
     setTimeout(() => {
       const generatedCode = `<!DOCTYPE html><html><body style="background:#09090b;color:#00ffcc;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;"><div><h1>تحديث جديد</h1><p>تم توليد هذا الكود بناءً على طلبك: ${userMsg.text}</p></div></body></html>`;
-      
+
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         text: "لقد قمت بتوليد الكود المطلوب بناءً على سياق مشروعك. يمكنك الآن معاينته في تبويب المستعرض أو المحاكي.",
         sender: 'ai',
         timestamp: new Date()
       };
-      
+
       setMessages(prev => [...prev, aiMsg]);
       setIsLoading(false);
-      
+
       // Send code to parent component
       if (onCodeGenerated) onCodeGenerated(generatedCode);
     }, 2000);
   };
 
   const clearChat = () => setMessages([]);
+
+  const handleExport = async () => {
+    if (messages.length === 0) return;
+
+    const electron = (window as any).electronAPI;
+    if (electron && electron.exportChat) {
+      const session = {
+        title: `جلسة_${new Date().toLocaleDateString('ar-EG').replace(/\//g, '-')}`,
+        messages: messages
+      };
+      const result = await electron.exportChat(session);
+      if (result.success) {
+        alert(`تم تصدير المحادثة بنجاح إلى: ${result.filePath}`);
+      }
+    }
+  };
 
   return (
     <div className="chatContainer" dir="rtl">
@@ -64,9 +80,14 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
           <Bot size={18} className="aiIcon" />
           <span>المساعد المحلي (GGUF Engine)</span>
         </div>
-        <button onClick={clearChat} className="headerAction" title="مسح المحادثة">
-          <Eraser size={16} />
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={handleExport} className="headerAction" title="تصدير إلى Obsidian" disabled={messages.length === 0}>
+            <BookOpen size={16} />
+          </button>
+          <button onClick={clearChat} className="headerAction" title="مسح المحادثة">
+            <Eraser size={16} />
+          </button>
+        </div>
       </div>
 
       <div className="messagesList" ref={scrollRef}>
@@ -86,7 +107,7 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
             <div className="messageContent">
               <div className="messageText">{msg.text}</div>
               <div className="messageTime">
-                {msg.timestamp.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+                {msg.timestamp.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           </div>
@@ -115,8 +136,8 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
           />
-          <button 
-            className="sendBtn" 
+          <button
+            className="sendBtn"
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
           >

@@ -39,9 +39,13 @@ class MainApp {
         // إدارة النماذج
         ipcMain.handle('model:status', () => this.modelManager.getStatus());
 
-        // التصدير لـ Obsidian
-        ipcMain.handle('export:obsidian', async (event, data) => {
-            return await this.exporter.exportToMarkdown(data);
+        // التصدير لـ Obsidian (Task 5.1 & 3.1)
+        ipcMain.handle('export:chat', async (event, session, vaultPath) => {
+            return await this.exporter.exportChat(session, vaultPath);
+        });
+
+        ipcMain.handle('export:audit', async (event, data, vaultPath) => {
+            return await this.exporter.exportAudit(data, vaultPath);
         });
 
         // فتح الروابط الخارجية

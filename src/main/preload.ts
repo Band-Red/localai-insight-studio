@@ -7,8 +7,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // وظائف النماذج
     checkModelStatus: () => ipcRenderer.invoke('model:status'),
 
-    // وظائف التصدير
-    exportToObsidian: (data: any) => ipcRenderer.invoke('export:obsidian', data),
+    // وظائف التصدير (Task 5.1 & 3.1)
+    exportChat: (session: any, vaultPath?: string) => ipcRenderer.invoke('export:chat', session, vaultPath),
+    exportAudit: (data: any, vaultPath?: string) => ipcRenderer.invoke('export:audit', data, vaultPath),
 
     // المعاينة
     openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
