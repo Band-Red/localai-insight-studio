@@ -9,12 +9,14 @@ const SplashScreen: React.FC<{ onFinish: () => void }> = ({ onFinish }) => {
             setProgress(prev => {
                 if (prev >= 100) {
                     clearInterval(timer);
-                    setTimeout(onFinish, 500);
+                    setTimeout(onFinish, 400); // سنابي أكثر في الانتقال
                     return 100;
                 }
-                return prev + 2;
+                // زيادة متغيرة تعطي إحساساً بالتحميل الحقيقي
+                const increment = prev < 30 ? 3 : prev < 70 ? 2 : 1.5;
+                return Math.min(prev + increment, 100);
             });
-        }, 40);
+        }, 35);
 
         return () => clearInterval(timer);
     }, [onFinish]);
