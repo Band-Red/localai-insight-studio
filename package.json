@@ -27,7 +27,7 @@
     "psutil": "^0.0.1"
   },
   "devDependencies": {
-    "electron": "^26.2.1",
+    "electron": "^35.7.5",
     "typescript": "^5.2.2",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
