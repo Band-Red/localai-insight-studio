@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron';
+import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import { ModelManager } from './model_manager';
@@ -122,6 +123,34 @@ class MainApp {
         ipcMain.handle('rag:clear', () => {
             this.ragManager.clear();
             return { success: true };
+        });
+
+        // تشغيل محرك التحليل (Python) (Task 2.3)
+        ipcMain.handle('system:stats', async () => {
+            return new Promise((resolve) => {
+                const pythonProcess = spawn('python', [path.join(__dirname, '../src/main/python_engine.py')]);
+
+                let dataString = '';
+                pythonProcess.stdout.on('data', (data) => {
+                    dataString += data.toString();
+                });
+
+                pythonProcess.stderr.on('data', (data) => {
+                    console.error(`Python Engine Error: ${data}`);
+                });
+
+                pythonProcess.on('close', (code) => {
+                    try {
+                        if (code === 0) {
+                            resolve(JSON.parse(dataString));
+                        } else {
+                            resolve({ error: 'Python process exited with error' });
+                        }
+                    } catch (e) {
+                        resolve({ error: 'Failed to parse python output' });
+                    }
+                });
+            });
         });
     }
 }

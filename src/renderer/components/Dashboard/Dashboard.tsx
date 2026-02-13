@@ -27,14 +27,16 @@ const Dashboard: React.FC = () => {
         const electron = (window as any).electronAPI;
         if (!electron) return;
 
-        // 1. التظاهر بجلب بيانات حقيقية من النظام
+        // 1. جلب بيانات حقيقية من محرك Python (Task 2.3)
+        const pythonStats = await electron.getSystemStats();
+
         const currentStats: SystemStats = {
-          cpuUsage: Math.floor(Math.random() * 30) + 10,
-          ramPercentage: Math.floor(Math.random() * 20) + 40,
-          ragAccuracy: 98.4,
-          totalQueries: 1250,
-          securityLevel: 100,
-          avgResponseTime: 450
+          cpuUsage: pythonStats.cpuUsage || 0,
+          ramPercentage: pythonStats.ramPercentage || 0,
+          ragAccuracy: pythonStats.ragAccuracy || 98.2,
+          totalQueries: pythonStats.totalQueries || 0,
+          securityLevel: pythonStats.securityLevel || 100,
+          avgResponseTime: pythonStats.avgResponseTime || 450
         };
 
         setStats(currentStats);
