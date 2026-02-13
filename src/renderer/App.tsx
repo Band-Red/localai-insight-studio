@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import ChatBox from './components/Chat/ChatBox';
 import Dashboard from './components/Dashboard/Dashboard';
+import SplashScreen from './components/Splash/SplashScreen';
 
 /**
  * استيراد التنسيقات بنظام الاستيراد المباشر لملفات الـ Modules 
@@ -25,6 +26,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'sandbox'>('sandbox');
   const [device, setDevice] = useState(DEVICES.iphone);
   const [key, setKey] = useState(0);
+  const [showSplash, setShowSplash] = useState(true);
   const [inspectedElement, setInspectedElement] = useState<any>(null);
   const [backendStatus, setBackendStatus] = useState<any>(null);
   const [currentCode, setCurrentCode] = useState('');
@@ -43,6 +45,9 @@ const App: React.FC = () => {
       }
     };
     fetchStatus();
+
+    // Show splash for 3.5 seconds
+    const splashTimer = setTimeout(() => setShowSplash(false), 3500);
 
     // استقبال رسائل الفحص من الـ iframe لعملية الـ Inspection البصري
     const handleMessage = (event: MessageEvent) => {
@@ -68,7 +73,10 @@ const App: React.FC = () => {
       </html>
     `);
 
-    return () => window.removeEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      clearTimeout(splashTimer);
+    };
   }, []);
 
   const openInBrowser = () => {
@@ -115,6 +123,10 @@ const App: React.FC = () => {
       </body>
     </html>
   `;
+
+  if (showSplash) {
+    return <SplashScreen />;
+  }
 
   return (
     <div className="appContainer">
