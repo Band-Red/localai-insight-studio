@@ -4,6 +4,8 @@ import {
   RefreshCw, MessageSquare, LayoutDashboard,
   Eye, MousePointer2, Zap
 } from 'lucide-react';
+import ChatBox from './components/Chat/ChatBox';
+import Dashboard from './components/Dashboard/Dashboard';
 
 /**
  * استيراد التنسيقات بنظام الاستيراد المباشر لملفات الـ Modules 
@@ -25,6 +27,7 @@ const App: React.FC = () => {
   const [key, setKey] = useState(0);
   const [inspectedElement, setInspectedElement] = useState<any>(null);
   const [backendStatus, setBackendStatus] = useState<any>(null);
+  const [currentCode, setCurrentCode] = useState('');
 
   // الربط مع الـ Backend (Task 6.1 & 6.2)
   useEffect(() => {
@@ -48,6 +51,23 @@ const App: React.FC = () => {
       }
     };
     window.addEventListener('message', handleMessage);
+
+    // Set initial code (demo)
+    setCurrentCode(`
+      <html>
+        <body style="margin:0; background:#f8fafc; font-family: sans-serif;">
+          <div style="padding:40px; text-align:center; color:#334155;">
+            <h1 style="color:#0f172a;">أهلاً بك في المعاينة</h1>
+            <p>انقر على أي عنصر لفحصه بصرياً ومعرفة تفاصيله.</p>
+            <div style="margin-top:20px; padding:20px; background:white; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+              عنصر تجريبي قابل للفحص
+            </div>
+            <button style="margin-top:20px; padding:10px 24px; background:#00ffcc; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">زر تفاعلي</button>
+          </div>
+        </body>
+      </html>
+    `);
+
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
@@ -148,7 +168,7 @@ const App: React.FC = () => {
                 <iframe
                   key={key}
                   className="iframeElement"
-                  srcDoc={injectInspector(demoCode)}
+                  srcDoc={injectInspector(currentCode)}
                   sandbox="allow-scripts"
                 />
               </div>
@@ -170,13 +190,10 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
+        ) : activeTab === 'chat' ? (
+          <ChatBox onCodeGenerated={(code) => { setCurrentCode(code); setActiveTab('sandbox'); }} />
         ) : (
-          <div className="statusPlaceholder">
-            <div>
-              <p>لوحة {activeTab === 'chat' ? 'المحادثة الذكية' : 'المراقبة'} قيد التشغيل عبر Backend...</p>
-              <p style={{ fontSize: '13px', opacity: 0.6 }}>{backendStatus?.active ? 'المحرك متصل بنجاح' : 'جاري فحص حالة الاتصال بالمحرك المحلي...'}</p>
-            </div>
-          </div>
+          <Dashboard />
         )}
       </main>
     </div>
