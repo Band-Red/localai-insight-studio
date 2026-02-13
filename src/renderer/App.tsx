@@ -7,6 +7,8 @@ import {
 import ChatBox from './components/Chat/ChatBox';
 import Dashboard from './components/Dashboard/Dashboard';
 import SplashScreen from './components/Splash/SplashScreen';
+import Emulator from './components/Emulator/Emulator';
+import Previewer from './components/Previewer/Previewer';
 
 /**
  * استيراد التنسيقات بنظام الاستيراد المباشر لملفات الـ Modules 
@@ -25,6 +27,8 @@ const DEVICES = {
 const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'sandbox'>('sandbox');
+  const [sandboxMode, setSandboxMode] = useState<'preview' | 'code'>('preview');
+  const [isInspectMode, setIsInspectMode] = useState(false);
   const [device, setDevice] = useState(DEVICES.iphone);
   const [key, setKey] = useState(0);
   const [inspectedElement, setInspectedElement] = useState<any>(null);
@@ -84,6 +88,7 @@ const App: React.FC = () => {
     const script = `
       <script>
         document.addEventListener('click', (e) => {
+          if (!${isInspectMode}) return;
           e.preventDefault();
           e.stopPropagation();
           document.querySelectorAll('.inspected-el').forEach(el => el.classList.remove('inspected-el'));
@@ -95,6 +100,18 @@ const App: React.FC = () => {
           };
           window.parent.postMessage({ type: 'ELEMENT_INSPECTED', info }, '*');
         }, true);
+        
+        // Add visual feedback for hover
+        document.addEventListener('mouseover', (e) => {
+          if (!${isInspectMode}) return;
+          e.target.style.outline = '1px dashed #00ffcc';
+          e.target.style.cursor = 'crosshair';
+        });
+        document.addEventListener('mouseout', (e) => {
+          if (!${isInspectMode}) return;
+          e.target.style.outline = 'none';
+        });
+
         const style = document.createElement('style');
         style.innerHTML = '.inspected-el { outline: 3px solid #00ffcc !important; outline-offset: -3px; }';
         document.head.appendChild(style);
@@ -147,54 +164,63 @@ const App: React.FC = () => {
       <main className="contentArea">
         {activeTab === 'sandbox' ? (
           <div className="sandboxContainer">
-            {/* Toolbar for Device Selection and Controls */}
-            <header className="toolbar">
-              <div className="deviceSelectors">
-                {Object.entries(DEVICES).map(([key, value]) => (
-                  <button
-                    key={key}
-                    className={`deviceBtn ${device.label === value.label ? 'deviceBtnActive' : ''}`}
-                    onClick={() => setDevice(value)}
-                  >
-                    {key === 'iphone' ? <Smartphone size={16} /> : key === 'tablet' ? <Tablet size={16} /> : <Monitor size={16} />}
-                    <span>{value.label}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="actionButtons">
-                <button className="navBtn" onClick={() => setKey(k => k + 1)} title="إعادة تحميل"><RefreshCw size={18} /></button>
-                <button className="navBtn" onClick={openInBrowser} title="فتح خارجي"><ExternalLink size={18} color="#00ffcc" /></button>
-              </div>
-            </header>
+            {/* Sandbox Mode Switcher */}
+            <div style={{ display: 'flex', gap: '10px', padding: '10px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <button
+                onClick={() => setSandboxMode('preview')}
+                style={{
+                  background: sandboxMode === 'preview' ? 'rgba(0,255,204,0.1)' : 'transparent',
+                  color: sandboxMode === 'preview' ? '#00ffcc' : '#9ca3af',
+                  border: 'none', padding: '6px 15px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px'
+                }}
+              >المعاينة التفاعلية</button>
+              <button
+                onClick={() => setSandboxMode('code')}
+                style={{
+                  background: sandboxMode === 'code' ? 'rgba(0,255,204,0.1)' : 'transparent',
+                  color: sandboxMode === 'code' ? '#00ffcc' : '#9ca3af',
+                  border: 'none', padding: '6px 15px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px'
+                }}
+              >عرض الكود المصدري</button>
 
-            {/* Viewport for Visual Rendering */}
-            <div className="viewport">
-              <div className="deviceFrame" style={{ width: device.width, height: device.height }}>
-                {device.label !== 'Desktop' && <div className="notch" />}
-                <iframe
-                  key={key}
-                  className="iframeElement"
-                  srcDoc={injectInspector(currentCode)}
-                  sandbox="allow-scripts"
-                />
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '11px', color: '#666' }}>وضع الفحص البصري:</span>
+                <button
+                  onClick={() => setIsInspectMode(!isInspectMode)}
+                  style={{
+                    background: isInspectMode ? '#00ffcc' : 'rgba(255,255,255,0.05)',
+                    color: isInspectMode ? '#000' : '#666',
+                    border: 'none', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold'
+                  }}
+                >{isInspectMode ? 'نشط' : 'معطل'}</button>
               </div>
             </div>
 
-            {/* Visual Inspector Panel */}
-            {inspectedElement && (
-              <div className="inspectorPanel">
-                <div className="inspectorHeader">
-                  <div className="inspectorTitle"><MousePointer2 size={16} /> <span>فحص العنصر</span></div>
-                  <button onClick={() => setInspectedElement(null)} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: '18px' }}>×</button>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {sandboxMode === 'preview' ? (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <Emulator code={injectInspector(currentCode)} />
+
+                  {/* Visual Inspector Overlay (kept from App.tsx logic) */}
+                  {inspectedElement && (
+                    <div className="inspectorPanel">
+                      <div className="inspectorHeader">
+                        <div className="inspectorTitle"><MousePointer2 size={16} /> <span>فحص العنصر</span></div>
+                        <button onClick={() => setInspectedElement(null)} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: '18px' }}>×</button>
+                      </div>
+                      <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <p style={{ margin: 0 }}><strong>العنصر:</strong> <code style={{ color: '#00ffcc' }}>&lt;{inspectedElement.tagName.toLowerCase()}&gt;</code></p>
+                        <p style={{ margin: 0 }}><strong>الفئات:</strong> <span style={{ color: '#9ca3af' }}>{inspectedElement.className || 'N/A'}</span></p>
+                        <p style={{ margin: 0 }}><strong>النص:</strong> <em style={{ color: '#e4e4e7' }}>"{inspectedElement.innerText}"</em></p>
+                      </div>
+                      <button className="inspectBtn" onClick={() => setActiveTab('chat')}>تعديل هذا الجزء ذكياً</button>
+                    </div>
+                  )}
                 </div>
-                <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <p style={{ margin: 0 }}><strong>العنصر:</strong> <code style={{ color: '#00ffcc' }}>&lt;{inspectedElement.tagName.toLowerCase()}&gt;</code></p>
-                  <p style={{ margin: 0 }}><strong>الفئات:</strong> <span style={{ color: '#9ca3af' }}>{inspectedElement.className || 'N/A'}</span></p>
-                  <p style={{ margin: 0 }}><strong>النص:</strong> <em style={{ color: '#e4e4e7' }}>"{inspectedElement.innerText}"</em></p>
-                </div>
-                <button className="inspectBtn" onClick={() => setActiveTab('chat')}>تعديل هذا الجزء ذكياً</button>
-              </div>
-            )}
+              ) : (
+                <Previewer content={currentCode} />
+              )}
+            </div>
           </div>
         ) : activeTab === 'chat' ? (
           <ChatBox onCodeGenerated={(code) => { setCurrentCode(code); setActiveTab('sandbox'); }} />
