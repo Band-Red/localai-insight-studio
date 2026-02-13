@@ -23,6 +23,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     logMetrics: (entry: any) => ipcRenderer.invoke('metrics:add', entry),
     getRecentMetrics: (limit?: number) => ipcRenderer.invoke('metrics:get-recent', limit),
 
+    // نظام الـ RAG (Task 2.2)
+    selectFolder: () => ipcRenderer.invoke('rag:select-folder'),
+    selectFile: () => ipcRenderer.invoke('rag:select-file'),
+    clearRagContext: () => ipcRenderer.invoke('rag:clear'),
+
     // المعاينة البصرية (Task 3.2)
     onInspected: (callback: any) => ipcRenderer.on('element:inspected', callback)
 });

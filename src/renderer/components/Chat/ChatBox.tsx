@@ -13,6 +13,7 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [attachedInfo, setAttachedInfo] = useState<{ count: number, path?: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,6 +93,30 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
     }
   };
 
+  const handleAttach = async () => {
+    const electron = (window as any).electronAPI;
+    if (!electron) return;
+
+    // إظهار خيار للمستخدم (مجلد أو ملف)
+    const result = await electron.selectFolder();
+    if (result.success) {
+      setAttachedInfo({ count: result.fileCount });
+    } else {
+      const fileResult = await electron.selectFile();
+      if (fileResult.success) {
+        setAttachedInfo({ count: fileResult.fileCount });
+      }
+    }
+  };
+
+  const clearRag = async () => {
+    const electron = (window as any).electronAPI;
+    if (electron) {
+      await electron.clearRagContext();
+      setAttachedInfo(null);
+    }
+  };
+
   return (
     <div className="chatContainer" dir="rtl">
 
@@ -144,9 +169,15 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
       </div>
 
       <div className="inputContainer">
+        {attachedInfo && (
+          <div style={{ padding: '4px 20px', fontSize: '11px', color: '#00ffcc', display: 'flex', justifyContent: 'space-between', background: 'rgba(0,255,204,0.05)' }}>
+            <span>📎 تم إرفاق سياق محلي ({attachedInfo.count} ملفات)</span>
+            <button onClick={clearRag} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '10px' }}>إلغاء الإرفاق</button>
+          </div>
+        )}
         <div className="inputWrapper">
-          <button className="attachBtn" title="إرفاق مسار مشروع">
-            <Paperclip size={18} />
+          <button className="attachBtn" title="إرفاق مجلد أو ملف للمشروع" onClick={handleAttach}>
+            <Paperclip size={18} color={attachedInfo ? '#00ffcc' : 'currentColor'} />
           </button>
           <input
             type="text"

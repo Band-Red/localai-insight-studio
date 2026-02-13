@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { ModelManager } from './model_manager';
@@ -6,6 +6,7 @@ import { SessionManager } from './session_manager';
 import { ObsidianExporter } from './obsidian_exporter';
 import { saveSettings, loadSettings } from './settings_manager';
 import { LoggerManager } from './logger_manager';
+import { RagManager } from './rag_manager';
 
 class MainApp {
     private mainWindow: BrowserWindow | null = null;
@@ -13,6 +14,7 @@ class MainApp {
     private sessionManager = new SessionManager();
     private exporter = new ObsidianExporter();
     private logger = new LoggerManager();
+    private ragManager = new RagManager();
 
     constructor() {
         app.on('ready', () => this.createWindow());
@@ -42,7 +44,11 @@ class MainApp {
         ipcMain.handle('chat:send', async (event, message, model) => {
             const startTime = Date.now();
             try {
-                const response = await this.modelManager.chat(message, model);
+                // دمج مسياق الـ RAG المحلي (Task 2.2)
+                const context = this.ragManager.getContextString();
+                const fullPrompt = context ? `${context}\nالمستخدم يقول: ${message}` : message;
+
+                const response = await this.modelManager.chat(fullPrompt, model);
                 const latency = Date.now() - startTime;
 
                 // تسجيل العملية في السجلات (Task 1.2)
@@ -88,6 +94,35 @@ class MainApp {
         // نظام السجلات (Task 1.2)
         ipcMain.handle('metrics:add', (event, entry) => this.logger.addLog(entry));
         ipcMain.handle('metrics:get-recent', (event, limit) => this.logger.getRecentLogs(limit));
+
+        // نظام الـ RAG (Task 2.2)
+        ipcMain.handle('rag:select-folder', async () => {
+            const result = await dialog.showOpenDialog(this.mainWindow!, {
+                properties: ['openDirectory']
+            });
+            if (!result.canceled && result.filePaths.length > 0) {
+                return await this.ragManager.indexFileOrFolder(result.filePaths[0]);
+            }
+            return { success: false, error: 'Cancelled' };
+        });
+
+        ipcMain.handle('rag:select-file', async () => {
+            const result = await dialog.showOpenDialog(this.mainWindow!, {
+                properties: ['openFile'],
+                filters: [
+                    { name: 'Documents', extensions: ['txt', 'md', 'pdf', 'js', 'ts', 'html', 'py'] }
+                ]
+            });
+            if (!result.canceled && result.filePaths.length > 0) {
+                return await this.ragManager.indexFileOrFolder(result.filePaths[0]);
+            }
+            return { success: false, error: 'Cancelled' };
+        });
+
+        ipcMain.handle('rag:clear', () => {
+            this.ragManager.clear();
+            return { success: true };
+        });
     }
 }
 
