@@ -90,13 +90,9 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-wrapper" dir="rtl">
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-        <div style={{
-          width: '12px', height: '12px', borderRadius: '50%',
-          backgroundColor: getHealthColor(stats.systemHealth),
-          boxShadow: `0 0 10px ${getHealthColor(stats.systemHealth)}`
-        }} />
-        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+      <div className="health-bar">
+        <div className={`health-dot ${stats.systemHealth}`} />
+        <span className="health-label">
           حالة النظام: {stats.systemHealth === 'healthy' ? 'مستقر' : stats.systemHealth === 'warning' ? 'تنبيه' : 'حرج'}
         </span>
       </div>

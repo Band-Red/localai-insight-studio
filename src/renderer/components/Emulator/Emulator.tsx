@@ -15,7 +15,7 @@ interface EmulatorProps {
 }
 
 const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
-  const [currentDevice, setCurrentDevice] = useState(DEVICES.iphone);
+  const [deviceKey, setDeviceKey] = useState<'iphone' | 'samsung' | 'tablet' | 'desktop'>('iphone');
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleOpenExternal = () => {
@@ -24,51 +24,61 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
     }
   };
 
+  const getSizeClass = (key: string) => {
+    switch (key) {
+      case 'iphone': return 'iphoneSize';
+      case 'samsung': return 'samsungSize';
+      case 'tablet': return 'tabletSize';
+      case 'desktop': return 'desktopSize';
+      default: return 'iphoneSize';
+    }
+  };
+
   return (
     <div className="emulatorContainer">
       {/* شريط التحكم العلوي */}
       <div className="toolbar">
         <div className="deviceSelectors">
-          <button 
-            onClick={() => setCurrentDevice(DEVICES.iphone)} 
-            className={`deviceButton ${currentDevice === DEVICES.iphone ? 'activeButton' : ''}`}
+          <button
+            onClick={() => setDeviceKey('iphone')}
+            className={`deviceButton ${deviceKey === 'iphone' ? 'activeButton' : ''}`}
           >
             <Smartphone size={16} /> iPhone
           </button>
-          
-          <button 
-            onClick={() => setCurrentDevice(DEVICES.samsung)} 
-            className={`deviceButton ${currentDevice === DEVICES.samsung ? 'activeButton' : ''}`}
+
+          <button
+            onClick={() => setDeviceKey('samsung')}
+            className={`deviceButton ${deviceKey === 'samsung' ? 'activeButton' : ''}`}
           >
             <Smartphone size={16} /> Samsung
           </button>
 
-          <button 
-            onClick={() => setCurrentDevice(DEVICES.tablet)} 
-            className={`deviceButton ${currentDevice === DEVICES.tablet ? 'activeButton' : ''}`}
+          <button
+            onClick={() => setDeviceKey('tablet')}
+            className={`deviceButton ${deviceKey === 'tablet' ? 'activeButton' : ''}`}
           >
             <Tablet size={16} /> Tablet
           </button>
 
-          <button 
-            onClick={() => setCurrentDevice(DEVICES.desktop)} 
-            className={`deviceButton ${currentDevice === DEVICES.desktop ? 'activeButton' : ''}`}
+          <button
+            onClick={() => setDeviceKey('desktop')}
+            className={`deviceButton ${deviceKey === 'desktop' ? 'activeButton' : ''}`}
           >
             <Monitor size={16} /> Desktop
           </button>
         </div>
-        
+
         <div className="actionButtons">
-          <button 
-            className="iconButton" 
-            onClick={() => setRefreshKey(prev => prev + 1)} 
+          <button
+            className="iconButton"
+            onClick={() => setRefreshKey(prev => prev + 1)}
             title="إعادة تحميل المعاينة"
           >
             <RefreshCw size={18} />
           </button>
-          <button 
-            className="iconButton" 
-            onClick={handleOpenExternal} 
+          <button
+            className="iconButton"
+            onClick={handleOpenExternal}
             title="فتح في المتصفح الخارجي"
           >
             <ExternalLink size={18} />
@@ -78,15 +88,8 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
 
       {/* منطقة العرض والمعاينة */}
       <main className="viewportArea">
-        <div 
-          className="deviceFrame" 
-          style={{ 
-            width: currentDevice.width, 
-            height: currentDevice.height,
-            maxWidth: '100%' 
-          }}
-        >
-          <iframe 
+        <div className={`deviceFrame ${getSizeClass(deviceKey)}`}>
+          <iframe
             key={refreshKey}
             title="Preview Frame"
             className="previewIframe"

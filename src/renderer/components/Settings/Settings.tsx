@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Folder, RefreshCw, Cpu, Database, Shield } from 'lucide-react';
 
+import styles from './Settings.module.css';
+
 interface AppSettings {
     theme: string;
     aiModel: string;
@@ -55,28 +57,28 @@ const Settings: React.FC = () => {
     };
 
     return (
-        <div style={{ padding: '30px', color: '#e4e4e7', height: '100%', overflowY: 'auto' }} dir="rtl">
-            <header style={{ marginBottom: '30px' }}>
-                <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>الإعدادات المركزية</h2>
-                <p style={{ color: '#a1a1aa', fontSize: '14px' }}>تخصيص محرك الذكاء الاصطناعي وبنية الملفات المحلية.</p>
+        <div className={styles.settingsWrapper} dir="rtl">
+            <header className={styles.header}>
+                <h2>الإعدادات المركزية</h2>
+                <p>تخصيص محرك الذكاء الاصطناعي وبنية الملفات المحلية.</p>
             </header>
 
-            <div style={{ display: 'grid', gap: '24px', maxWidth: '800px' }}>
+            <div className={styles.grid}>
 
                 {/* AI Engine Settings */}
-                <section style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <section className={styles.section}>
+                    <div className={styles.sectionHeader}>
                         <Cpu size={20} color="#00ffcc" />
-                        <h3 style={{ margin: 0, fontSize: '18px' }}>محرك الذكاء الاصطناعي</h3>
+                        <h3>محرك الذكاء الاصطناعي</h3>
                     </div>
 
-                    <div style={{ display: 'grid', gap: '15px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '13px', color: '#a1a1aa' }}>النموذج النشط (Ollama)</label>
+                    <div className={styles.formGrid}>
+                        <div className={styles.field}>
+                            <label>النموذج النشط (Ollama)</label>
                             <select
                                 value={settings.aiModel}
                                 onChange={(e) => setSettings({ ...settings, aiModel: e.target.value })}
-                                style={{ background: '#18181b', color: '#fff', border: '1px solid #27272a', padding: '10px', borderRadius: '6px' }}
+                                className={styles.select}
                             >
                                 <option value="llama3">Llama 3 (8B)</option>
                                 <option value="mistral">Mistral (7B)</option>
@@ -85,72 +87,68 @@ const Settings: React.FC = () => {
                             </select>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label style={{ fontSize: '13px', color: '#a1a1aa' }}>حد السياق (Context Limit)</label>
+                        <div className={styles.field}>
+                            <label>حد السياق (Context Limit)</label>
                             <input
                                 type="number"
                                 value={settings.contextLimit}
                                 onChange={(e) => setSettings({ ...settings, contextLimit: parseInt(e.target.value) })}
-                                style={{ background: '#18181b', color: '#fff', border: '1px solid #27272a', padding: '10px', borderRadius: '6px' }}
+                                className={styles.input}
                             />
                         </div>
                     </div>
                 </section>
 
                 {/* Data & Export Settings */}
-                <section style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <section className={styles.section}>
+                    <div className={styles.sectionHeader}>
                         <Folder size={20} color="#00ffcc" />
-                        <h3 style={{ margin: 0, fontSize: '18px' }}>تكامل البيانات (Obsidian)</h3>
+                        <h3>تكامل البيانات (Obsidian)</h3>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontSize: '13px', color: '#a1a1aa' }}>مسار ملفات Obsidian (Vault)</label>
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                    <div className={styles.field}>
+                        <label>مسار ملفات Obsidian (Vault)</label>
+                        <div className={styles.browseWrapper}>
                             <input
                                 type="text"
                                 readOnly
                                 placeholder="لم يتم اختيار مسار بعد..."
                                 value={settings.obsidianVaultPath}
-                                style={{ flex: 1, background: '#18181b', color: '#fff', border: '1px solid #27272a', padding: '10px', borderRadius: '6px' }}
+                                className={styles.inputReadOnly}
                             />
                             <button
                                 onClick={handleBrowseVault}
-                                style={{ background: '#27272a', color: '#fff', border: 'none', padding: '0 15px', borderRadius: '6px', cursor: 'pointer' }}
+                                className={styles.browseBtn}
                             >تغيير</button>
                         </div>
-                        <p style={{ fontSize: '11px', color: '#71717a' }}>سيتم حفظ كافة الجلسات والتقارير في هذا المجلد بصيغة Markdown.</p>
+                        <p className={styles.hint}>سيتم حفظ كافة الجلسات والتقارير في هذا المجلد بصيغة Markdown.</p>
                     </div>
                 </section>
 
                 {/* Security & System */}
-                <section style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <section className={styles.section}>
+                    <div className={styles.sectionHeader}>
                         <Shield size={20} color="#00ffcc" />
-                        <h3 style={{ margin: 0, fontSize: '18px' }}>نظام السيادة الرقمية</h3>
+                        <h3>نظام السيادة الرقمية</h3>
                     </div>
-                    <div style={{ padding: '10px', background: 'rgba(16,185,129,0.05)', borderRadius: '6px', border: '1px solid rgba(16,185,129,0.2)' }}>
-                        <p style={{ margin: 0, fontSize: '13px', color: '#10b981' }}>التطبيق يعمل في وضع الأوفلاين بالكامل. لا يتم إرسال أي بيانات خارج هذا الجهاز.</p>
+                    <div className={styles.securityBanner}>
+                        <p>التطبيق يعمل في وضع الأوفلاين بالكامل. لا يتم إرسال أي بيانات خارج هذا الجهاز.</p>
                     </div>
                 </section>
 
                 {/* Action Bar */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div className={styles.actionBar}>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        style={{
-                            background: '#00ffcc', color: '#000', border: 'none',
-                            padding: '12px 30px', borderRadius: '8px', cursor: 'pointer',
-                            fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'
-                        }}
+                        className={styles.saveBtn}
                     >
-                        {isSaving ? <RefreshCw size={18} className="spin" /> : <Save size={18} />}
+                        {isSaving ? <RefreshCw size={18} className={styles.spin} /> : <Save size={18} />}
                         حفظ التغييرات
                     </button>
 
                     {status && (
-                        <span style={{ color: status.type === 'success' ? '#10b981' : '#ef4444', fontSize: '14px' }}>
+                        <span className={`${styles.statusMsg} ${status.type === 'success' ? styles.statusSuccess : styles.statusError}`}>
                             {status.msg}
                         </span>
                     )}

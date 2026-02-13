@@ -125,7 +125,7 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
           <Bot size={18} className="aiIcon" />
           <span>المساعد المحلي (GGUF Engine)</span>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="headerActions">
           <button onClick={handleExport} className="headerAction" title="تصدير إلى Obsidian" disabled={messages.length === 0}>
             <BookOpen size={16} />
           </button>
@@ -170,9 +170,9 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
 
       <div className="inputContainer">
         {attachedInfo && (
-          <div style={{ padding: '4px 20px', fontSize: '11px', color: '#00ffcc', display: 'flex', justifyContent: 'space-between', background: 'rgba(0,255,204,0.05)' }}>
+          <div className="ragStatus">
             <span>📎 تم إرفاق سياق محلي ({attachedInfo.count} ملفات)</span>
-            <button onClick={clearRag} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '10px' }}>إلغاء الإرفاق</button>
+            <button onClick={clearRag} className="ragClearBtn">إلغاء الإرفاق</button>
           </div>
         )}
         <div className="inputWrapper">

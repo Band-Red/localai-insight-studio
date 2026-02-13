@@ -1,0 +1,178 @@
+.settingsWrapper {
+    padding: 30px;
+    color: #e4e4e7;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.header {
+    margin-bottom: 30px;
+}
+
+.header h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.header p {
+    color: #a1a1aa;
+    font-size: 14px;
+}
+
+.grid {
+    display: grid;
+    gap: 24px;
+    max-width: 800px;
+}
+
+.section {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.sectionHeader h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.formGrid {
+    display: grid;
+    gap: 15px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field label {
+    font-size: 13px;
+    color: #a1a1aa;
+}
+
+.select,
+.input {
+    background: #18181b;
+    color: #fff;
+    border: 1px solid #27272a;
+    padding: 10px;
+    border-radius: 6px;
+    outline: none;
+}
+
+.select:focus,
+.input:focus {
+    border-color: #00ffcc;
+}
+
+.browseWrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.inputReadOnly {
+    flex: 1;
+    background: #18181b;
+    color: #fff;
+    border: 1px solid #27272a;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.browseBtn {
+    background: #27272a;
+    color: #fff;
+    border: none;
+    padding: 0 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.browseBtn:hover {
+    background: #3f3f46;
+}
+
+.hint {
+    font-size: 11px;
+    color: #71717a;
+}
+
+.securityBanner {
+    padding: 10px;
+    background: rgba(16, 185, 129, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.securityBanner p {
+    margin: 0;
+    font-size: 13px;
+    color: #10b981;
+}
+
+.actionBar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.saveBtn {
+    background: #00ffcc;
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.saveBtn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.statusMsg {
+    font-size: 14px;
+}
+
+.statusSuccess {
+    color: #10b981;
+}
+
+.statusError {
+    color: #ef4444;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}

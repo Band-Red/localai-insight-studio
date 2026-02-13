@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Zap, MessageSquare, LayoutDashboard, Eye,
-  MousePointer2, Settings as SettingsIcon, ExternalLink
+  MousePointer2, Settings as SettingsIcon, ExternalLink,
+  Smartphone, Tablet, Monitor
 } from 'lucide-react';
 import ChatBox from './components/Chat/ChatBox';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -175,44 +176,44 @@ const App: React.FC = () => {
       <main className="main-viewport">
         {activeTab === 'sandbox' ? (
           <div className="sandboxContainer">
+            {/* Device Selection Bar */}
+            <div className="device-toolbar">
+              {Object.entries(DEVICES).map(([key, d]) => (
+                <button
+                  key={key}
+                  className={`device-btn ${device === d ? 'active' : ''}`}
+                  onClick={() => setDevice(d)}
+                >
+                  {key === 'iphone' ? <Smartphone size={14} /> :
+                    key === 'tablet' ? <Tablet size={14} /> :
+                      key === 'desktop' ? <Monitor size={14} /> : <Zap size={14} />}
+                  {d.label}
+                </button>
+              ))}
+            </div>
+
             {/* Sandbox Mode Switcher */}
-            <div style={{ display: 'flex', gap: '10px', padding: '10px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="sandbox-mode-switcher">
               <button
                 onClick={() => setSandboxMode('preview')}
-                style={{
-                  background: sandboxMode === 'preview' ? 'rgba(0,255,204,0.1)' : 'transparent',
-                  color: sandboxMode === 'preview' ? '#00ffcc' : '#9ca3af',
-                  border: 'none', padding: '6px 15px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px'
-                }}
+                className={`mode-btn ${sandboxMode === 'preview' ? 'active' : ''}`}
               >المعاينة التفاعلية</button>
               <button
                 onClick={() => setSandboxMode('code')}
-                style={{
-                  background: sandboxMode === 'code' ? 'rgba(0,255,204,0.1)' : 'transparent',
-                  color: sandboxMode === 'code' ? '#00ffcc' : '#9ca3af',
-                  border: 'none', padding: '6px 15px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px'
-                }}
+                className={`mode-btn ${sandboxMode === 'code' ? 'active' : ''}`}
               >عرض الكود المصدري</button>
 
-              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '11px', color: '#666' }}>وضع الفحص البصري:</span>
+              <div className="toolbar-actions">
+                <span className="inspect-label">وضع الفحص البصري:</span>
                 <button
                   onClick={() => setIsInspectMode(!isInspectMode)}
-                  style={{
-                    background: isInspectMode ? '#00ffcc' : 'rgba(255,255,255,0.05)',
-                    color: isInspectMode ? '#000' : '#666',
-                    border: 'none', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold'
-                  }}
+                  className={`inspect-toggle ${isInspectMode ? 'active' : 'inactive'}`}
                 >{isInspectMode ? 'نشط' : 'معطل'}</button>
 
                 <button
                   onClick={openInBrowser}
                   title="فتح في المتصفح الخارجي"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    color: '#9ca3af',
-                    border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center'
-                  }}
+                  className="external-btn"
                 ><ExternalLink size={14} /></button>
               </div>
             </div>
@@ -224,17 +225,17 @@ const App: React.FC = () => {
 
                   {/* Visual Inspector Overlay (kept from App.tsx logic) */}
                   {inspectedElement && (
-                    <div className="inspectorPanel">
-                      <div className="inspectorHeader">
-                        <div className="inspectorTitle"><MousePointer2 size={16} /> <span>فحص العنصر</span></div>
-                        <button onClick={() => setInspectedElement(null)} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: '18px' }}>×</button>
+                    <div className="inspector-panel">
+                      <div className="inspector-header">
+                        <div className="inspector-title"><MousePointer2 size={16} /> <span>فحص العنصر</span></div>
+                        <button onClick={() => setInspectedElement(null)} className="close-btn">×</button>
                       </div>
-                      <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <p style={{ margin: 0 }}><strong>العنصر:</strong> <code style={{ color: '#00ffcc' }}>&lt;{inspectedElement.tagName.toLowerCase()}&gt;</code></p>
-                        <p style={{ margin: 0 }}><strong>الفئات:</strong> <span style={{ color: '#9ca3af' }}>{inspectedElement.className || 'N/A'}</span></p>
-                        <p style={{ margin: 0 }}><strong>النص:</strong> <em style={{ color: '#e4e4e7' }}>"{inspectedElement.innerText}"</em></p>
+                      <div className="inspector-details">
+                        <p><strong>العنصر:</strong> <code className="tag-name">&lt;{inspectedElement.tagName.toLowerCase()}&gt;</code></p>
+                        <p><strong>الفئات:</strong> <span className="class-name">{inspectedElement.className || 'N/A'}</span></p>
+                        <p><strong>النص:</strong> <em className="inner-text">"{inspectedElement.innerText}"</em></p>
                       </div>
-                      <button className="inspectBtn" onClick={() => setActiveTab('chat')}>تعديل هذا الجزء ذكياً</button>
+                      <button className="inspect-btn-action" onClick={() => setActiveTab('chat')}>تعديل هذا الجزء ذكياً</button>
                     </div>
                   )}
                 </div>
