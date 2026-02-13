@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Zap, MessageSquare, LayoutDashboard, Eye,
   MousePointer2, Settings as SettingsIcon, ExternalLink
@@ -35,6 +35,10 @@ const App: React.FC = () => {
   const [backendStatus, setBackendStatus] = useState<any>(null);
   const [currentCode, setCurrentCode] = useState('');
 
+  const handleSplashFinish = useCallback(() => {
+    setShowSplash(false);
+  }, []);
+
   // الربط مع الـ Backend (Task 6.1 & 6.2)
   useEffect(() => {
     const fetchStatus = async () => {
@@ -60,7 +64,7 @@ const App: React.FC = () => {
 
     // Set initial code (demo)
     setCurrentCode(`
-  < html >
+  <html>
   <body style="margin:0; background:#f8fafc; font-family: sans-serif;">
     <div style="padding:40px; text-align:center; color:#334155;">
       <h1 style="color:#0f172a;">أهلاً بك في المعاينة</h1>
@@ -71,7 +75,7 @@ const App: React.FC = () => {
       <button style="margin-top:20px; padding:10px 24px; background:#00ffcc; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">زر تفاعلي</button>
     </div>
   </body>
-      </html >
+  </html>
   `);
 
     return () => window.removeEventListener('message', handleMessage);
@@ -137,30 +141,30 @@ const App: React.FC = () => {
   `;
 
   if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+    return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
   return (
-    <div className="appContainer">
+    <div className="app-container">
       {/* Sidebar - Side Navigation Panel */}
       <aside className="sidebar">
-        <div className="logoSection"><Zap color="#00ffcc" size={28} /></div>
-        <nav className="navItems">
+        <div className="logo-section"><Zap color="#00ffcc" size={28} /></div>
+        <nav className="nav-items">
           <button
-            className={`navBtn ${activeTab === 'chat' ? 'navBtnActive' : ''} `}
+            className={`nav-item ${activeTab === 'chat' ? 'active' : ''} `}
             onClick={() => setActiveTab('chat')}
           ><MessageSquare size={22} /></button>
           <button
-            className={`navBtn ${activeTab === 'dashboard' ? 'navBtnActive' : ''} `}
+            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''} `}
             onClick={() => setActiveTab('dashboard')}
           ><LayoutDashboard size={22} /></button>
           <button
-            className={`navBtn ${activeTab === 'sandbox' ? 'navBtnActive' : ''} `}
+            className={`nav-item ${activeTab === 'sandbox' ? 'active' : ''} `}
             onClick={() => setActiveTab('sandbox')}
           ><Eye size={22} /></button>
           <div style={{ marginTop: 'auto' }}>
             <button
-              className={`navBtn ${activeTab === 'settings' ? 'navBtnActive' : ''} `}
+              className={`nav-item ${activeTab === 'settings' ? 'active' : ''} `}
               onClick={() => setActiveTab('settings')}
             ><SettingsIcon size={22} /></button>
           </div>
@@ -168,7 +172,7 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="contentArea">
+      <main className="main-viewport">
         {activeTab === 'sandbox' ? (
           <div className="sandboxContainer">
             {/* Sandbox Mode Switcher */}

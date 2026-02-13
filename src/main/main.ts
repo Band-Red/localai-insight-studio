@@ -35,7 +35,7 @@ class MainApp {
             frame: false // للحصول على واجهة عصرية
         });
 
-        this.mainWindow.loadFile('index.html');
+        this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
     }
 
     private setupIpc() {
