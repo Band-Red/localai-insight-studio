@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Smartphone, Monitor, Tablet, ExternalLink, 
-  RefreshCw, MessageSquare, LayoutDashboard, 
-  Eye, MousePointer2, Zap 
+import {
+  Smartphone, Monitor, Tablet, ExternalLink,
+  RefreshCw, MessageSquare, LayoutDashboard,
+  Eye, MousePointer2, Zap
 } from 'lucide-react';
 
 /**
  * استيراد التنسيقات بنظام الاستيراد المباشر لملفات الـ Modules 
  * لضمان حقن التنسيقات في الـ DOM بشكل صحيح مع الالتزام بالشرط
  */
-import './style.module.css';
+import './App.module.css';
 
 // تعريف الأجهزة
 const DEVICES = {
@@ -102,15 +102,15 @@ const App: React.FC = () => {
       <aside className="sidebar">
         <div className="logoSection"><Zap color="#00ffcc" size={28} /></div>
         <nav className="navItems">
-          <button 
+          <button
             className={`navBtn ${activeTab === 'chat' ? 'navBtnActive' : ''}`}
             onClick={() => setActiveTab('chat')}
           ><MessageSquare size={22} /></button>
-          <button 
+          <button
             className={`navBtn ${activeTab === 'dashboard' ? 'navBtnActive' : ''}`}
             onClick={() => setActiveTab('dashboard')}
           ><LayoutDashboard size={22} /></button>
-          <button 
+          <button
             className={`navBtn ${activeTab === 'sandbox' ? 'navBtnActive' : ''}`}
             onClick={() => setActiveTab('sandbox')}
           ><Eye size={22} /></button>
@@ -125,7 +125,7 @@ const App: React.FC = () => {
             <header className="toolbar">
               <div className="deviceSelectors">
                 {Object.entries(DEVICES).map(([key, value]) => (
-                  <button 
+                  <button
                     key={key}
                     className={`deviceBtn ${device.label === value.label ? 'deviceBtnActive' : ''}`}
                     onClick={() => setDevice(value)}
@@ -145,7 +145,7 @@ const App: React.FC = () => {
             <div className="viewport">
               <div className="deviceFrame" style={{ width: device.width, height: device.height }}>
                 {device.label !== 'Desktop' && <div className="notch" />}
-                <iframe 
+                <iframe
                   key={key}
                   className="iframeElement"
                   srcDoc={injectInspector(demoCode)}
@@ -159,12 +159,12 @@ const App: React.FC = () => {
               <div className="inspectorPanel">
                 <div className="inspectorHeader">
                   <div className="inspectorTitle"><MousePointer2 size={16} /> <span>فحص العنصر</span></div>
-                  <button onClick={() => setInspectedElement(null)} style={{background:'none', border:'none', color:'#71717a', cursor:'pointer', fontSize:'18px'}}>×</button>
+                  <button onClick={() => setInspectedElement(null)} style={{ background: 'none', border: 'none', color: '#71717a', cursor: 'pointer', fontSize: '18px' }}>×</button>
                 </div>
-                <div style={{fontSize:'12px', display:'flex', flexDirection:'column', gap:'6px'}}>
-                  <p style={{margin:0}}><strong>العنصر:</strong> <code style={{color:'#00ffcc'}}>&lt;{inspectedElement.tagName.toLowerCase()}&gt;</code></p>
-                  <p style={{margin:0}}><strong>الفئات:</strong> <span style={{color:'#9ca3af'}}>{inspectedElement.className || 'N/A'}</span></p>
-                  <p style={{margin:0}}><strong>النص:</strong> <em style={{color:'#e4e4e7'}}>"{inspectedElement.innerText}"</em></p>
+                <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <p style={{ margin: 0 }}><strong>العنصر:</strong> <code style={{ color: '#00ffcc' }}>&lt;{inspectedElement.tagName.toLowerCase()}&gt;</code></p>
+                  <p style={{ margin: 0 }}><strong>الفئات:</strong> <span style={{ color: '#9ca3af' }}>{inspectedElement.className || 'N/A'}</span></p>
+                  <p style={{ margin: 0 }}><strong>النص:</strong> <em style={{ color: '#e4e4e7' }}>"{inspectedElement.innerText}"</em></p>
                 </div>
                 <button className="inspectBtn" onClick={() => setActiveTab('chat')}>تعديل هذا الجزء ذكياً</button>
               </div>
@@ -174,7 +174,7 @@ const App: React.FC = () => {
           <div className="statusPlaceholder">
             <div>
               <p>لوحة {activeTab === 'chat' ? 'المحادثة الذكية' : 'المراقبة'} قيد التشغيل عبر Backend...</p>
-              <p style={{fontSize: '13px', opacity: 0.6}}>{backendStatus?.active ? 'المحرك متصل بنجاح' : 'جاري فحص حالة الاتصال بالمحرك المحلي...'}</p>
+              <p style={{ fontSize: '13px', opacity: 0.6 }}>{backendStatus?.active ? 'المحرك متصل بنجاح' : 'جاري فحص حالة الاتصال بالمحرك المحلي...'}</p>
             </div>
           </div>
         )}
