@@ -35,23 +35,43 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
     setInputValue('');
     setIsLoading(true);
 
-    // Simulation of AI response (will be linked to ModelManager later)
-    setTimeout(() => {
-      const generatedCode = `<!DOCTYPE html><html><body style="background:#09090b;color:#00ffcc;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;"><div><h1>تحديث جديد</h1><p>تم توليد هذا الكود بناءً على طلبك: ${userMsg.text}</p></div></body></html>`;
+    // Communication with local AI engine (Task 2.1)
+    try {
+      const electron = (window as any).electronAPI;
+      if (electron && electron.sendMessage) {
+        const result = await electron.sendMessage(inputValue);
 
-      const aiMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "لقد قمت بتوليد الكود المطلوب بناءً على سياق مشروعك. يمكنك الآن معاينته في تبويب المستعرض أو المحاكي.",
-        sender: 'ai',
-        timestamp: new Date()
-      };
+        const aiMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          text: result.success ? result.response : `خطأ: ${result.error}`,
+          sender: 'ai',
+          timestamp: new Date()
+        };
 
-      setMessages(prev => [...prev, aiMsg]);
+        setMessages(prev => [...prev, aiMsg]);
+        setIsLoading(false);
+
+        // إذا كان الرد يحتوي على كود (محاكاة بسيطة للفلترة لاحقاً)
+        if (result.success && result.response.includes('<html>')) {
+          if (onCodeGenerated) onCodeGenerated(result.response);
+        }
+      } else {
+        // Falling back to simulation if API not available
+        setTimeout(() => {
+          const aiMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            text: "عذراً، محرك الذكاء الاصطناعي المحلي غير متصل حالياً.",
+            sender: 'ai',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, aiMsg]);
+          setIsLoading(false);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Chat Error:', error);
       setIsLoading(false);
-
-      // Send code to parent component
-      if (onCodeGenerated) onCodeGenerated(generatedCode);
-    }, 2000);
+    }
   };
 
   const clearChat = () => setMessages([]);

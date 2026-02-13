@@ -39,6 +39,34 @@ class MainApp {
         // إدارة النماذج
         ipcMain.handle('model:status', () => this.modelManager.getStatus());
 
+        ipcMain.handle('chat:send', async (event, message, model) => {
+            const startTime = Date.now();
+            try {
+                const response = await this.modelManager.chat(message, model);
+                const latency = Date.now() - startTime;
+
+                // تسجيل العملية في السجلات (Task 1.2)
+                this.logger.addLog({
+                    event: 'AI_Chat_Success',
+                    cpuUsage: 15, // تقريبي
+                    ramUsage: 45, // تقريبي
+                    latency: latency,
+                    status: 'success'
+                });
+
+                return { success: true, response };
+            } catch (error) {
+                this.logger.addLog({
+                    event: 'AI_Chat_Error',
+                    cpuUsage: 5,
+                    ramUsage: 10,
+                    latency: Date.now() - startTime,
+                    status: 'error'
+                });
+                return { success: false, error: 'Failed to communicate with local AI engine' };
+            }
+        });
+
         // التصدير لـ Obsidian (Task 5.1 & 3.1)
         ipcMain.handle('export:chat', async (event, session, vaultPath) => {
             return await this.exporter.exportChat(session, vaultPath);

@@ -4,8 +4,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // وظائف المراقبة
     getSystemStats: () => ipcRenderer.invoke('system:stats'),
 
-    // وظائف النماذج
+    // وظائف النماذج (Task 2.1)
     checkModelStatus: () => ipcRenderer.invoke('model:status'),
+    sendMessage: (message: string, model?: string) => ipcRenderer.invoke('chat:send', message, model),
 
     // وظائف التصدير (Task 5.1 & 3.1)
     exportChat: (session: any, vaultPath?: string) => ipcRenderer.invoke('export:chat', session, vaultPath),
