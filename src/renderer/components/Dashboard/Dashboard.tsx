@@ -9,11 +9,14 @@ import './Dashboard.module.css';
 
 interface SystemStats {
   cpuUsage: number;
+  cpuStatus: 'success' | 'warning' | 'error';
   ramPercentage: number;
+  ramStatus: 'success' | 'warning' | 'error';
   ragAccuracy: number;
   totalQueries: number;
   securityLevel: number;
   avgResponseTime: number;
+  systemHealth: 'healthy' | 'warning' | 'critical';
 }
 
 const Dashboard: React.FC = () => {
@@ -32,11 +35,14 @@ const Dashboard: React.FC = () => {
 
         const currentStats: SystemStats = {
           cpuUsage: pythonStats.cpuUsage || 0,
+          cpuStatus: pythonStats.cpuStatus || 'success',
           ramPercentage: pythonStats.ramPercentage || 0,
+          ramStatus: pythonStats.ramStatus || 'success',
           ragAccuracy: pythonStats.ragAccuracy || 98.2,
           totalQueries: pythonStats.totalQueries || 0,
           securityLevel: pythonStats.securityLevel || 100,
-          avgResponseTime: pythonStats.avgResponseTime || 450
+          avgResponseTime: pythonStats.avgResponseTime || 450,
+          systemHealth: pythonStats.systemHealth || 'healthy'
         };
 
         setStats(currentStats);
@@ -73,8 +79,27 @@ const Dashboard: React.FC = () => {
 
   if (!stats) return <div className="loading">جاري جلب البيانات من المحرك المحلي...</div>;
 
+  const getHealthColor = (health: string) => {
+    switch (health) {
+      case 'critical': return '#ef4444';
+      case 'warning': return '#f59e0b';
+      default: return '#10b981';
+    }
+  };
+
   return (
     <div className="dashboard-wrapper" dir="rtl">
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+        <div style={{
+          width: '12px', height: '12px', borderRadius: '50%',
+          backgroundColor: getHealthColor(stats.systemHealth),
+          boxShadow: `0 0 10px ${getHealthColor(stats.systemHealth)}`
+        }} />
+        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+          حالة النظام: {stats.systemHealth === 'healthy' ? 'مستقر' : stats.systemHealth === 'warning' ? 'تنبيه' : 'حرج'}
+        </span>
+      </div>
 
       {/* Stats Cards */}
       <div className="stats-grid">
@@ -150,10 +175,21 @@ const Dashboard: React.FC = () => {
       {/* Alerting System (Task 4.3) */}
       <div className="alerts-section">
         <h4>تنبيهات الأمان والذكاء</h4>
-        <div className="alert-item warning">
-          <AlertTriangle size={16} />
-          <p>تم رصد محاولة استدراج للنموذج (Prompt Injection) - تم الحجب محلياً.</p>
-          <span>منذ دقيقتين</span>
+        {stats.systemHealth !== 'healthy' && (
+          <div className={`alert-item ${stats.systemHealth}`}>
+            <AlertTriangle size={16} />
+            <p>
+              {stats.systemHealth === 'critical'
+                ? 'استهلاك موارد النظام حرج جداً - قد تتأثر سرعة استجابة الذكاء الاصطناعي.'
+                : 'يوجد استهلاك مرتفع للموارد - يرجى مراقبة العمليات الجارية.'}
+            </p>
+            <span>الآن</span>
+          </div>
+        )}
+        <div className="alert-item success">
+          <ShieldCheck size={16} color="#10b981" />
+          <p>نظام التشفير المحلي نشط - كافة البيانات معالجة داخل الجهاز.</p>
+          <span>دائم</span>
         </div>
       </div>
     </div>

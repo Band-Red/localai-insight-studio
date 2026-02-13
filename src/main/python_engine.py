@@ -26,21 +26,34 @@ class LocalAIEngine:
         kl_div = round(0.1 + (time.time() % 10) / 100, 4)
         
         metrics = {
-            "cpuUsage": cpu_percent,               # 1. استهلاك المعالج
-            "ramUsedGB": round(memory.used / (1024**3), 2), # 2. الذاكرة المستهلكة بالجيجا
-            "securityLevel": 100 if self.is_offline else 80, # 3. مستوى الأمان
-            "reportsGenerated": self._count_reports(), # 4. عدد التقارير المولدة
-            "totalQueries": self._get_total_queries(), # 5. إجمالي الاستعلامات الحقيقية
-            "avgResponseTime": 420,                # 6. متوسط زمن الاستجابة (ms)
-            "ramPercentage": memory.percent,       # 7. نسبة استهلاك الرام
-            "ragAccuracy": 98.2,                   # 8. دقة الـ RAG (قيمة مستنتجة)
-            "cpuLoad": os.getloadavg()[0] if hasattr(os, 'getloadavg') else cpu_percent * 1.1, # 9. حمل المعالج
-            "confidenceLevel": 96,                 # 10. درجة الثقة في ردود النموذج
-            "systemUptime": self._get_uptime(),    # 11. مدة تشغيل النظام
-            "klDivergence": kl_div,                # 12. تباعد KL (مقياس جودة)
-            "privacyScanStatus": "Verified"        # 13. حالة فحص الخصوصية
+            "cpuUsage": cpu_percent,
+            "cpuStatus": self._get_status(cpu_percent, 70, 90), # 1. حالة المعالج
+            "ramUsedGB": round(memory.used / (1024**3), 2),
+            "ramPercentage": memory.percent,
+            "ramStatus": self._get_status(memory.percent, 80, 95), # 2. حالة الرام
+            "securityLevel": 100 if self.is_offline else 80,
+            "reportsGenerated": self._count_reports(),
+            "totalQueries": self._get_total_queries(),
+            "avgResponseTime": 420,
+            "ragAccuracy": 98.2,
+            "cpuLoad": os.getloadavg()[0] if hasattr(os, 'getloadavg') else cpu_percent * 1.1,
+            "confidenceLevel": 96,
+            "systemUptime": self._get_uptime(),
+            "klDivergence": kl_div,
+            "privacyScanStatus": "Verified",
+            "systemHealth": self._compute_overall_health(cpu_percent, memory.percent)
         }
         return metrics
+
+    def _get_status(self, value, warn, critical):
+        if value >= critical: return "error"
+        if value >= warn: return "warning"
+        return "success"
+
+    def _compute_overall_health(self, cpu, ram):
+        if cpu > 90 or ram > 95: return "critical"
+        if cpu > 70 or ram > 80: return "warning"
+        return "healthy"
 
     def _get_total_queries(self):
         # يمكن الوصول لعدد الأسطر في ملف الـ CSV المحفوظ
