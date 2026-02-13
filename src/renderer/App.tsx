@@ -23,10 +23,10 @@ const DEVICES = {
 };
 
 const App: React.FC = () => {
+  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'sandbox'>('sandbox');
   const [device, setDevice] = useState(DEVICES.iphone);
   const [key, setKey] = useState(0);
-  const [showSplash, setShowSplash] = useState(true);
   const [inspectedElement, setInspectedElement] = useState<any>(null);
   const [backendStatus, setBackendStatus] = useState<any>(null);
   const [currentCode, setCurrentCode] = useState('');
@@ -45,9 +45,6 @@ const App: React.FC = () => {
       }
     };
     fetchStatus();
-
-    // Show splash for 3.5 seconds
-    const splashTimer = setTimeout(() => setShowSplash(false), 3500);
 
     // استقبال رسائل الفحص من الـ iframe لعملية الـ Inspection البصري
     const handleMessage = (event: MessageEvent) => {
@@ -73,10 +70,7 @@ const App: React.FC = () => {
       </html>
     `);
 
-    return () => {
-      window.removeEventListener('message', handleMessage);
-      clearTimeout(splashTimer);
-    };
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   const openInBrowser = () => {
@@ -125,7 +119,7 @@ const App: React.FC = () => {
   `;
 
   if (showSplash) {
-    return <SplashScreen />;
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
   return (
