@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Smartphone, Monitor, Tablet, ExternalLink,
-  RefreshCw, MessageSquare, LayoutDashboard,
-  Eye, MousePointer2, Zap
+  Zap, MessageSquare, LayoutDashboard, Eye,
+  MousePointer2, Settings as SettingsIcon, ExternalLink
 } from 'lucide-react';
 import ChatBox from './components/Chat/ChatBox';
 import Dashboard from './components/Dashboard/Dashboard';
 import SplashScreen from './components/Splash/SplashScreen';
 import Emulator from './components/Emulator/Emulator';
 import Previewer from './components/Previewer/Previewer';
+import Settings from './components/Settings/Settings';
 
 /**
  * استيراد التنسيقات بنظام الاستيراد المباشر لملفات الـ Modules 
@@ -26,7 +26,7 @@ const DEVICES = {
 
 const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'sandbox'>('sandbox');
+  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'sandbox' | 'settings'>('sandbox');
   const [sandboxMode, setSandboxMode] = useState<'preview' | 'code'>('preview');
   const [isInspectMode, setIsInspectMode] = useState(false);
   const [device, setDevice] = useState(DEVICES.iphone);
@@ -60,19 +60,19 @@ const App: React.FC = () => {
 
     // Set initial code (demo)
     setCurrentCode(`
-      <html>
-        <body style="margin:0; background:#f8fafc; font-family: sans-serif;">
-          <div style="padding:40px; text-align:center; color:#334155;">
-            <h1 style="color:#0f172a;">أهلاً بك في المعاينة</h1>
-            <p>انقر على أي عنصر لفحصه بصرياً ومعرفة تفاصيله.</p>
-            <div style="margin-top:20px; padding:20px; background:white; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
-              عنصر تجريبي قابل للفحص
-            </div>
-            <button style="margin-top:20px; padding:10px 24px; background:#00ffcc; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">زر تفاعلي</button>
-          </div>
-        </body>
-      </html>
-    `);
+  < html >
+  <body style="margin:0; background:#f8fafc; font-family: sans-serif;">
+    <div style="padding:40px; text-align:center; color:#334155;">
+      <h1 style="color:#0f172a;">أهلاً بك في المعاينة</h1>
+      <p>انقر على أي عنصر لفحصه بصرياً ومعرفة تفاصيله.</p>
+      <div style="margin-top:20px; padding:20px; background:white; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+        عنصر تجريبي قابل للفحص
+      </div>
+      <button style="margin-top:20px; padding:10px 24px; background:#00ffcc; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">زر تفاعلي</button>
+    </div>
+  </body>
+      </html >
+  `);
 
     return () => window.removeEventListener('message', handleMessage);
   }, []);
@@ -100,13 +100,14 @@ const App: React.FC = () => {
           };
           window.parent.postMessage({ type: 'ELEMENT_INSPECTED', info }, '*');
         }, true);
-        
+
         // Add visual feedback for hover
         document.addEventListener('mouseover', (e) => {
           if (!${isInspectMode}) return;
           e.target.style.outline = '1px dashed #00ffcc';
           e.target.style.cursor = 'crosshair';
         });
+
         document.addEventListener('mouseout', (e) => {
           if (!${isInspectMode}) return;
           e.target.style.outline = 'none';
@@ -121,18 +122,18 @@ const App: React.FC = () => {
   };
 
   const demoCode = `
-    <html>
-      <body style="margin:0; background:#f8fafc; font-family: sans-serif;">
-        <div style="padding:40px; text-align:center; color:#334155;">
-          <h1 style="color:#0f172a;">أهلاً بك في المعاينة</h1>
-          <p>انقر على أي عنصر لفحصه بصرياً ومعرفة تفاصيله.</p>
-          <div style="margin-top:20px; padding:20px; background:white; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
-            عنصر تجريبي قابل للفحص
-          </div>
-          <button style="margin-top:20px; padding:10px 24px; background:#00ffcc; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">زر تفاعلي</button>
-        </div>
-      </body>
-    </html>
+  < html >
+  <body style="margin:0; background:#f8fafc; font-family: sans-serif;">
+    <div style="padding:40px; text-align:center; color:#334155;">
+      <h1 style="color:#0f172a;">أهلاً بك في المعاينة</h1>
+      <p>انقر على أي عنصر لفحصه بصرياً ومعرفة تفاصيله.</p>
+      <div style="margin-top:20px; padding:20px; background:white; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+        عنصر تجريبي قابل للفحص
+      </div>
+      <button style="margin-top:20px; padding:10px 24px; background:#00ffcc; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">زر تفاعلي</button>
+    </div>
+  </body>
+    </html >
   `;
 
   if (showSplash) {
@@ -146,17 +147,23 @@ const App: React.FC = () => {
         <div className="logoSection"><Zap color="#00ffcc" size={28} /></div>
         <nav className="navItems">
           <button
-            className={`navBtn ${activeTab === 'chat' ? 'navBtnActive' : ''}`}
+            className={`navBtn ${activeTab === 'chat' ? 'navBtnActive' : ''} `}
             onClick={() => setActiveTab('chat')}
           ><MessageSquare size={22} /></button>
           <button
-            className={`navBtn ${activeTab === 'dashboard' ? 'navBtnActive' : ''}`}
+            className={`navBtn ${activeTab === 'dashboard' ? 'navBtnActive' : ''} `}
             onClick={() => setActiveTab('dashboard')}
           ><LayoutDashboard size={22} /></button>
           <button
-            className={`navBtn ${activeTab === 'sandbox' ? 'navBtnActive' : ''}`}
+            className={`navBtn ${activeTab === 'sandbox' ? 'navBtnActive' : ''} `}
             onClick={() => setActiveTab('sandbox')}
           ><Eye size={22} /></button>
+          <div style={{ marginTop: 'auto' }}>
+            <button
+              className={`navBtn ${activeTab === 'settings' ? 'navBtnActive' : ''} `}
+              onClick={() => setActiveTab('settings')}
+            ><SettingsIcon size={22} /></button>
+          </div>
         </nav>
       </aside>
 
@@ -193,6 +200,16 @@ const App: React.FC = () => {
                     border: 'none', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold'
                   }}
                 >{isInspectMode ? 'نشط' : 'معطل'}</button>
+
+                <button
+                  onClick={openInBrowser}
+                  title="فتح في المتصفح الخارجي"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    color: '#9ca3af',
+                    border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center'
+                  }}
+                ><ExternalLink size={14} /></button>
               </div>
             </div>
 
@@ -224,8 +241,10 @@ const App: React.FC = () => {
           </div>
         ) : activeTab === 'chat' ? (
           <ChatBox onCodeGenerated={(code) => { setCurrentCode(code); setActiveTab('sandbox'); }} />
-        ) : (
+        ) : activeTab === 'dashboard' ? (
           <Dashboard />
+        ) : (
+          <Settings />
         )}
       </main>
     </div>

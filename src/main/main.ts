@@ -102,7 +102,8 @@ class MainApp {
                 properties: ['openDirectory']
             });
             if (!result.canceled && result.filePaths.length > 0) {
-                return await this.ragManager.indexFileOrFolder(result.filePaths[0]);
+                const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
+                return { ...indexResult, path: result.filePaths[0] };
             }
             return { success: false, error: 'Cancelled' };
         });
@@ -115,7 +116,8 @@ class MainApp {
                 ]
             });
             if (!result.canceled && result.filePaths.length > 0) {
-                return await this.ragManager.indexFileOrFolder(result.filePaths[0]);
+                const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
+                return { ...indexResult, path: result.filePaths[0] };
             }
             return { success: false, error: 'Cancelled' };
         });
