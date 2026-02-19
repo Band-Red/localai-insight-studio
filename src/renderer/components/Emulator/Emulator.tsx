@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Smartphone, Monitor, Tablet, ExternalLink, RefreshCw } from 'lucide-react';
-import './Emulator.module.css';
+import React, { useState, useEffect } from 'react';
+import { Smartphone, Monitor, Tablet, ExternalLink, RefreshCw, Layers } from 'lucide-react';
+import styles from './Emulator.module.css';
+import mockupStyles from './EmulatorMockup.module.css';
 
 // تعريف قياسات الأجهزة المدعومة
 const DEVICES = {
@@ -15,8 +16,20 @@ interface EmulatorProps {
 }
 
 const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
-  const [deviceKey, setDeviceKey] = useState<'iphone' | 'samsung' | 'tablet' | 'desktop'>('iphone');
+  const [deviceKey, setDeviceKey] = useState<'iphone' | 'samsung' | 'tablet' | 'desktop'>('desktop');
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // كشف تلقائي لنوع الكود
+  useEffect(() => {
+    const isMobile = (c: string) => {
+      const indicators = ['import java', 'import swift', 'import flutter', 'MaterialApp', 'Scaffold', 'View {', 'UIViewController'];
+      return indicators.some(ind => c.includes(ind));
+    };
+
+    if (isMobile(code)) {
+      setDeviceKey('desktop');
+    }
+  }, [code]);
 
   const handleOpenExternal = () => {
     if ((window as any).electronAPI && code) {
@@ -24,60 +37,62 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
     }
   };
 
+  const isHtml = code.trim().toLowerCase().startsWith('<html') || code.includes('<!DOCTYPE') || code.includes('<html>');
+
   const getSizeClass = (key: string) => {
     switch (key) {
-      case 'iphone': return 'iphoneSize';
-      case 'samsung': return 'samsungSize';
-      case 'tablet': return 'tabletSize';
-      case 'desktop': return 'desktopSize';
-      default: return 'iphoneSize';
+      case 'iphone': return styles.iphoneSize;
+      case 'samsung': return styles.samsungSize;
+      case 'tablet': return styles.tabletSize;
+      case 'desktop': return styles.desktopSize;
+      default: return styles.iphoneSize;
     }
   };
 
   return (
-    <div className="emulatorContainer">
+    <div className={styles.emulatorContainer}>
       {/* شريط التحكم العلوي */}
-      <div className="toolbar">
-        <div className="deviceSelectors">
+      <div className={styles.toolbar}>
+        <div className={styles.deviceSelectors}>
           <button
             onClick={() => setDeviceKey('iphone')}
-            className={`deviceButton ${deviceKey === 'iphone' ? 'activeButton' : ''}`}
+            className={`${styles.deviceButton} ${deviceKey === 'iphone' ? styles.activeButton : ''}`}
           >
             <Smartphone size={16} /> iPhone
           </button>
 
           <button
             onClick={() => setDeviceKey('samsung')}
-            className={`deviceButton ${deviceKey === 'samsung' ? 'activeButton' : ''}`}
+            className={`${styles.deviceButton} ${deviceKey === 'samsung' ? styles.activeButton : ''}`}
           >
             <Smartphone size={16} /> Samsung
           </button>
 
           <button
             onClick={() => setDeviceKey('tablet')}
-            className={`deviceButton ${deviceKey === 'tablet' ? 'activeButton' : ''}`}
+            className={`${styles.deviceButton} ${deviceKey === 'tablet' ? styles.activeButton : ''}`}
           >
             <Tablet size={16} /> Tablet
           </button>
 
           <button
             onClick={() => setDeviceKey('desktop')}
-            className={`deviceButton ${deviceKey === 'desktop' ? 'activeButton' : ''}`}
+            className={`${styles.deviceButton} ${deviceKey === 'desktop' ? styles.activeButton : ''}`}
           >
             <Monitor size={16} /> Desktop
           </button>
         </div>
 
-        <div className="actionButtons">
+        <div className={styles.actionButtons}>
           <button
-            className="iconButton"
+            className={styles.iconButton}
             onClick={() => setRefreshKey(prev => prev + 1)}
             title="إعادة تحميل المعاينة"
           >
             <RefreshCw size={18} />
           </button>
           <button
-            className="iconButton"
+            className={styles.iconButton}
             onClick={handleOpenExternal}
             title="فتح في المتصفح الخارجي"
           >
@@ -87,15 +102,31 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
       </div>
 
       {/* منطقة العرض والمعاينة */}
-      <main className="viewportArea">
-        <div className={`deviceFrame ${getSizeClass(deviceKey)}`}>
-          <iframe
-            key={refreshKey}
-            title="Preview Frame"
-            className="previewIframe"
-            srcDoc={code || "<html><body style='display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'>بانتظار الكود للمعاينة...</body></html>"}
-            sandbox="allow-scripts"
-          />
+      <main className={styles.viewportArea}>
+        <div className={`${styles.deviceFrame} ${getSizeClass(deviceKey)}`}>
+          {isHtml ? (
+            <iframe
+              key={refreshKey}
+              title="Preview Frame"
+              className={styles.previewIframe}
+              srcDoc={code || "<html><body style='display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#00ffcc;font-family:sans-serif;'>بانتظار الكود للمعاينة...</body></html>"}
+              sandbox="allow-scripts"
+            />
+          ) : (
+            <div className={mockupStyles.mobileMockupContainer}>
+              <div className={mockupStyles.mockupHeader}>
+                <Layers size={24} color="#00ffcc" />
+                <h3>Mobile App UI</h3>
+                <p>تتم حالياً معاينة الكود البرمجي للهاتف</p>
+              </div>
+              <div className={mockupStyles.mockupCodeView}>
+                <pre><code>{code.substring(0, 1000)}...</code></pre>
+              </div>
+              <div className={mockupStyles.mockupBadge}>
+                Mobile Source Active
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

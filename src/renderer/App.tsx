@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Zap, MessageSquare, LayoutDashboard, Eye,
-  MousePointer2, Settings as SettingsIcon, ExternalLink,
-  Smartphone, Tablet, Monitor
+  Settings as SettingsIcon, ExternalLink,
+  Smartphone, Tablet, Monitor, X, Brain
 } from 'lucide-react';
 import ChatBox from './components/Chat/ChatBox';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -10,12 +10,11 @@ import SplashScreen from './components/Splash/SplashScreen';
 import Emulator from './components/Emulator/Emulator';
 import Previewer from './components/Previewer/Previewer';
 import Settings from './components/Settings/Settings';
+import VisualEditorOverlay from './components/Emulator/VisualEditorOverlay';
+import ModelManager from './components/Models/ModelManager';
 
-/**
- * استيراد التنسيقات بنظام الاستيراد المباشر لملفات الـ Modules 
- * لضمان حقن التنسيقات في الـ DOM بشكل صحيح مع الالتزام بالشرط
- */
-import './App.module.css';
+import styles from './App.module.css';
+import layoutStyles from './AppLayout.module.css';
 
 // تعريف الأجهزة
 const DEVICES = {
@@ -27,35 +26,24 @@ const DEVICES = {
 
 const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'sandbox' | 'settings'>('sandbox');
+  const [activeTab, setActiveTab] = useState<'chat' | 'dashboard' | 'sandbox' | 'settings' | 'models'>('chat');
+  const [activeModelName, setActiveModelName] = useState<string | null>(null);
   const [sandboxMode, setSandboxMode] = useState<'preview' | 'code'>('preview');
-  const [isInspectMode, setIsInspectMode] = useState(false);
+  const [isInspectMode, setIsInspectMode] = useState(true); // تفعيل وضع الفحص افتراضياً لتجربة أفضل
   const [device, setDevice] = useState(DEVICES.iphone);
-  const [key, setKey] = useState(0);
   const [inspectedElement, setInspectedElement] = useState<any>(null);
-  const [backendStatus, setBackendStatus] = useState<any>(null);
   const [currentCode, setCurrentCode] = useState('');
+
+  // حالات جديدة للمعاينة في الدردشة
+  const [isChatPreviewOpen, setIsChatPreviewOpen] = useState(false);
+  const [chatPreviewCode, setChatPreviewCode] = useState('');
+  const [isUpdatingCode, setIsUpdatingCode] = useState(false);
 
   const handleSplashFinish = useCallback(() => {
     setShowSplash(false);
   }, []);
 
-  // الربط مع الـ Backend (Task 6.1 & 6.2)
   useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        // @ts-ignore - استدعاء من الـ Preload script للتحقق من حالة النموذج
-        if (window.electronAPI && window.electronAPI.checkModelStatus) {
-          const status = await window.electronAPI.checkModelStatus();
-          setBackendStatus(status);
-        }
-      } catch (err) {
-        console.error("فشل الربط مع محرك البحث المحلي", err);
-      }
-    };
-    fetchStatus();
-
-    // استقبال رسائل الفحص من الـ iframe لعملية الـ Inspection البصري
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'ELEMENT_INSPECTED') {
         setInspectedElement(event.data.info);
@@ -63,17 +51,16 @@ const App: React.FC = () => {
     };
     window.addEventListener('message', handleMessage);
 
-    // Set initial code (demo)
     setCurrentCode(`
   <html>
-  <body style="margin:0; background:#f8fafc; font-family: sans-serif;">
-    <div style="padding:40px; text-align:center; color:#334155;">
-      <h1 style="color:#0f172a;">أهلاً بك في المعاينة</h1>
-      <p>انقر على أي عنصر لفحصه بصرياً ومعرفة تفاصيله.</p>
-      <div style="margin-top:20px; padding:20px; background:white; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
-        عنصر تجريبي قابل للفحص
+  <body style="margin:0; background:#050507; font-family: sans-serif; color: #fff; display: flex; align-items:center; justify-content:center; height: 100vh;">
+    <div style="padding:40px; text-align:center; max-width: 500px;">
+      <h1 style="color:#00ffcc; margin-bottom: 20px;">أهلاً بك في المعاينة</h1>
+      <p style="color:#71717a; line-height: 1.6;">انقر على أي عنصر لفحصه بصرياً ومعرفة تفاصيله وتعديله ذكياً.</p>
+      <div style="margin-top:30px; padding:25px; background:#0c0c12; border-radius:16px; border:1px solid #1f1f23; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+        عنصر تجريبي قابل للفحص والبناء
       </div>
-      <button style="margin-top:20px; padding:10px 24px; background:#00ffcc; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">زر تفاعلي</button>
+      <button style="margin-top:30px; padding:12px 30px; background:#00ffcc; color:#000; border:none; border-radius:10px; font-weight:bold; cursor:pointer; transition: transform 0.2s;">زر تفاعلي</button>
     </div>
   </body>
   </html>
@@ -83,9 +70,8 @@ const App: React.FC = () => {
   }, []);
 
   const openInBrowser = () => {
-    // @ts-ignore - فتح الرابط في المتصفح الخارجي للنظام عبر Electron
-    if (window.electronAPI && window.electronAPI.openExternal) {
-      window.electronAPI.openExternal('http://localhost:3000');
+    if ((window as any).electronAPI && (window as any).electronAPI.openExternal) {
+      (window as any).electronAPI.openExternal('http://localhost:3000');
     }
   };
 
@@ -96,20 +82,22 @@ const App: React.FC = () => {
           if (!${isInspectMode}) return;
           e.preventDefault();
           e.stopPropagation();
-          document.querySelectorAll('.inspected-el').forEach(el => el.classList.remove('inspected-el'));
-          e.target.classList.add('inspected-el');
+          
           const info = {
             tagName: e.target.tagName,
             className: e.target.className,
-            innerText: e.target.innerText.substring(0, 30)
+            innerText: e.target.innerText.substring(0, 50),
+            html: e.target.outerHTML.substring(0, 200),
+            x: e.clientX,
+            y: e.clientY
           };
           window.parent.postMessage({ type: 'ELEMENT_INSPECTED', info }, '*');
         }, true);
 
-        // Add visual feedback for hover
         document.addEventListener('mouseover', (e) => {
           if (!${isInspectMode}) return;
-          e.target.style.outline = '1px dashed #00ffcc';
+          e.target.style.outline = '2px solid #00ffcc';
+          e.target.style.outlineOffset = '-2px';
           e.target.style.cursor = 'crosshair';
         });
 
@@ -117,55 +105,90 @@ const App: React.FC = () => {
           if (!${isInspectMode}) return;
           e.target.style.outline = 'none';
         });
-
-        const style = document.createElement('style');
-        style.innerHTML = '.inspected-el { outline: 3px solid #00ffcc !important; outline-offset: -3px; }';
-        document.head.appendChild(style);
       </script>
     `;
     return html.replace('</body>', `${script}</body>`);
   };
 
-  const demoCode = `
-  < html >
-  <body style="margin:0; background:#f8fafc; font-family: sans-serif;">
-    <div style="padding:40px; text-align:center; color:#334155;">
-      <h1 style="color:#0f172a;">أهلاً بك في المعاينة</h1>
-      <p>انقر على أي عنصر لفحصه بصرياً ومعرفة تفاصيله.</p>
-      <div style="margin-top:20px; padding:20px; background:white; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
-        عنصر تجريبي قابل للفحص
-      </div>
-      <button style="margin-top:20px; padding:10px 24px; background:#00ffcc; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">زر تفاعلي</button>
-    </div>
-  </body>
-    </html >
-  `;
+  const handleRunInChat = (code: string) => {
+    setChatPreviewCode(code);
+    setIsChatPreviewOpen(true);
+  };
+
+  const handleVisualEditSubmit = async (instruction: string) => {
+    if (!inspectedElement || !instruction.trim()) return;
+
+    setIsUpdatingCode(true);
+    try {
+      const electron = (window as any).electronAPI;
+      if (electron && electron.sendMessage) {
+        // نرسل السياق الكامل للذكاء الاصطناعي ليقوم بالتعديل الموضعي
+        const prompt = `
+          لدي هذا الكود:
+          \`\`\`html
+          ${chatPreviewCode || currentCode}
+          \`\`\`
+          
+          أريد تعديل العنصر التالي:
+          الفئة: ${inspectedElement.tagName}
+          الكود القديم للعنصر: ${inspectedElement.html}
+          
+          الطلب: ${instruction}
+          
+          قم بإرجاع الكود الكامل المعدل فقط داخل وسم html.
+        `;
+
+        const result = await electron.sendMessage(prompt);
+        if (result.success) {
+          // استخراج الكود من الاستجابة (بافتراض أنه يعود بماركداون)
+          const codeMatch = result.response.match(/```html\n?([\s\S]*?)```/) || [null, result.response];
+          const newCode = codeMatch[1].trim();
+
+          if (isChatPreviewOpen) {
+            setChatPreviewCode(newCode);
+          } else {
+            setCurrentCode(newCode);
+          }
+          setInspectedElement(null);
+        }
+      }
+    } catch (error) {
+      console.error("Visual Edit Error:", error);
+    } finally {
+      setIsUpdatingCode(false);
+    }
+  };
 
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
   return (
-    <div className="app-container">
+    <div className={styles.appContainer}>
       {/* Sidebar - Side Navigation Panel */}
-      <aside className="sidebar">
-        <div className="logo-section"><Zap color="#00ffcc" size={28} /></div>
-        <nav className="nav-items">
+      <aside className={styles.sidebar}>
+        <div className={styles.logoSection}><Zap color="#00ffcc" size={28} /></div>
+        <nav className={styles.navItems}>
           <button
-            className={`nav-item ${activeTab === 'chat' ? 'active' : ''} `}
+            className={`${styles.navItem} ${activeTab === 'chat' ? styles.active : ''}`}
             onClick={() => setActiveTab('chat')}
           ><MessageSquare size={22} /></button>
           <button
-            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''} `}
+            className={`${styles.navItem} ${activeTab === 'dashboard' ? styles.active : ''}`}
             onClick={() => setActiveTab('dashboard')}
           ><LayoutDashboard size={22} /></button>
           <button
-            className={`nav-item ${activeTab === 'sandbox' ? 'active' : ''} `}
+            className={`${styles.navItem} ${activeTab === 'sandbox' ? styles.active : ''}`}
             onClick={() => setActiveTab('sandbox')}
           ><Eye size={22} /></button>
-          <div style={{ marginTop: 'auto' }}>
+          <button
+            className={`${styles.navItem} ${activeTab === 'models' ? styles.active : ''}`}
+            onClick={() => setActiveTab('models')}
+            title="نماذج GGUF المحلية"
+          ><Brain size={22} /></button>
+          <div className={styles.sidebarBottom}>
             <button
-              className={`nav-item ${activeTab === 'settings' ? 'active' : ''} `}
+              className={`${styles.navItem} ${activeTab === 'settings' ? styles.active : ''}`}
               onClick={() => setActiveTab('settings')}
             ><SettingsIcon size={22} /></button>
           </div>
@@ -173,15 +196,15 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="main-viewport">
+      <main className={styles.mainViewport}>
         {activeTab === 'sandbox' ? (
-          <div className="sandboxContainer">
+          <div className={styles.sandboxContainer}>
             {/* Device Selection Bar */}
-            <div className="device-toolbar">
+            <div className={styles.deviceToolbar}>
               {Object.entries(DEVICES).map(([key, d]) => (
                 <button
                   key={key}
-                  className={`device-btn ${device === d ? 'active' : ''}`}
+                  className={`${styles.deviceBtn} ${device === d ? styles.active : ''}`}
                   onClick={() => setDevice(d)}
                 >
                   {key === 'iphone' ? <Smartphone size={14} /> :
@@ -193,59 +216,80 @@ const App: React.FC = () => {
             </div>
 
             {/* Sandbox Mode Switcher */}
-            <div className="sandbox-mode-switcher">
+            <div className={styles.sandboxModeSwitcher}>
               <button
                 onClick={() => setSandboxMode('preview')}
-                className={`mode-btn ${sandboxMode === 'preview' ? 'active' : ''}`}
+                className={`${styles.modeBtn} ${sandboxMode === 'preview' ? styles.active : ''}`}
               >المعاينة التفاعلية</button>
               <button
                 onClick={() => setSandboxMode('code')}
-                className={`mode-btn ${sandboxMode === 'code' ? 'active' : ''}`}
+                className={`${styles.modeBtn} ${sandboxMode === 'code' ? styles.active : ''}`}
               >عرض الكود المصدري</button>
 
-              <div className="toolbar-actions">
-                <span className="inspect-label">وضع الفحص البصري:</span>
+              <div className={styles.toolbarActions}>
+                <span className={styles.inspectLabel}>وضع الفحص البصري:</span>
                 <button
                   onClick={() => setIsInspectMode(!isInspectMode)}
-                  className={`inspect-toggle ${isInspectMode ? 'active' : 'inactive'}`}
+                  className={`${styles.inspectToggle} ${isInspectMode ? styles.active : styles.inactive}`}
                 >{isInspectMode ? 'نشط' : 'معطل'}</button>
 
                 <button
                   onClick={openInBrowser}
                   title="فتح في المتصفح الخارجي"
-                  className="external-btn"
+                  className={styles.externalBtn}
                 ><ExternalLink size={14} /></button>
               </div>
             </div>
 
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div className={styles.viewportContent}>
               {sandboxMode === 'preview' ? (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div className={styles.previewContainer}>
                   <Emulator code={injectInspector(currentCode)} />
 
-                  {/* Visual Inspector Overlay (kept from App.tsx logic) */}
-                  {inspectedElement && (
-                    <div className="inspector-panel">
-                      <div className="inspector-header">
-                        <div className="inspector-title"><MousePointer2 size={16} /> <span>فحص العنصر</span></div>
-                        <button onClick={() => setInspectedElement(null)} className="close-btn">×</button>
-                      </div>
-                      <div className="inspector-details">
-                        <p><strong>العنصر:</strong> <code className="tag-name">&lt;{inspectedElement.tagName.toLowerCase()}&gt;</code></p>
-                        <p><strong>الفئات:</strong> <span className="class-name">{inspectedElement.className || 'N/A'}</span></p>
-                        <p><strong>النص:</strong> <em className="inner-text">"{inspectedElement.innerText}"</em></p>
-                      </div>
-                      <button className="inspect-btn-action" onClick={() => setActiveTab('chat')}>تعديل هذا الجزء ذكياً</button>
-                    </div>
-                  )}
+                  {/* Visual Editor Overlay for Sandbox tab */}
+                  <VisualEditorOverlay
+                    element={inspectedElement}
+                    onCancel={() => setInspectedElement(null)}
+                    onSubmit={handleVisualEditSubmit}
+                    loading={isUpdatingCode}
+                  />
                 </div>
               ) : (
                 <Previewer content={currentCode} />
               )}
             </div>
           </div>
+        ) : activeTab === 'models' ? (
+          <ModelManager onActiveModelChange={setActiveModelName} />
         ) : activeTab === 'chat' ? (
-          <ChatBox onCodeGenerated={(code) => { setCurrentCode(code); setActiveTab('sandbox'); }} />
+          <div className={layoutStyles.chatSplitContainer}>
+            <div className={`${layoutStyles.chatSide} ${isChatPreviewOpen ? layoutStyles.withPreview : ''}`}>
+              <ChatBox
+                onCodeGenerated={(code) => { setCurrentCode(code); }}
+                onRunCode={handleRunInChat}
+                activeModel={activeModelName}
+              />
+            </div>
+            {isChatPreviewOpen && (
+              <div className={layoutStyles.previewSide}>
+                <div className={layoutStyles.previewHeader}>
+                  <span>معاينة حية للنظام المولد</span>
+                  <button className={layoutStyles.closePreviewBtn} onClick={() => setIsChatPreviewOpen(false)}>
+                    <X size={16} />
+                  </button>
+                </div>
+                <Emulator code={injectInspector(chatPreviewCode)} />
+
+                {/* Visual Editor Overlay for Chat splitting view */}
+                <VisualEditorOverlay
+                  element={inspectedElement}
+                  onCancel={() => setInspectedElement(null)}
+                  onSubmit={handleVisualEditSubmit}
+                  loading={isUpdatingCode}
+                />
+              </div>
+            )}
+          </div>
         ) : activeTab === 'dashboard' ? (
           <Dashboard />
         ) : (

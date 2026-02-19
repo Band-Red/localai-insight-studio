@@ -1,0 +1,761 @@
+/* ═══════════════════════════════════════════════════════════════
+   ModelManager.module.css — Design Tokens: project dark theme
+   #050507 bg | #0c0c12 card | #1f1f23 border | #00ffcc accent
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Layout ─────────────────────────────────────────────────── */
+.managerWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: #050507;
+    color: #fff;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    direction: rtl;
+}
+
+.managerHeader {
+    padding: 24px 28px 0;
+    border-bottom: 1px solid #1f1f23;
+    flex-shrink: 0;
+}
+
+.managerHeader h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 4px;
+}
+
+.managerHeader p {
+    font-size: 13px;
+    color: #71717a;
+    margin: 0 0 20px;
+}
+
+.tabBar {
+    display: flex;
+    gap: 4px;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #71717a;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.tab:hover {
+    color: #a1a1aa;
+}
+
+.tab.activeTab {
+    color: #00ffcc;
+    border-bottom-color: #00ffcc;
+}
+
+.managerBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    scrollbar-width: thin;
+    scrollbar-color: #1f1f23 transparent;
+}
+
+/* ── Split Layout (Library tab) ─────────────────────────────── */
+.libraryLayout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    height: 100%;
+}
+
+/* ── Cards / Sections ───────────────────────────────────────── */
+.card {
+    background: #0c0c12;
+    border: 1px solid #1f1f23;
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.sectionTitle span {
+    color: #00ffcc;
+}
+
+/* ── Drop Zone ───────────────────────────────────────────────── */
+.dropZone {
+    border: 2px dashed #1f1f23;
+    border-radius: 16px;
+    padding: 48px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.25s, background 0.25s;
+    text-align: center;
+}
+
+.dropZone:hover,
+.dropZoneActive {
+    border-color: #00ffcc;
+    background: rgba(0, 255, 204, 0.04);
+}
+
+.dropZoneError {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.04);
+}
+
+.dropIcon {
+    animation: pulseIcon 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseIcon {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(0.92);
+    }
+}
+
+.dropTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.dropSubtitle {
+    font-size: 12px;
+    color: #71717a;
+}
+
+.dropError {
+    font-size: 12px;
+    color: #ef4444;
+    font-weight: 500;
+}
+
+/* ── Model List ─────────────────────────────────────────────── */
+.modelList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modelItem {
+    background: #050507;
+    border: 1px solid #1f1f23;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.2s;
+}
+
+.modelItem:hover {
+    border-color: #2a2a32;
+}
+
+.modelItemActive {
+    border-color: #00ffcc !important;
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.statusIdle {
+    background: #3f3f46;
+}
+
+.statusLoading {
+    background: #f59e0b;
+    animation: dotPulse 1s ease-in-out infinite;
+}
+
+.statusReady {
+    background: #00ffcc;
+    box-shadow: 0 0 6px rgba(0, 255, 204, 0.6);
+}
+
+.statusError {
+    background: #ef4444;
+}
+
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.modelInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.modelName {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modelMeta {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    background: rgba(0, 255, 204, 0.1);
+    color: #00ffcc;
+    border: 1px solid rgba(0, 255, 204, 0.2);
+}
+
+.badgeGray {
+    background: rgba(113, 113, 122, 0.15);
+    color: #71717a;
+    border: 1px solid #1f1f23;
+}
+
+.modelActions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.btnLoad {
+    padding: 6px 14px;
+    background: #00ffcc;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btnLoad:hover {
+    opacity: 0.85;
+}
+
+.btnLoad:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btnStop {
+    padding: 6px 14px;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btnDelete {
+    padding: 6px 8px;
+    background: transparent;
+    color: #3f3f46;
+    border: 1px solid #1f1f23;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.btnDelete:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.emptyState {
+    padding: 40px;
+    text-align: center;
+    color: #3f3f46;
+    font-size: 13px;
+}
+
+/* ── Form Fields ─────────────────────────────────────────────── */
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.formGridFull {
+    grid-template-columns: 1fr;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fieldFull {
+    grid-column: 1 / -1;
+}
+
+.label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a1a1aa;
+    letter-spacing: 0.03em;
+}
+
+.input,
+.select,
+.textarea {
+    background: #050507;
+    border: 1px solid #1f1f23;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+    border-color: #00ffcc;
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.inputGroup {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.inputGroup .input {
+    flex: 1;
+}
+
+.inputSuffix {
+    font-size: 12px;
+    color: #71717a;
+    flex-shrink: 0;
+}
+
+/* ── Toggle Switches ─────────────────────────────────────────── */
+.toggleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #0f0f14;
+}
+
+.toggleRow:last-child {
+    border-bottom: none;
+}
+
+.toggleLabel {
+    font-size: 13px;
+    color: #d4d4d8;
+}
+
+.toggleHint {
+    font-size: 11px;
+    color: #52525b;
+    margin-top: 2px;
+}
+
+.toggle {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggleSlider {
+    position: absolute;
+    inset: 0;
+    background: #1f1f23;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background 0.25s;
+}
+
+.toggleSlider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    left: 3px;
+    top: 3px;
+    transition: transform 0.25s;
+}
+
+.toggle input:checked+.toggleSlider {
+    background: #00ffcc;
+}
+
+.toggle input:checked+.toggleSlider::before {
+    transform: translateX(18px);
+}
+
+/* ── Smart Suggest Button ────────────────────────────────────── */
+.smartBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: rgba(0, 255, 204, 0.08);
+    color: #00ffcc;
+    border: 1px solid rgba(0, 255, 204, 0.25);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.smartBtn:hover {
+    background: rgba(0, 255, 204, 0.15);
+}
+
+.smartBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.sectionHeaderRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* ── Quantization Grid ───────────────────────────────────────── */
+.quantGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.quantOption {
+    background: #050507;
+    border: 1px solid #1f1f23;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.quantOption:hover {
+    border-color: #2a2a32;
+}
+
+.quantOptionSelected {
+    border-color: #00ffcc;
+    background: rgba(0, 255, 204, 0.06);
+}
+
+.quantName {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.quantMeta {
+    font-size: 11px;
+    color: #71717a;
+    margin-top: 3px;
+}
+
+/* ── API Keys Section ────────────────────────────────────────── */
+.apiKeyList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.apiKeyRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #050507;
+    border: 1px solid #1f1f23;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #a1a1aa;
+}
+
+.apiKeyRow span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btnIcon {
+    background: transparent;
+    border: none;
+    color: #3f3f46;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.btnIcon:hover {
+    color: #ef4444;
+}
+
+.btnGenerate {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px dashed #1f1f23;
+    color: #71717a;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.btnGenerate:hover {
+    border-color: #00ffcc;
+    color: #00ffcc;
+}
+
+/* ── Sliders ─────────────────────────────────────────────────── */
+.sliderRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 4px;
+    background: #1f1f23;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00ffcc;
+    cursor: pointer;
+}
+
+.sliderValue {
+    width: 48px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #00ffcc;
+}
+
+/* ── Save Bar ────────────────────────────────────────────────── */
+.saveBar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 28px;
+    border-top: 1px solid #1f1f23;
+    flex-shrink: 0;
+}
+
+.btnSave {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: #00ffcc;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btnSave:hover {
+    opacity: 0.85;
+}
+
+.btnSave:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.statusMsg {
+    font-size: 13px;
+}
+
+.statusSuccess {
+    color: #00ffcc;
+}
+
+.statusError {
+    color: #ef4444;
+}
+
+/* ── Suggestion Alert ────────────────────────────────────────── */
+.suggestionAlert {
+    background: rgba(0, 255, 204, 0.06);
+    border: 1px solid rgba(0, 255, 204, 0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #a1a1aa;
+    line-height: 1.6;
+}
+
+.suggestionAlert strong {
+    color: #00ffcc;
+}
+
+/* ── MCP Editor ─────────────────────────────────────────────── */
+.mcpEditor {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 13px;
+    background: #050507;
+    border: 1px solid #1f1f23;
+    border-radius: 10px;
+    padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #a1a1aa;
+    min-height: 300px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.mcpEditor:focus {
+    border-color: #00ffcc;
+}
+
+.mcpHint {
+    font-size: 12px;
+    color: #52525b;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── Divider ─────────────────────────────────────────────────── */
+.divider {
+    height: 1px;
+    background: #1f1f23;
+    margin: 24px 0;
+}
+
+/* ── Resource Badges ─────────────────────────────────────────── */
+.resourceRow {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.resourceBadge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #050507;
+    border: 1px solid #1f1f23;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: #a1a1aa;
+}
+
+.resourceBadge strong {
+    color: #fff;
+}
+
+/* ── Scrollbar override ──────────────────────────────────────── */
+.managerBody::-webkit-scrollbar {
+    width: 6px;
+}
+
+.managerBody::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.managerBody::-webkit-scrollbar-thumb {
+    background: #1f1f23;
+    border-radius: 3px;
+}

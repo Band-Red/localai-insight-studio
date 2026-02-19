@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen } from 'lucide-react';
-import './ChatBox.module.css';
+
+import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap } from 'lucide-react';
+import CodeSandbox from './CodeSandbox';
+import styles from './ChatBox.module.css';
 
 interface Message {
   id: string;
@@ -9,7 +11,13 @@ interface Message {
   timestamp: Date;
 }
 
-const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCodeGenerated }) => {
+interface ChatBoxProps {
+  onCodeGenerated?: (code: string) => void;
+  onRunCode?: (code: string) => void;
+  activeModel?: string | null;
+}
+
+const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeModel }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +60,7 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
         setMessages(prev => [...prev, aiMsg]);
         setIsLoading(false);
 
-        // إذا كان الرد يحتوي على كود (محاكاة بسيطة للفلترة لاحقاً)
+        // إذا كان الرد يحتوي على كود
         if (result.success && result.response.includes('<html>')) {
           if (onCodeGenerated) onCodeGenerated(result.response);
         }
@@ -61,7 +69,7 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
         setTimeout(() => {
           const aiMsg: Message = {
             id: (Date.now() + 1).toString(),
-            text: "عذراً، محرك الذكاء الاصطناعي المحلي غير متصل حالياً.",
+            text: "عذراً، محرك الذكاء الاصطناعي المحلي غير متصل حالياً.\n\nمثال لكود ويب:\n```html\n<html><body><h1 style='color:green'>Hello World</h1></body></html>\n```",
             sender: 'ai',
             timestamp: new Date()
           };
@@ -73,6 +81,27 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
       console.error('Chat Error:', error);
       setIsLoading(false);
     }
+  };
+
+  const renderMessageText = (text: string) => {
+    // تقطيع النص للبحث عن كود ماركداون
+    const parts = text.split(/(```[\s\S]*?```)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        const match = part.match(/```(\w+)?\n?([\s\S]*?)```/);
+        const language = match?.[1] || '';
+        const code = match?.[2] || '';
+        return (
+          <CodeSandbox
+            key={index}
+            code={code}
+            language={language}
+            onRun={onRunCode}
+          />
+        );
+      }
+      return <div key={index} className={styles.messageText}>{part}</div>;
+    });
   };
 
   const clearChat = () => setMessages([]);
@@ -97,7 +126,6 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
     const electron = (window as any).electronAPI;
     if (!electron) return;
 
-    // إظهار خيار للمستخدم (مجلد أو ملف)
     const result = await electron.selectFolder();
     if (result.success) {
       setAttachedInfo({ count: result.fileCount });
@@ -118,40 +146,51 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
   };
 
   return (
-    <div className="chatContainer" dir="rtl">
+    <div className={styles.chatContainer} dir="rtl">
 
-      <div className="chatHeader">
-        <div className="headerInfo">
-          <Bot size={18} className="aiIcon" />
+      <div className={styles.chatHeader}>
+        <div className={styles.headerInfo}>
+          <Bot size={18} className={styles.aiIcon} />
           <span>المساعد المحلي (GGUF Engine)</span>
+          {activeModel && (
+            <span className={styles.statusBadge} title="النموذج النشط حالياً">
+              🟢 {activeModel}
+            </span>
+          )}
         </div>
-        <div className="headerActions">
-          <button onClick={handleExport} className="headerAction" title="تصدير إلى Obsidian" disabled={messages.length === 0}>
+        <div className={styles.headerActions}>
+          <button onClick={handleExport} className={styles.headerAction} title="تصدير إلى Obsidian" disabled={messages.length === 0}>
             <BookOpen size={16} />
           </button>
-          <button onClick={clearChat} className="headerAction" title="مسح المحادثة">
+          <button onClick={clearChat} className={styles.headerAction} title="مسح المحادثة">
             <Eraser size={16} />
           </button>
         </div>
       </div>
 
-      <div className="messagesList" ref={scrollRef}>
+
+      <div className={styles.messagesList} ref={scrollRef}>
         {messages.length === 0 && (
-          <div className="welcomeArea">
-            <div className="welcomeLogo">AI</div>
+          <div className={styles.welcomeArea}>
+            <div className={styles.logoContainer}>
+              <div className={styles.logoRing}></div>
+              <div className={styles.logoInner}>
+                <Zap size={30} color="#050507" strokeWidth={3} />
+              </div>
+            </div>
             <h3>كيف يمكنني مساعدتك في مشروعك اليوم؟</h3>
             <p>يمكنني كتابة الأكواد، تحليل الملفات، أو مراقبة أداء النظام محلياً.</p>
           </div>
         )}
 
         {messages.map((msg) => (
-          <div key={msg.id} className={`messageRow ${msg.sender}`}>
-            <div className="avatar">
+          <div key={msg.id} className={`${styles.messageRow} ${styles[msg.sender] || ''}`}>
+            <div className={styles.avatar}>
               {msg.sender === 'user' ? <User size={16} /> : <Bot size={16} />}
             </div>
-            <div className="messageContent">
-              <div className="messageText">{msg.text}</div>
-              <div className="messageTime">
+            <div className={styles.messageContent}>
+              {renderMessageText(msg.text)}
+              <div className={styles.messageTime}>
                 {msg.timestamp.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
@@ -159,36 +198,40 @@ const ChatBox: React.FC<{ onCodeGenerated?: (code: string) => void }> = ({ onCod
         ))}
 
         {isLoading && (
-          <div className="messageRow ai loading">
-            <div className="avatar"><Loader2 size={16} className="spin" /></div>
-            <div className="messageContent">
-              <div className="typingDots"><span>.</span><span>.</span><span>.</span></div>
+          <div className={`${styles.messageRow} ${styles.ai} ${styles.loading}`}>
+            <div className={styles.avatar}><Loader2 size={16} className={styles.spin} /></div>
+            <div className={styles.messageContent}>
+              <div className={styles.typingDots}><span>.</span><span>.</span><span>.</span></div>
             </div>
           </div>
         )}
       </div>
 
-      <div className="inputContainer">
+      <div className={styles.inputContainer}>
         {attachedInfo && (
-          <div className="ragStatus">
+          <div className={styles.ragStatus}>
             <span>📎 تم إرفاق سياق محلي ({attachedInfo.count} ملفات)</span>
-            <button onClick={clearRag} className="ragClearBtn">إلغاء الإرفاق</button>
+            <button onClick={clearRag} className={styles.ragClearBtn}>إلغاء الإرفاق</button>
           </div>
         )}
-        <div className="inputWrapper">
-          <button className="attachBtn" title="إرفاق مجلد أو ملف للمشروع" onClick={handleAttach}>
-            <Paperclip size={18} color={attachedInfo ? '#00ffcc' : 'currentColor'} />
+        <div className={styles.inputWrapper}>
+          <button
+            className={`${styles.attachBtn} ${attachedInfo ? styles.active : ''}`}
+            title="إرفاق مجلد أو ملف للمشروع"
+            onClick={handleAttach}
+          >
+            <Paperclip size={18} />
           </button>
           <input
             type="text"
-            className="chatInput"
+            className={styles.chatInput}
             placeholder="اسأل الذكاء الاصطناعي عن كود أو أداء النظام..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
           />
           <button
-            className="sendBtn"
+            className={styles.sendBtn}
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
           >

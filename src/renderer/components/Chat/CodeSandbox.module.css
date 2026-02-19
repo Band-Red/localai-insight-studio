@@ -1,0 +1,76 @@
+.codeSandboxContainer {
+    margin: 15px 0;
+    border-radius: 12px;
+    background: #0c0c12;
+    border: 1px solid #1f1f23;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.codeHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: #121217;
+    border-bottom: 1px solid #1f1f23;
+}
+
+.codeTitle {
+    font-size: 12px;
+    color: #71717a;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.codeActions {
+    display: flex;
+    gap: 8px;
+}
+
+.actionBtn {
+    background: transparent;
+    border: none;
+    color: #71717a;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.actionBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.runBtn {
+    color: #00ffcc;
+    font-weight: bold;
+}
+
+.runBtn:hover {
+    background: rgba(0, 255, 204, 0.1);
+    color: #00ffcc;
+}
+
+.codeContent {
+    padding: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    background: #050507;
+}
+
+.codeText {
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #e4e4e7;
+}

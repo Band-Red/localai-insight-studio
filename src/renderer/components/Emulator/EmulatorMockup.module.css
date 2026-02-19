@@ -1,0 +1,72 @@
+.mobileMockupContainer {
+    height: 100%;
+    width: 100%;
+    background: #050507;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #fff;
+    gap: 20px;
+}
+
+.mockupHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.mockupHeader h3 {
+    color: #00ffcc;
+    margin: 0;
+    font-size: 20px;
+}
+
+.mockupHeader p {
+    color: #71717a;
+    font-size: 14px;
+    margin: 0;
+}
+
+.mockupCodeView {
+    width: 100%;
+    background: #121217;
+    border: 1px solid #1f1f23;
+    border-radius: 12px;
+    padding: 15px;
+    max-height: 400px;
+    overflow: hidden;
+    text-align: left;
+    position: relative;
+}
+
+.mockupCodeView pre {
+    margin: 0;
+    font-family: monospace;
+    font-size: 11px;
+    color: #a1a1aa;
+    white-space: pre-wrap;
+}
+
+.mockupCodeView::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(transparent, #121217);
+}
+
+.mockupBadge {
+    background: rgba(0, 255, 204, 0.1);
+    color: #00ffcc;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    border: 1px solid rgba(0, 255, 204, 0.2);
+}

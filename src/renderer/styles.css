@@ -2,28 +2,34 @@
  * نظام التنسيق الموحد الذي يدعم الهوية البصرية والـ RTL
  */
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   /* نظام الألوان الأساسي - Dark Mode */
   --bg-main: #09090b;
   --bg-sidebar: #121217;
   --bg-card: #18181b;
-  
+
   /* ألوان التمييز (النيون) */
   --accent: #00ffcc;
   --accent-glow: rgba(0, 255, 204, 0.3);
   --accent-dim: rgba(0, 255, 204, 0.1);
-  
+
   /* ألوان النصوص */
   --text-primary: #fafafa;
   --text-secondary: #71717a;
   --text-muted: #52525b;
-  
+
   /* ألوان الحالة */
   --danger: #ef4444;
   --success: #10b981;
   --info: #3b82f6;
   --warning: #f59e0b;
-  
+
   /* الحدود والظلال */
   --border: #1f1f23;
   --border-light: #2a2a3c;
@@ -37,14 +43,17 @@ body {
   background-color: var(--bg-main);
   color: var(--text-primary);
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  direction: rtl; /* دعم اللغة العربية افتراضياً */
+  direction: rtl;
+  /* دعم اللغة العربية افتراضياً */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden; /* لمنع السكرول الخارجي لضمان ثبات الواجهة */
+  overflow: hidden;
+  /* لمنع السكرول الخارجي لضمان ثبات الواجهة */
 }
 
 /* حاوية التطبيق الرئيسية */
-#app-root, .app-layout {
+#app-root,
+.app-layout {
   display: flex;
   height: 100vh;
   width: 100vw;
@@ -100,7 +109,11 @@ a {
 }
 
 /* إعدادات التباعد الافتراضية */
-h1, h2, h3, h4, p {
+h1,
+h2,
+h3,
+h4,
+p {
   margin: 0;
 }
 

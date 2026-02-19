@@ -1,0 +1,109 @@
+.visualEditorContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2000;
+}
+
+.editorOverlay {
+    position: absolute;
+    background: rgba(12, 12, 18, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--accent, #00ffcc);
+    border-radius: 12px;
+    padding: 12px;
+    width: 320px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    pointer-events: auto;
+    animation: fadeInDown 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.elementSummary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #71717a;
+    border-bottom: 1px solid #1f1f23;
+    padding-bottom: 8px;
+}
+
+.tagName {
+    color: var(--accent, #00ffcc);
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.inputWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.editInput {
+    background: #050507;
+    border: 1px solid #1f1f23;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.editInput:focus {
+    border-color: var(--accent, #00ffcc);
+}
+
+.actionButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.cancelBtn {
+    background: transparent;
+    border: none;
+    color: #71717a;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.submitBtn {
+    background: var(--accent, #00ffcc);
+    color: #000;
+    border: none;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

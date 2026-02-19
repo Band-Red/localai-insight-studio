@@ -15,9 +15,27 @@ const commonConfig = {
         exclude: /node_modules/,
       },
       {
-        // معالجة ملفات CSS (بناءً على طلبك للاستيراد المباشر)
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
+        oneOf: [
+          {
+            test: /\.module\.css$/,
+            use: [
+              'style-loader',
+              {
+                loader: 'css-loader',
+                options: {
+                  modules: {
+                    localIdentName: '[name]__[local]--[hash:base64:5]',
+                    exportLocalsConvention: 'camelCase',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            use: ['style-loader', 'css-loader'],
+          },
+        ],
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
@@ -26,7 +44,7 @@ const commonConfig = {
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.css'],
     alias: { '@': path.resolve(__dirname, 'src') },
   },
 };

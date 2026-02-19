@@ -4,7 +4,7 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { Activity, ShieldCheck, Cpu, Database, AlertTriangle } from 'lucide-react';
-import './Dashboard.module.css';
+import styles from './Dashboard.module.css';
 
 
 interface SystemStats {
@@ -77,52 +77,44 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  if (!stats) return <div className="loading">جاري جلب البيانات من المحرك المحلي...</div>;
-
-  const getHealthColor = (health: string) => {
-    switch (health) {
-      case 'critical': return '#ef4444';
-      case 'warning': return '#f59e0b';
-      default: return '#10b981';
-    }
-  };
+  if (!stats) return <div className={styles.loading}>جاري جلب البيانات من المحرك المحلي...</div>;
 
   return (
-    <div className="dashboard-wrapper" dir="rtl">
+    <div className={styles.dashboardWrapper} dir="rtl">
 
-      <div className="health-bar">
-        <div className={`health-dot ${stats.systemHealth}`} />
-        <span className="health-label">
+      <div className={styles.healthBar}>
+        <div className={`${styles.healthDot} ${styles[stats.systemHealth] || ''}`} />
+        <span className={styles.healthLabel}>
           حالة النظام: {stats.systemHealth === 'healthy' ? 'مستقر' : stats.systemHealth === 'warning' ? 'تنبيه' : 'حرج'}
         </span>
       </div>
 
       {/* Stats Cards */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon cpu"><Cpu size={20} /></div>
-          <div className="stat-info">
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={`${styles.statIcon} ${styles.cpu}`}><Cpu size={20} /></div>
+          <div className={styles.statInfo}>
             <span>استهلاك المعالج</span>
             <h3>{stats.cpuUsage}%</h3>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon ram"><Database size={20} /></div>
-          <div className="stat-info">
+        <div className={styles.statCard}>
+          <div className={`${styles.statIcon} ${styles.ram}`}><Database size={20} /></div>
+          <div className={styles.statInfo}>
             <span>ذاكرة الرام</span>
             <h3>{stats.ramPercentage}%</h3>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon security"><ShieldCheck size={20} /></div>
-          <div className="stat-info">
+        <div className={styles.statCard}>
+          <div className={`${styles.statIcon} ${styles.security}`}><ShieldCheck size={20} /></div>
+          <div className={styles.statInfo}>
             <span>مستوى الأمان</span>
             <h3>{stats.securityLevel}%</h3>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon accuracy"><Activity size={20} /></div>
-          <div className="stat-info">
+        <div className={styles.statCard}>
+          <div className={`${styles.statIcon} ${styles.accuracy}`}><Activity size={20} /></div>
+          <div className={styles.statInfo}>
             <span>دقة الـ RAG</span>
             <h3>{stats.ragAccuracy}%</h3>
           </div>
@@ -130,8 +122,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="charts-container">
-        <div className="chart-box main-chart">
+      <div className={styles.chartsContainer}>
+        <div className={`${styles.chartBox} ${styles.mainChart}`}>
           <h4>أداء النظام اللحظي</h4>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={history}>
@@ -154,7 +146,7 @@ const Dashboard: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="chart-box side-chart">
+        <div className={`${styles.chartBox} ${styles.sideChart}`}>
           <h4>كفاءة النموذج</h4>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={history}>
@@ -169,10 +161,10 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Alerting System (Task 4.3) */}
-      <div className="alerts-section">
+      <div className={styles.alertsSection}>
         <h4>تنبيهات الأمان والذكاء</h4>
         {stats.systemHealth !== 'healthy' && (
-          <div className={`alert-item ${stats.systemHealth}`}>
+          <div className={`${styles.alertItem} ${styles[stats.systemHealth] || ''}`}>
             <AlertTriangle size={16} />
             <p>
               {stats.systemHealth === 'critical'
@@ -182,7 +174,7 @@ const Dashboard: React.FC = () => {
             <span>الآن</span>
           </div>
         )}
-        <div className="alert-item success">
+        <div className={`${styles.alertItem} ${styles.success}`}>
           <ShieldCheck size={16} color="#10b981" />
           <p>نظام التشفير المحلي نشط - كافة البيانات معالجة داخل الجهاز.</p>
           <span>دائم</span>
