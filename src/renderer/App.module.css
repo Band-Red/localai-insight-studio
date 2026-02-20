@@ -443,11 +443,16 @@ body {
   color: #999;
 }
 
-.deviceBtn.active {
-  background: rgba(0, 255, 204, 0.1);
-  border-color: var(--accent);
-  color: var(--accent);
+.deviceToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(12, 12, 18, 0.5);
+  border-bottom: 1px solid var(--border);
+  min-height: 56px;
 }
+
 
 .sandboxModeSwitcher {
   display: flex;
@@ -632,24 +637,37 @@ body {
 
 .engineToast {
   position: absolute;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 24px;
+  right: 24px;
   background: rgba(0, 255, 204, 0.1);
   color: var(--accent);
-  padding: 10px 20px;
-  border-radius: 20px;
+  padding: 12px 24px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  backdrop-filter: blur(8px);
+  gap: 12px;
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 255, 204, 0.3);
   z-index: 1000;
-  animation: slideDown 0.3s ease-out;
-  font-weight: 500;
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  font-weight: 600;
   font-size: 14px;
   pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 
 
 

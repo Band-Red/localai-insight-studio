@@ -31,7 +31,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // RAG
     selectFolder: () => ipcRenderer.invoke('rag:select-folder'),
     selectFile: () => ipcRenderer.invoke('rag:select-file'),
+    selectDirectory: () => ipcRenderer.invoke('system:select-directory'),
     clearRagContext: () => ipcRenderer.invoke('rag:clear'),
+
 
     // المعاينة البصرية
     onInspected: (callback: any) => ipcRenderer.on('element:inspected', callback),

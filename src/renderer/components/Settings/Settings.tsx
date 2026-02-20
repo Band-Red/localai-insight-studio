@@ -48,13 +48,14 @@ const Settings: React.FC = () => {
 
     const handleBrowseVault = async () => {
         const electron = (window as any).electronAPI;
-        if (electron && electron.selectFolder) {
-            const result = await electron.selectFolder();
+        if (electron && electron.selectDirectory) {
+            const result = await electron.selectDirectory();
             if (result.success && result.path) {
                 setSettings({ ...settings, obsidianVaultPath: result.path });
             }
         }
     };
+
 
     return (
         <div className={styles.settingsWrapper} dir="rtl">

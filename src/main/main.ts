@@ -68,11 +68,13 @@ class MainApp {
                 const latency = Date.now() - startTime;
                 this.logger.addLog({ event: 'AI_Chat_Success', cpuUsage: 15, ramUsage: 45, latency, status: 'success' });
                 return { success: true, response };
-            } catch {
+            } catch (err: any) {
+                console.error('[Chat Error]:', err);
                 this.logger.addLog({ event: 'AI_Chat_Error', cpuUsage: 5, ramUsage: 10, latency: Date.now() - startTime, status: 'error' });
-                return { success: false, error: 'Failed to communicate with local AI engine' };
+                return { success: false, error: err.message || 'Failed to communicate with local AI engine' };
             }
         });
+
 
         // ── GGUF Model Management ────────────────────────────────────────
         ipcMain.handle('gguf:select-file', async () => {
@@ -135,11 +137,34 @@ class MainApp {
             this.exporter.exportAudit(data, vaultPath));
 
         // ── System ───────────────────────────────────────────────────────
-        ipcMain.handle('open-external', (_e, url) => shell.openExternal(url));
-        ipcMain.handle('settings:save', (_e, settings) => saveSettings(settings));
-        ipcMain.handle('settings:load', () => loadSettings());
+        ipcMain.handle('open-external', async (_e, url) => {
+            try { await shell.openExternal(url); return { success: true }; }
+            catch (err: any) { return { success: false, error: err.message }; }
+        });
+
+        ipcMain.handle('settings:save', (_e, settings) => {
+            try { return saveSettings(settings); }
+            catch (err: any) { return { success: false, error: err.message }; }
+        });
+
+        ipcMain.handle('settings:load', () => {
+            try { return loadSettings(); }
+            catch (err: any) { return null; }
+        });
+
+        ipcMain.handle('system:select-directory', async () => {
+            const result = await dialog.showOpenDialog(this.mainWindow!, {
+                properties: ['openDirectory', 'createDirectory']
+            });
+            if (!result.canceled && result.filePaths.length > 0) {
+                return { success: true, path: result.filePaths[0] };
+            }
+            return { success: false, error: 'Cancelled' };
+        });
+
         ipcMain.handle('metrics:add', (_e, entry) => this.logger.addLog(entry));
         ipcMain.handle('metrics:get-recent', (_e, limit) => this.logger.getRecentLogs(limit));
+
 
         // ── RAG ─────────────────────────────────────────────────────────
         ipcMain.handle('rag:select-folder', async () => {

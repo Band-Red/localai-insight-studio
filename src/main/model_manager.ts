@@ -116,34 +116,43 @@ export class ModelManager {
     // Model CRUD
     // ----------------------------------------------------------------
     public registerModel(filePath: string): { success: boolean; model?: GgufModel; error?: string } {
-        if (!filePath.toLowerCase().endsWith('.gguf')) {
-            return { success: false, error: 'Only .gguf files are supported' };
-        }
-        if (!fs.existsSync(filePath)) {
-            return { success: false, error: 'File does not exist' };
-        }
-        if (this.models.size >= this.maxModels) {
-            return { success: false, error: `Maximum ${this.maxModels} models allowed` };
-        }
+        try {
+            if (!filePath || typeof filePath !== 'string') {
+                return { success: false, error: 'مسار الملف غير صالح' };
+            }
+            if (!filePath.toLowerCase().endsWith('.gguf')) {
+                return { success: false, error: 'يُقبل فقط ملفات .gguf' };
+            }
+            if (!fs.existsSync(filePath)) {
+                return { success: false, error: 'الملف غير موجود في المسار المحدد' };
+            }
+            if (this.models.size >= this.maxModels) {
+                return { success: false, error: `الحد الأقصى هو ${this.maxModels} نماذج` };
+            }
 
-        const stat = fs.statSync(filePath);
-        const id = crypto.randomUUID();
-        const filename = path.basename(filePath);
-        const model: GgufModel = {
-            id,
-            name: filename.replace(/\.gguf$/i, ''),
-            filePath,
-            fileSizeBytes: stat.size,
-            fileSizeMB: Math.round(stat.size / (1024 * 1024)),
-            quantization: detectQuantization(filename),
-            status: 'idle',
-            addedAt: new Date().toISOString()
-        };
+            const stat = fs.statSync(filePath);
+            const id = crypto.randomUUID();
+            const filename = path.basename(filePath);
+            const model: GgufModel = {
+                id,
+                name: filename.replace(/\.gguf$/i, ''),
+                filePath,
+                fileSizeBytes: stat.size,
+                fileSizeMB: Math.round(stat.size / (1024 * 1024)),
+                quantization: detectQuantization(filename),
+                status: 'idle',
+                addedAt: new Date().toISOString()
+            };
 
-        this.models.set(id, model);
-        this.saveToDisk();
-        return { success: true, model };
+            this.models.set(id, model);
+            this.saveToDisk();
+            return { success: true, model };
+        } catch (err: any) {
+            console.error('[Register Model Error]:', err);
+            return { success: false, error: err.message || 'فشل غير متوقع في إضافة النموذج' };
+        }
     }
+
 
     public removeModel(id: string): { success: boolean } {
         if (id === this.activeServerId) {

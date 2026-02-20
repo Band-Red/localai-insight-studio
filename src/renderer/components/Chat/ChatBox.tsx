@@ -123,19 +123,24 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   };
 
   const handleAttach = async () => {
-    const electron = (window as any).electronAPI;
-    if (!electron) return;
+    try {
+      const electron = (window as any).electronAPI;
+      if (!electron) return;
 
-    const result = await electron.selectFolder();
-    if (result.success) {
-      setAttachedInfo({ count: result.fileCount });
-    } else {
-      const fileResult = await electron.selectFile();
-      if (fileResult.success) {
-        setAttachedInfo({ count: fileResult.fileCount });
+      const result = await electron.selectDirectory();
+      if (result.success) {
+        setAttachedInfo({ count: result.fileCount || 1 });
+      } else {
+        const fileResult = await electron.selectFile();
+        if (fileResult.success) {
+          setAttachedInfo({ count: fileResult.fileCount || 1 });
+        }
       }
+    } catch (err) {
+      console.error('Attach Error:', err);
     }
   };
+
 
   const clearRag = async () => {
     const electron = (window as any).electronAPI;
