@@ -94,6 +94,31 @@ body {
   color: var(--accent);
 }
 
+.navItem,
+.tab,
+.deviceBtn,
+.modeBtn,
+.btnSave,
+.saveBtn,
+.btnIcon,
+.smartBtn,
+.quantOption,
+.closePreviewBtn,
+.headerAction,
+.attachBtn,
+.sendBtn,
+.browseBtn,
+.autoDocBtn,
+.offlineToggle,
+.inspectToggle,
+.externalBtn,
+.inspectBtnAction,
+.closeBtn,
+.ragClearBtn {
+  cursor: pointer;
+}
+
+
 .sidebarBottom {
   padding-bottom: 20px;
 }
@@ -593,6 +618,18 @@ body {
   transform: scale(0.98);
 }
 
+@keyframes slideDown {
+  from {
+    top: -50px;
+    opacity: 0;
+  }
+
+  to {
+    top: 16px;
+    opacity: 1;
+  }
+}
+
 .engineToast {
   position: absolute;
   top: 16px;
@@ -611,19 +648,10 @@ body {
   animation: slideDown 0.3s ease-out;
   font-weight: 500;
   font-size: 14px;
+  pointer-events: none;
 }
 
-@keyframes slideDown {
-  from {
-    top: -50px;
-    opacity: 0;
-  }
 
-  to {
-    top: 16px;
-    opacity: 1;
-  }
-}
 
 /* ── Large Screen Optimization ─────────────────────────────────── */
 @media (min-width: 1440px) {
@@ -631,8 +659,13 @@ body {
     width: 80px;
   }
 
+  .navItem {
+    width: 56px;
+    height: 56px;
+  }
+
   .dashboardScroll {
-    padding: 60px 80px;
+    padding: 60px 100px;
   }
 
   .statsGrid {
@@ -641,14 +674,23 @@ body {
   }
 
   .headerTitles h1 {
-    font-size: 34px;
+    font-size: 38px;
+  }
+
+  .headerTitles p {
+    font-size: 16px;
   }
 
   .statValue {
-    font-size: 36px;
+    font-size: 42px;
   }
 
   .statCard {
-    padding: 30px;
+    padding: 40px;
+    border-radius: 20px;
+  }
+
+  .mainViewport {
+    background: radial-gradient(circle at top right, #1a2236, #050507);
   }
 }

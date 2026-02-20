@@ -91,11 +91,15 @@ const Settings: React.FC = () => {
                             <label>حد السياق (Context Limit)</label>
                             <input
                                 type="number"
-                                value={settings.contextLimit}
-                                onChange={(e) => setSettings({ ...settings, contextLimit: parseInt(e.target.value) })}
+                                value={settings.contextLimit || ''}
+                                onChange={(e) => {
+                                    const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                    setSettings({ ...settings, contextLimit: val });
+                                }}
                                 className={styles.input}
                             />
                         </div>
+
                     </div>
                 </section>
 
@@ -111,9 +115,9 @@ const Settings: React.FC = () => {
                         <div className={styles.browseWrapper}>
                             <input
                                 type="text"
-                                readOnly
                                 placeholder="لم يتم اختيار مسار بعد..."
                                 value={settings.obsidianVaultPath}
+                                onChange={(e) => setSettings({ ...settings, obsidianVaultPath: e.target.value })}
                                 className={styles.inputReadOnly}
                             />
                             <button
@@ -121,6 +125,7 @@ const Settings: React.FC = () => {
                                 className={styles.browseBtn}
                             >تغيير</button>
                         </div>
+
                         <p className={styles.hint}>سيتم حفظ كافة الجلسات والتقارير في هذا المجلد بصيغة Markdown.</p>
                     </div>
                 </section>

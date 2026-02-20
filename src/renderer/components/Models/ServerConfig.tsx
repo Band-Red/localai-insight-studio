@@ -137,9 +137,10 @@ const ServerConfig: React.FC<ServerConfigProps> = ({ config, modelId, gpus, onCh
                         min={1024}
                         max={65535}
                         onChange={(e) => {
-                            const v = parseInt(e.target.value) || 8080;
-                            set({ port: Math.max(1024, Math.min(65535, v)) });
+                            const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                            set({ port: val });
                         }}
+
                     />
                     {config.port < 1024 && (
                         <span className={styles.warningSmall}>⚠ يتطلب صلاحيات المدير</span>
@@ -153,8 +154,12 @@ const ServerConfig: React.FC<ServerConfigProps> = ({ config, modelId, gpus, onCh
                             type="number"
                             className={styles.input}
                             min={4}
-                            value={config.ramGb}
-                            onChange={(e) => set({ ramGb: Math.max(4, parseInt(e.target.value) || 4) })}
+                            value={config.ramGb || ''}
+                            onChange={(e) => {
+                                const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                set({ ramGb: val });
+                            }}
+
                         />
                         <span className={styles.inputSuffix}>الحد الأدنى 4 GB</span>
                     </div>
@@ -186,8 +191,9 @@ const ServerConfig: React.FC<ServerConfigProps> = ({ config, modelId, gpus, onCh
                             min={0}
                             max={32}
                             className={styles.input}
-                            value={config.vramGb}
-                            onChange={(e) => set({ vramGb: parseInt(e.target.value) || 0 })}
+                            value={config.vramGb || ''}
+                            onChange={(e) => set({ vramGb: e.target.value === '' ? 0 : parseInt(e.target.value) })}
+
                         />
                         <span className={styles.inputSuffix}>0 = تلقائي</span>
                     </div>
@@ -206,8 +212,9 @@ const ServerConfig: React.FC<ServerConfigProps> = ({ config, modelId, gpus, onCh
                     <input
                         type="number"
                         className={styles.input}
-                        value={config.contextLength}
-                        onChange={(e) => set({ contextLength: parseInt(e.target.value) || 4096 })}
+                        value={config.contextLength || ''}
+                        onChange={(e) => set({ contextLength: e.target.value === '' ? 0 : parseInt(e.target.value) })}
+
                     />
                 </div>
 

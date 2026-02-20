@@ -16,13 +16,9 @@ import ModelManager from './components/Models/ModelManager';
 import styles from './App.module.css';
 import layoutStyles from './AppLayout.module.css';
 
-// تعريف الأجهزة
-const DEVICES = {
-  iphone: { width: '393px', height: '852px', label: 'iPhone' },
-  samsung: { width: '360px', height: '780px', label: 'Samsung' },
-  tablet: { width: '768px', height: '1024px', label: 'Tablet' },
-  desktop: { width: '100%', height: '100%', label: 'Desktop' }
-};
+// وضع المعاينة الافتراضي
+const DEFAULT_VIEWPORT = { width: '100%', height: '100%' };
+
 
 const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -30,7 +26,8 @@ const App: React.FC = () => {
   const [activeModelName, setActiveModelName] = useState<string | null>(null);
   const [sandboxMode, setSandboxMode] = useState<'preview' | 'code'>('preview');
   const [isInspectMode, setIsInspectMode] = useState(true); // تفعيل وضع الفحص افتراضياً لتجربة أفضل
-  const [device, setDevice] = useState(DEVICES.iphone);
+  const [device, setDevice] = useState(DEFAULT_VIEWPORT);
+
   const [inspectedElement, setInspectedElement] = useState<any>(null);
   const [currentCode, setCurrentCode] = useState('');
 
@@ -224,32 +221,18 @@ const App: React.FC = () => {
         )}
         {activeTab === 'sandbox' ? (
           <div className={styles.sandboxContainer}>
-            {/* Device Selection Bar */}
+            {/* Sandbox Controls & Actions */}
             <div className={styles.deviceToolbar}>
-              {Object.entries(DEVICES).map(([key, d]) => (
+              <div className={styles.sandboxModeSwitcher}>
                 <button
-                  key={key}
-                  className={`${styles.deviceBtn} ${device === d ? styles.active : ''}`}
-                  onClick={() => setDevice(d)}
-                >
-                  {key === 'iphone' ? <Smartphone size={14} /> :
-                    key === 'tablet' ? <Tablet size={14} /> :
-                      key === 'desktop' ? <Monitor size={14} /> : <Zap size={14} />}
-                  {d.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Sandbox Mode Switcher */}
-            <div className={styles.sandboxModeSwitcher}>
-              <button
-                onClick={() => setSandboxMode('preview')}
-                className={`${styles.modeBtn} ${sandboxMode === 'preview' ? styles.active : ''}`}
-              >المعاينة التفاعلية</button>
-              <button
-                onClick={() => setSandboxMode('code')}
-                className={`${styles.modeBtn} ${sandboxMode === 'code' ? styles.active : ''}`}
-              >عرض الكود المصدري</button>
+                  onClick={() => setSandboxMode('preview')}
+                  className={`${styles.modeBtn} ${sandboxMode === 'preview' ? styles.active : ''}`}
+                >المعاينة التفاعلية</button>
+                <button
+                  onClick={() => setSandboxMode('code')}
+                  className={`${styles.modeBtn} ${sandboxMode === 'code' ? styles.active : ''}`}
+                >عرض مصدر الكود</button>
+              </div>
 
               <div className={styles.toolbarActions}>
                 <span className={styles.inspectLabel}>وضع الفحص البصري:</span>
@@ -265,6 +248,7 @@ const App: React.FC = () => {
                 ><ExternalLink size={14} /></button>
               </div>
             </div>
+
 
             <div className={styles.viewportContent}>
               {sandboxMode === 'preview' ? (
@@ -319,9 +303,10 @@ const App: React.FC = () => {
           <Dashboard />
         ) : (
           <Settings />
-        )}
-      </main>
-    </div>
+        )
+        }
+      </main >
+    </div >
   );
 };
 

@@ -62,6 +62,23 @@
     border-bottom-color: #00ffcc;
 }
 
+.tab,
+.btnSave,
+.btnLoad,
+.btnStop,
+.btnDelete,
+.quantOption,
+.dropZone,
+.smartBtn,
+.btnIcon,
+.btnGenerate,
+.input,
+.select,
+.toggleSlider {
+    cursor: pointer;
+}
+
+
 .managerBody {
     flex: 1;
     overflow-y: auto;
