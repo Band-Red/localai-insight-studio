@@ -10,6 +10,7 @@ export interface RagContext {
 
 export class RagManager {
     private context: RagContext[] = [];
+    private readonly maxFiles = 50;
 
     public async indexFileOrFolder(targetPath: string) {
         this.context = []; // Clear previous context
@@ -37,6 +38,7 @@ export class RagManager {
                     await this.indexDirectory(fullPath);
                 }
             } else {
+                if (this.context.length >= this.maxFiles) break;
                 await this.indexSingleFile(fullPath);
             }
         }
@@ -47,7 +49,7 @@ export class RagManager {
         const fileName = path.basename(filePath);
 
         try {
-            if (['.txt', '.md', '.js', '.ts', '.html', '.css', '.json', '.py'].includes(ext)) {
+            if (['.txt', '.md', '.js', '.ts', '.tsx', '.jsx', '.html', '.css', '.json', '.py'].includes(ext)) {
                 const content = fs.readFileSync(filePath, 'utf-8');
                 this.context.push({ fileName, content });
             } else if (ext === '.pdf') {

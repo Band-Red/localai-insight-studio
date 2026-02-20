@@ -27,13 +27,27 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
     };
 
     if (isMobile(code)) {
-      setDeviceKey('desktop');
+      setDeviceKey('iphone');
     }
   }, [code]);
 
   const handleOpenExternal = () => {
-    if ((window as any).electronAPI && code) {
-      (window as any).electronAPI.openExternalBrowser(code);
+    const electron = (window as any).electronAPI;
+    if (electron?.openExternal && code) {
+      if (isHtml) {
+        // Enforce full HTML structure for cleaner browser preview
+        const fullHtml = code.includes('<html>') ? code : `<html><body style="background:#050507;color:#fff;padding:20px;">${code}</body></html>`;
+        const blob = new Blob([fullHtml], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        electron.openExternal(url);
+      } else {
+        // For non-HTML code, we could either copy to clipboard or open a search/view
+        // For now, let's toast or alert, or just open a blank page with pre tags
+        const previewCode = `<html><body style="background:#050507;color:#00ffcc;font-family:monospace;padding:20px;"><pre>${code.replace(/</g, '&lt;')}</pre></body></html>`;
+        const blob = new Blob([previewCode], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        electron.openExternal(url);
+      }
     }
   };
 

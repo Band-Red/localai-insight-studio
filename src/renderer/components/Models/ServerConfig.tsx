@@ -142,7 +142,7 @@ const ServerConfig: React.FC<ServerConfigProps> = ({ config, modelId, gpus, onCh
                         }}
                     />
                     {config.port < 1024 && (
-                        <span style={{ color: '#f59e0b', fontSize: 11 }}>⚠ يتطلب صلاحيات المدير</span>
+                        <span className={styles.warningSmall}>⚠ يتطلب صلاحيات المدير</span>
                     )}
                 </div>
 

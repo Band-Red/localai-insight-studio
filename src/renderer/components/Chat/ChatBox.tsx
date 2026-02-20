@@ -48,7 +48,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     try {
       const electron = (window as any).electronAPI;
       if (electron && electron.sendMessage) {
-        const result = await electron.sendMessage(inputValue);
+        const result = await electron.sendMessage(inputValue, activeModel);
 
         const aiMsg: Message = {
           id: (Date.now() + 1).toString(),

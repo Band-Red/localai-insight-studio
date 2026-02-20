@@ -115,7 +115,7 @@ const ModelParameters: React.FC<ModelParametersProps> = ({ params, modelId, onCh
             </div>
 
             {/* System Prompt */}
-            <div className={styles.field} style={{}}>
+            <div className={styles.field}>
                 <label className={styles.label}>System Prompt</label>
                 <textarea
                     className={styles.textarea}

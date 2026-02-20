@@ -224,9 +224,56 @@
     }
 }
 
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
 .modelInfo {
     flex: 1;
     min-width: 0;
+}
+
+.cardWithMargin {
+    margin-top: 16px;
+}
+
+.sidebarSecondary {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.warningText {
+    color: #f59e0b;
+}
+
+.warningSmall {
+    color: #f59e0b;
+    font-size: 11px;
+}
+
+.marginLeftAuto {
+    margin-left: auto;
+}
+
+.marginRightAuto {
+    margin-right: auto;
+}
+
+.flexColumnGap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .modelName {

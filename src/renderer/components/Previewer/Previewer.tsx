@@ -1,59 +1,58 @@
 import React from 'react';
 import { FileCode, Copy, Share2, Maximize2 } from 'lucide-react';
-import './Previewer.module.css';
+import styles from './Previewer.module.css';
 
 interface PreviewerProps {
   content?: string;
   fileName?: string;
 }
 
-const Previewer: React.FC<PreviewerProps> = ({ 
-  content = "// لا يوجد كود متاح حالياً للعرض", 
-  fileName = "index.html" 
+const Previewer: React.FC<PreviewerProps> = ({
+  content = "// لا يوجد كود متاح حالياً للعرض",
+  fileName = "index.html"
 }) => {
 
   const handleCopy = () => {
-    // محاولة نسخ المحتوى إلى الحافظة
-    if (content) {
-      document.execCommand('copy');
-      // ملاحظة: في بيئة الإنتاج يفضل استخدام navigator.clipboard.writeText
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(content);
+      alert('تم نسخ الكود بنجاح');
     }
   };
 
   return (
-    <div className="previewContainer">
+    <div className={styles.previewContainer}>
       {/* رأس المستعرض */}
-      <header className="header">
-        <div className="titleArea">
+      <header className={styles.header}>
+        <div className={styles.titleArea}>
           <FileCode size={18} color="#00ffcc" />
-          <span className="titleText">{fileName}</span>
+          <span className={styles.titleText}>{fileName}</span>
         </div>
 
-        <div className="controls">
-          <button className="actionButton" onClick={handleCopy}>
+        <div className={styles.controls}>
+          <button className={styles.actionButton} onClick={handleCopy}>
             <Copy size={14} />
             <span>نسخ</span>
           </button>
-          <button className="actionButton">
+          <button className={styles.actionButton}>
             <Maximize2 size={14} />
             <span>تكبير</span>
           </button>
-          <button className="actionButton">
+          <button className={styles.actionButton}>
             <Share2 size={14} />
           </button>
         </div>
       </header>
 
       {/* منطقة عرض الكود المصدري */}
-      <main className="contentArea">
-        <div className="codeWindow">
+      <main className={styles.contentArea}>
+        <div className={styles.codeWindow}>
           {content}
         </div>
       </main>
 
       {/* تذييل المكون */}
-      <footer className="statusFooter">
-        <span className="statusLabel">Mode: Local Syntax Highlighting</span>
+      <footer className={styles.statusFooter}>
+        <span className={styles.statusLabel}>Mode: Local Syntax Highlighting</span>
       </footer>
     </div>
   );

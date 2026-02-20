@@ -199,7 +199,7 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
 
                             {/* Quantization Section */}
                             {activeModel && (
-                                <div className={styles.card} style={{ marginTop: 16 }}>
+                                <div className={`${styles.card} ${styles.cardWithMargin}`}>
                                     <div className={styles.sectionTitle}><span>نوع الكميّة (Quantization)</span></div>
                                     <QuantizationSelector
                                         selected={selectedQuant}
@@ -211,7 +211,7 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                         </div>
 
                         {/* Right: Drop Zone + System Info */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div className={styles.sidebarSecondary}>
                             <div className={styles.card}>
                                 <div className={styles.sectionTitle}><span>إضافة نموذج</span></div>
                                 <ModelDropZone onModelAdded={refreshModels} disabled={models.length >= 5} />
@@ -280,12 +280,12 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                     {saveStatus === 'success' && <span className={`${styles.statusMsg} ${styles.statusSuccess}`}>✓ تم الحفظ</span>}
                     {saveStatus === 'error' && <span className={`${styles.statusMsg} ${styles.statusError}`}>✗ فشل الحفظ</span>}
                     {restartNeeded && activeModel && (
-                        <span className={styles.statusMsg} style={{ color: '#f59e0b' }}>
+                        <span className={`${styles.statusMsg} ${styles.warningText}`}>
                             ⚠ أعِد تشغيل النموذج لتطبيق الإعدادات
                         </span>
                     )}
                     {activeModel && (
-                        <span className={styles.statusMsg} style={{ marginRight: 'auto' }}>
+                        <span className={`${styles.statusMsg} ${styles.marginRightAuto}`}>
                             🟢 النموذج النشط: <strong>{activeModel.name}</strong>
                         </span>
                     )}

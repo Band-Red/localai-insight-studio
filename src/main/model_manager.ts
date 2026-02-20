@@ -79,6 +79,7 @@ export class ModelManager {
     private models: Map<string, GgufModel> = new Map();
     private serverProcess: ChildProcess | null = null;
     private activeServerId: string | null = null;
+    private activePort: number = 8080;
     private readonly maxModels = 5;
     private readonly storageFile: string;
 
@@ -157,6 +158,10 @@ export class ModelManager {
         return Array.from(this.models.values());
     }
 
+    public getActiveServer() {
+        return { id: this.activeServerId, port: this.activePort };
+    }
+
     // ----------------------------------------------------------------
     // Server
     // ----------------------------------------------------------------
@@ -169,6 +174,7 @@ export class ModelManager {
 
         // Mark as loading
         model.status = 'loading';
+        this.activePort = config.port || 8080;
         this.models.set(model.id, model);
 
         return new Promise((resolve) => {
@@ -277,6 +283,12 @@ export class ModelManager {
     }
 
     public async chat(message: string, model: string = 'llama3') {
+        // If GGUF server is running, use it via API
+        if (this.activeServerId) {
+            return this.chatGguf(message);
+        }
+
+        // Fallback to Ollama
         return new Promise((resolve, reject) => {
             exec(`ollama run ${model} "${message.replace(/"/g, '\\"')}"`, { encoding: 'utf8' }, (error, stdout, stderr) => {
                 if (error) {
@@ -286,6 +298,28 @@ export class ModelManager {
                     resolve(stdout.trim());
                 }
             });
+        });
+    }
+
+    private async chatGguf(message: string): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await fetch(`http://127.0.0.1:${this.activePort}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: message }],
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data: any = await response.json();
+                resolve(data.choices[0].message.content);
+            } catch (error: any) {
+                console.error('GGUF Chat Error:', error);
+                reject(error);
+            }
         });
     }
 

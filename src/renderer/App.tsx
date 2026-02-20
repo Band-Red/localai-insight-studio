@@ -70,8 +70,15 @@ const App: React.FC = () => {
   }, []);
 
   const openInBrowser = () => {
+    const code = sandboxMode === 'preview' ? currentCode : currentCode; // Placeholder if logic changes
     if ((window as any).electronAPI && (window as any).electronAPI.openExternal) {
-      (window as any).electronAPI.openExternal('http://localhost:3000');
+      if (code.startsWith('<html') || code.includes('<!DOCTYPE')) {
+        const blob = new Blob([code], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        (window as any).electronAPI.openExternal(url);
+      } else {
+        (window as any).electronAPI.openExternal('https://google.com'); // Default fallback
+      }
     }
   };
 
@@ -87,7 +94,7 @@ const App: React.FC = () => {
             tagName: e.target.tagName,
             className: e.target.className,
             innerText: e.target.innerText.substring(0, 50),
-            html: e.target.outerHTML.substring(0, 200),
+            html: e.target.outerHTML.substring(0, 500),
             x: e.clientX,
             y: e.clientY
           };
@@ -99,6 +106,7 @@ const App: React.FC = () => {
           e.target.style.outline = '2px solid #00ffcc';
           e.target.style.outlineOffset = '-2px';
           e.target.style.cursor = 'crosshair';
+          e.target.style.transition = 'outline 0.15s ease';
         });
 
         document.addEventListener('mouseout', (e) => {
@@ -122,25 +130,26 @@ const App: React.FC = () => {
     try {
       const electron = (window as any).electronAPI;
       if (electron && electron.sendMessage) {
-        // نرسل السياق الكامل للذكاء الاصطناعي ليقوم بالتعديل الموضعي
         const prompt = `
-          لدي هذا الكود:
+          Context: You are modifying a live web application.
+          Code: 
           \`\`\`html
           ${chatPreviewCode || currentCode}
           \`\`\`
           
-          أريد تعديل العنصر التالي:
-          الفئة: ${inspectedElement.tagName}
-          الكود القديم للعنصر: ${inspectedElement.html}
+          Action: Modify the following element based on the instruction.
+          Element Tag: ${inspectedElement.tagName}
+          Element HTML: ${inspectedElement.html}
+          Instruction: ${instruction}
           
-          الطلب: ${instruction}
-          
-          قم بإرجاع الكود الكامل المعدل فقط داخل وسم html.
+          Requirements:
+          1. Retain all other functionality.
+          2. Return the COMPLETE updated HTML code.
+          3. Wrap the response in \`\`\`html code block.
         `;
 
-        const result = await electron.sendMessage(prompt);
+        const result = await electron.sendMessage(prompt, activeModelName);
         if (result.success) {
-          // استخراج الكود من الاستجابة (بافتراض أنه يعود بماركداون)
           const codeMatch = result.response.match(/```html\n?([\s\S]*?)```/) || [null, result.response];
           const newCode = codeMatch[1].trim();
 

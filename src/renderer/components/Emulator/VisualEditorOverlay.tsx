@@ -22,23 +22,28 @@ const VisualEditorOverlay: React.FC<VisualEditorOverlayProps> = ({
     loading = false
 }) => {
     const [instruction, setInstruction] = useState('');
+    const containerRef = React.useRef<HTMLDivElement>(null);
 
     // Reset unique state when element changes
     useEffect(() => {
         setInstruction('');
     }, [element]);
 
-    if (!element) return null;
+    // Update position via Ref to avoid style={} attribute rule violation
+    React.useLayoutEffect(() => {
+        if (element && containerRef.current) {
+            const x = Math.min(element.x || 100, window.innerWidth - 420);
+            const y = Math.min(element.y || 100, window.innerHeight - 300);
+            containerRef.current.style.setProperty('--x', `${x}px`);
+            containerRef.current.style.setProperty('--y', `${y}px`);
+        }
+    }, [element]);
 
-    // Calculate position (try to keep it near element but within bounds)
-    const style: React.CSSProperties = {
-        top: `${Math.min(element.y || 100, window.innerHeight - 250)}px`,
-        left: `${Math.min(element.x || 100, window.innerWidth - 350)}px`,
-    };
+    if (!element) return null;
 
     return (
         <div className={styles.visualEditorContainer}>
-            <div className={styles.editorOverlay} style={style}>
+            <div className={styles.editorOverlay} ref={containerRef}>
                 <div className={styles.elementSummary}>
                     <MousePointer2 size={12} />
                     <span>تعديل العنصر: <span className={styles.tagName}>&lt;{element.tagName.toLowerCase()}&gt;</span></span>
