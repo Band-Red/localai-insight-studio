@@ -592,3 +592,63 @@ body {
 .inspectBtnAction:active {
   transform: scale(0.98);
 }
+
+.engineToast {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 255, 204, 0.1);
+  color: var(--accent);
+  padding: 10px 20px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+@keyframes slideDown {
+  from {
+    top: -50px;
+    opacity: 0;
+  }
+
+  to {
+    top: 16px;
+    opacity: 1;
+  }
+}
+
+/* ── Large Screen Optimization ─────────────────────────────────── */
+@media (min-width: 1440px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .dashboardScroll {
+    padding: 60px 80px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+  }
+
+  .headerTitles h1 {
+    font-size: 34px;
+  }
+
+  .statValue {
+    font-size: 36px;
+  }
+
+  .statCard {
+    padding: 30px;
+  }
+}

@@ -5,14 +5,21 @@
 /venv
 /.pnp
 .pnp.js
-*.md
-/Doc
 
 # testing
 /coverage
 
 # production
 /build
+/dist
+/release
+
+# bin & models
+/bin
+*.gguf
+
+# secret
+.env
 
 # misc
 .DS_Store

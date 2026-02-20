@@ -239,3 +239,24 @@
   background: rgba(239, 68, 68, 0.05);
   border-color: rgba(239, 68, 68, 0.1);
 }
+
+/* ── Large Screen Optimization ─────────────────────────────────── */
+@media (min-width: 1440px) {
+  .dashboardWrapper {
+    padding: 60px 80px;
+  }
+
+  .statsGrid {
+    gap: 30px;
+  }
+
+  .chartsContainer {
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+  }
+
+  .statCard {
+    padding: 30px 25px;
+    border-radius: 16px;
+  }
+}

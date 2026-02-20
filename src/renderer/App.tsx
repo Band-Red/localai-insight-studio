@@ -38,6 +38,7 @@ const App: React.FC = () => {
   const [isChatPreviewOpen, setIsChatPreviewOpen] = useState(false);
   const [chatPreviewCode, setChatPreviewCode] = useState('');
   const [isUpdatingCode, setIsUpdatingCode] = useState(false);
+  const [engineStatus, setEngineStatus] = useState<string | null>(null);
 
   const handleSplashFinish = useCallback(() => {
     setShowSplash(false);
@@ -50,6 +51,16 @@ const App: React.FC = () => {
       }
     };
     window.addEventListener('message', handleMessage);
+
+    const electron = (window as any).electronAPI;
+    if (electron?.onEngineSetupStatus) {
+      electron.onEngineSetupStatus((msg: string) => {
+        setEngineStatus(msg);
+        if (msg.includes('بنجاح') || msg.includes('موجود وجاهز')) {
+          setTimeout(() => setEngineStatus(null), 4000);
+        }
+      });
+    }
 
     setCurrentCode(`
   <html>
@@ -206,6 +217,11 @@ const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main className={styles.mainViewport}>
+        {engineStatus && (
+          <div className={styles.engineToast}>
+            <Brain size={16} /> <span>{engineStatus}</span>
+          </div>
+        )}
         {activeTab === 'sandbox' ? (
           <div className={styles.sandboxContainer}>
             {/* Device Selection Bar */}

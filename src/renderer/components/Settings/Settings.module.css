@@ -176,3 +176,27 @@
 .spin {
     animation: spin 1s linear infinite;
 }
+
+/* ── Large Screen Optimization ─────────────────────────────────── */
+@media (min-width: 1440px) {
+    .settingsWrapper {
+        padding: 60px 80px;
+    }
+
+    .grid {
+        max-width: 1000px;
+        gap: 40px;
+    }
+
+    .section {
+        padding: 40px;
+    }
+
+    .header h2 {
+        font-size: 30px;
+    }
+
+    .sectionHeader h3 {
+        font-size: 22px;
+    }
+}

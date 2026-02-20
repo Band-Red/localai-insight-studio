@@ -63,3 +63,55 @@
         opacity: 1;
     }
 }
+
+/* ── Responsive Optimization ─────────────────────────────────── */
+@media (max-width: 900px) {
+    .chatSplitContainer {
+        flex-direction: column;
+    }
+
+    .chatSide {
+        min-width: 100%;
+    }
+
+    .chatSide.withPreview {
+        flex: 1;
+        border-left: none;
+        border-bottom: 1px solid #1f1f23;
+    }
+
+    .previewSide {
+        flex: 1;
+        animation: slideUp 0.3s ease-out;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ── Large Screen Optimization ─────────────────────────────────── */
+@media (min-width: 1440px) {
+    .chatSide {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .chatSide.withPreview {
+        max-width: 100%;
+        margin: 0;
+        flex: 0.5;
+    }
+
+    .previewSide {
+        flex: 0.5;
+    }
+}

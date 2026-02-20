@@ -194,7 +194,16 @@ export class ModelManager {
             if (config.enableCors) args.push('--cors');
 
             try {
-                this.serverProcess = spawn('llama-server', args, {
+                // Determine the correct path to llama-server
+                const isPackaged = __dirname.includes('app.asar');
+                const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..', '..');
+                const binFolder = path.join(rootDir, 'bin');
+                const exePath = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
+                const localServerPath = path.join(binFolder, exePath);
+
+                const serverCmd = fs.existsSync(localServerPath) ? localServerPath : exePath;
+
+                this.serverProcess = spawn(serverCmd, args, {
                     stdio: ['ignore', 'pipe', 'pipe'],
                     detached: false
                 });
@@ -227,7 +236,7 @@ export class ModelManager {
                         clearTimeout(timeout);
                         model.status = 'error';
                         model.errorMsg = err.code === 'ENOENT'
-                            ? 'llama-server غير موجود في PATH — ثبّته من: github.com/ggerganov/llama.cpp'
+                            ? 'llama-server غير موجود في مجلد bin أو PATH — يرجى وضع llama-server.exe في مجلد bin داخل المشروع'
                             : `فشل في تشغيل الخادم: ${err.message}`;
                         this.models.set(model.id, model);
                         resolve({ success: false, error: model.errorMsg });

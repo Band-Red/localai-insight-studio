@@ -23,6 +23,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     logMetrics: (entry: any) => ipcRenderer.invoke('metrics:add', entry),
     getRecentMetrics: (limit?: number) => ipcRenderer.invoke('metrics:get-recent', limit),
 
+    // إعدادات المحرك
+    onEngineSetupStatus: (callback: (msg: string) => void) => {
+        ipcRenderer.on('engine:setup-status', (_e, msg) => callback(msg));
+    },
+
     // RAG
     selectFolder: () => ipcRenderer.invoke('rag:select-folder'),
     selectFile: () => ipcRenderer.invoke('rag:select-file'),

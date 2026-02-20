@@ -135,11 +135,13 @@ html {
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.1);
     opacity: 0.9;
@@ -150,6 +152,7 @@ html {
   0% {
     width: 0%;
   }
+
   100% {
     width: 100%;
   }
@@ -160,6 +163,7 @@ html {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

@@ -3,12 +3,18 @@ import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import * as dotenv from 'dotenv';
+
+// Load .env file
+dotenv.config();
+
 import { ModelManager } from './model_manager';
 import { SessionManager } from './session_manager';
 import { ObsidianExporter } from './obsidian_exporter';
 import { saveSettings, loadSettings } from './settings_manager';
 import { LoggerManager } from './logger_manager';
 import { RagManager } from './rag_manager';
+import { EngineSetupManager } from './engine_setup';
 
 class MainApp {
     private mainWindow: BrowserWindow | null = null;
@@ -17,6 +23,7 @@ class MainApp {
     private exporter = new ObsidianExporter();
     private logger = new LoggerManager();
     private ragManager = new RagManager();
+    private engineSetup = new EngineSetupManager();
     private readonly mcpConfigPath = path.join(os.homedir(), '.localai-insight-studio', 'mcp.json');
 
     constructor() {
@@ -37,6 +44,15 @@ class MainApp {
             frame: false
         });
         this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+        // تحقق من المحرك وتثبيته في الخلفية عند الإقلاع
+        this.engineSetup.ensureEngineAvailable((msg: string) => {
+            console.log(`[Engine Setup]: ${msg}`);
+            // يمكننا إرسال الحالة للواجهة لو أردنا
+            if (this.mainWindow) {
+                this.mainWindow.webContents.send('engine:setup-status', msg);
+            }
+        });
     }
 
     private setupIpc() {
