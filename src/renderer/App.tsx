@@ -131,6 +131,15 @@ const App: React.FC = () => {
     setIsChatPreviewOpen(true);
   };
 
+  const extractCode = (text: string) => {
+    const codeMatch = text.match(/```html\n?([\s\S]*?)```/) || 
+                     text.match(/```xml\n?([\s\S]*?)```/) ||
+                     text.match(/```[\s\S]*?\n?([\s\S]*?)```/);
+    if (codeMatch && codeMatch[1]) return codeMatch[1].trim();
+    if (text.includes('<html>')) return text.trim();
+    return text.trim();
+  };
+
   const handleVisualEditSubmit = async (instruction: string) => {
     if (!inspectedElement || !instruction.trim()) return;
 
@@ -158,8 +167,7 @@ const App: React.FC = () => {
 
         const result = await electron.sendMessage(prompt, activeModelName);
         if (result.success) {
-          const codeMatch = result.response.match(/```html\n?([\s\S]*?)```/) || [null, result.response];
-          const newCode = codeMatch[1].trim();
+          const newCode = extractCode(result.response);
 
           if (isChatPreviewOpen) {
             setChatPreviewCode(newCode);
@@ -175,6 +183,7 @@ const App: React.FC = () => {
       setIsUpdatingCode(false);
     }
   };
+
 
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
@@ -274,10 +283,11 @@ const App: React.FC = () => {
           <div className={layoutStyles.chatSplitContainer}>
             <div className={`${layoutStyles.chatSide} ${isChatPreviewOpen ? layoutStyles.withPreview : ''}`}>
               <ChatBox
-                onCodeGenerated={(code) => { setCurrentCode(code); }}
+                onCodeGenerated={(code) => { setCurrentCode(extractCode(code)); }}
                 onRunCode={handleRunInChat}
                 activeModel={activeModelName}
               />
+
             </div>
             {isChatPreviewOpen && (
               <div className={layoutStyles.previewSide}>

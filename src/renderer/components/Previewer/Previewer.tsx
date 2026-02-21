@@ -8,13 +8,15 @@ interface PreviewerProps {
 }
 
 const Previewer: React.FC<PreviewerProps> = ({
-  content = "// لا يوجد كود متاح حالياً للعرض",
+  content,
   fileName = "index.html"
 }) => {
+  const displayCode = content && content.trim() ? content : "// لا يوجد كود متاح حالياً للعرض";
+
 
   const handleCopy = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(content);
+      navigator.clipboard.writeText(displayCode);
       alert('تم نسخ الكود بنجاح');
     }
   };
@@ -46,9 +48,10 @@ const Previewer: React.FC<PreviewerProps> = ({
       {/* منطقة عرض الكود المصدري */}
       <main className={styles.contentArea}>
         <div className={styles.codeWindow}>
-          {content}
+          <pre><code>{displayCode}</code></pre>
         </div>
       </main>
+
 
       {/* تذييل المكون */}
       <footer className={styles.statusFooter}>
