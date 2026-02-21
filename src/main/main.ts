@@ -301,11 +301,14 @@ class MainApp {
                     child.stderr.on('data', (data) => { errorString += data.toString(); });
                     
                     child.on('error', (err: any) => {
-                        if (err.code === 'ENOENT' && cmd === 'python') {
-                            tryPython('python3');
+                        if (err.code === 'ENOENT') {
+                            if (cmd === 'python') tryPython('python3');
+                            else if (cmd === 'python3') tryPython('py');
+                            else {
+                                console.log('[Dashboard] All Python commands failed, using Node OS fallback');
+                                resolve(getOSStats());
+                            }
                         } else {
-                            // Fallback to Node OS stats if Python is completely missing
-                            console.log('[Dashboard] Python missing, using Node OS fallback');
                             resolve(getOSStats());
                         }
                     });
@@ -316,15 +319,13 @@ class MainApp {
                                 const parsed = JSON.parse(dataString);
                                 resolve({ ...parsed, error: null });
                             } catch (e) {
-                                console.log('[Dashboard] Parse failed, using Node OS fallback');
                                 resolve({ ...getOSStats(), error: null });
                             }
                         } else {
-                            if (cmd === 'python') {
-                                tryPython('python3');
-                            } else {
-                                console.log('[Dashboard] Python failed (code ' + code + '), using Node OS fallback');
-                                resolve({ ...getOSStats(), error: null }); // Explicitly return error: null
+                            if (cmd === 'python') tryPython('python3');
+                            else if (cmd === 'python3') tryPython('py');
+                            else {
+                                resolve({ ...getOSStats(), error: null });
                             }
                         }
                     });
