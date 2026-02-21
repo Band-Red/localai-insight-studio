@@ -27,33 +27,61 @@ class MainApp {
     private readonly mcpConfigPath = path.join(os.homedir(), '.localai-insight-studio', 'mcp.json');
 
     constructor() {
-        app.on('ready', () => this.createWindow());
-        this.setupIpc();
+        this.initApp();
+    }
+
+    private initApp() {
+        // Ensure app waits for ready state properly
+        app.whenReady().then(() => {
+            this.createWindow();
+            this.setupIpc();
+
+            app.on('activate', () => {
+                if (BrowserWindow.getAllWindows().length === 0) {
+                    this.createWindow();
+                }
+            });
+        });
+
+        app.on('window-all-closed', () => {
+            if (process.platform !== 'darwin') {
+                app.quit();
+            }
+        });
     }
 
     private createWindow() {
         this.mainWindow = new BrowserWindow({
-            width: 1200,
-            height: 800,
+            width: 1400, // Slightly wider for better initial experience
+            height: 900,
             webPreferences: {
                 preload: path.join(__dirname, 'preload.js'),
                 contextIsolation: true,
-                nodeIntegration: false
+                nodeIntegration: false,
+                sandbox: false // Recommended for better tool communication in dev
             },
-            backgroundColor: '#09090b',
-            frame: false
+            backgroundColor: '#050507',
+            frame: false,
+            show: false // Don't show until ready-to-show
         });
+
         this.mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+        this.mainWindow.once('ready-to-show', () => {
+            if (this.mainWindow) {
+                this.mainWindow.show();
+            }
+        });
 
         // تحقق من المحرك وتثبيته في الخلفية عند الإقلاع
         this.engineSetup.ensureEngineAvailable((msg: string) => {
             console.log(`[Engine Setup]: ${msg}`);
-            // يمكننا إرسال الحالة للواجهة لو أردنا
-            if (this.mainWindow) {
+            if (this.mainWindow && !this.mainWindow.isDestroyed()) {
                 this.mainWindow.webContents.send('engine:setup-status', msg);
             }
         });
     }
+
 
     private setupIpc() {
         // ── Legacy Ollama (backward compat) ─────────────────────────────
