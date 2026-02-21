@@ -78,11 +78,13 @@
 }
 
 .welcomeArea {
-  text-align: center;
-  margin-top: 60px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 0;
 }
 
 /* تنسيق الشعار المقتبس من صفحة الترحيب */
