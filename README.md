@@ -238,5 +238,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-© 2026 LocalAI Insight Studio (Fahad)
+© 2026 The Developer of Local AI Insight Studio
+
 
