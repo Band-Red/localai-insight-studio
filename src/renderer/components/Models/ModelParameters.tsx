@@ -44,8 +44,10 @@ export const defaultModelParams: ModelParamValues = {
 interface ModelParametersProps {
     params: ModelParamValues;
     modelId: string | null;
+    models: any[];
     onChange: (params: ModelParamValues) => void;
 }
+
 
 const Slider: React.FC<{ label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void }> = ({ label, value, min, max, step, onChange }) => (
     <div className={styles.field}>
@@ -72,7 +74,8 @@ const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void }> = (
     </label>
 );
 
-const ModelParameters: React.FC<ModelParametersProps> = ({ params, modelId, onChange }) => {
+const ModelParameters: React.FC<ModelParametersProps> = ({ params, modelId, models, onChange }) => {
+
     const [isSuggesting, setIsSuggesting] = useState(false);
     const [suggestion, setSuggestion] = useState<string | null>(null);
 
@@ -181,11 +184,15 @@ const ModelParameters: React.FC<ModelParametersProps> = ({ params, modelId, onCh
 
             <div className={styles.formGrid}>
                 <div className={styles.field}>
-                    <label className={styles.label}>Draft Model</label>
+                    <label className={styles.label}>Draft Model (اختياري)</label>
                     <select className={styles.select} value={params.draftModel} onChange={(e) => set({ draftModel: e.target.value })}>
-                        <option value="">Please load a model first</option>
+                        <option value="">-- بدون نموذج مسودة --</option>
+                        {models.filter(m => m.id !== modelId).map(m => (
+                            <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
                     </select>
                 </div>
+
 
                 <Slider
                     label="Drafting Probability Cutoff"

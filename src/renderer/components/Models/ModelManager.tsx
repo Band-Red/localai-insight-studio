@@ -104,7 +104,12 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
         setModels(prev => prev.map(m => m.id === id ? { ...m, status: 'loading' } : m));
         // Save model name before async call (avoids stale closure bug)
         const modelName = models.find(m => m.id === id)?.name || null;
-        const result = await electron.startServer({ ...serverConfig, modelId: id });
+        const result = await electron.startServer({
+            ...serverConfig,
+            modelId: id,
+            draftModel: modelParams.draftModel
+        });
+
         // Always refresh from source of truth first
         await refreshModels();
         if (result.success) {
@@ -258,8 +263,10 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                         <ModelParameters
                             params={modelParams}
                             modelId={activeModelId}
+                            models={models}
                             onChange={setModelParams}
                         />
+
                     </div>
                 )}
 

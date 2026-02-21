@@ -159,10 +159,18 @@ class MainApp {
         });
 
         // ── Export ───────────────────────────────────────────────────────
-        ipcMain.handle('export:chat', async (_e, session, vaultPath) =>
-            this.exporter.exportChat(session, vaultPath));
-        ipcMain.handle('export:audit', async (_e, data, vaultPath) =>
-            this.exporter.exportAudit(data, vaultPath));
+        ipcMain.handle('export:chat', async (_e, session, vaultPath) => {
+            const settings = loadSettings();
+            const targetPath = vaultPath || settings?.obsidianVaultPath;
+            return this.exporter.exportChat(session, targetPath);
+        });
+
+        ipcMain.handle('export:audit', async (_e, data, vaultPath) => {
+            const settings = loadSettings();
+            const targetPath = vaultPath || settings?.obsidianVaultPath;
+            return this.exporter.exportAudit(data, targetPath);
+        });
+
 
         // ── System ───────────────────────────────────────────────────────
         ipcMain.handle('open-external', async (_e, url) => {
@@ -196,38 +204,66 @@ class MainApp {
 
         // ── RAG ─────────────────────────────────────────────────────────
         ipcMain.handle('rag:select-folder', async () => {
-            const result = await dialog.showOpenDialog(this.mainWindow!, { properties: ['openDirectory'] });
-            if (!result.canceled && result.filePaths.length > 0) {
-                const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
-                return { ...indexResult, path: result.filePaths[0] };
+            try {
+                const result = await dialog.showOpenDialog(this.mainWindow!, { properties: ['openDirectory'] });
+                if (!result.canceled && result.filePaths.length > 0) {
+                    const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
+                    return { ...indexResult, path: result.filePaths[0] };
+                }
+                return { success: false, error: 'Cancelled' };
+            } catch (err: any) {
+                console.error('[RAG Select Folder Error]:', err);
+                return { success: false, error: err.message || 'Failed to index folder' };
             }
-            return { success: false, error: 'Cancelled' };
         });
 
+
         ipcMain.handle('rag:select-file', async () => {
-            const result = await dialog.showOpenDialog(this.mainWindow!, {
-                properties: ['openFile'],
-                filters: [{ name: 'Documents', extensions: ['txt', 'md', 'pdf', 'js', 'ts', 'html', 'py'] }]
-            });
-            if (!result.canceled && result.filePaths.length > 0) {
-                const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
-                return { ...indexResult, path: result.filePaths[0] };
+            try {
+                const result = await dialog.showOpenDialog(this.mainWindow!, {
+                    properties: ['openFile'],
+                    filters: [{ name: 'Documents', extensions: ['txt', 'md', 'pdf', 'js', 'ts', 'html', 'py'] }]
+                });
+                if (!result.canceled && result.filePaths.length > 0) {
+                    const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
+                    return { ...indexResult, path: result.filePaths[0] };
+                }
+                return { success: false, error: 'Cancelled' };
+            } catch (err: any) {
+                console.error('[RAG Select File Error]:', err);
+                return { success: false, error: err.message || 'Failed to index file' };
             }
-            return { success: false, error: 'Cancelled' };
         });
+
 
         ipcMain.handle('rag:clear', () => { this.ragManager.clear(); return { success: true }; });
 
         ipcMain.handle('system:stats', async () => new Promise((resolve) => {
-            const pythonProcess = spawn('python', [path.join(__dirname, '../src/main/python_engine.py')]);
-            let dataString = '';
-            pythonProcess.stdout.on('data', (data) => { dataString += data.toString(); });
-            pythonProcess.stderr.on('data', (data) => { console.error(`Python Engine Error: ${data}`); });
-            pythonProcess.on('close', (code) => {
-                try { resolve(code === 0 ? JSON.parse(dataString) : { error: 'Python process exited with error' }); }
-                catch { resolve({ error: 'Failed to parse python output' }); }
-            });
+            const scriptPath = path.join(__dirname, '../src/main/python_engine.py');
+            const tryPython = (cmd: string) => {
+                const child = spawn(cmd, [scriptPath]);
+                let dataString = '';
+                child.stdout.on('data', (data) => { dataString += data.toString(); });
+                child.on('error', (err: any) => {
+                    if (err.code === 'ENOENT') {
+                        if (cmd === 'python') tryPython('python3');
+                        else resolve({ error: 'Python not found' });
+                    } else {
+                        resolve({ error: err.message });
+                    }
+                });
+                child.on('close', (code) => {
+                    if (code === 0) {
+                        try { resolve(JSON.parse(dataString)); }
+                        catch { resolve({ error: 'Failed to parse python output' }); }
+                    } else if (cmd === 'python3') {
+                        resolve({ error: `Python process exited with code ${code}` });
+                    }
+                });
+            };
+            tryPython('python');
         }));
+
     }
 }
 

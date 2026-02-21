@@ -127,10 +127,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
       const electron = (window as any).electronAPI;
       if (!electron) return;
 
-      const result = await electron.selectDirectory();
+      const result = await electron.selectFolder();
       if (result.success) {
         setAttachedInfo({ count: result.fileCount || 1 });
-      } else {
+      } else if (result.error !== 'Cancelled') {
         const fileResult = await electron.selectFile();
         if (fileResult.success) {
           setAttachedInfo({ count: fileResult.fileCount || 1 });

@@ -37,7 +37,9 @@ export interface ServerConfig {
     serveOnLan: boolean;
     enableCors: boolean;
     jitLoading: boolean;
+    draftModel?: string;
 }
+
 
 export interface SmartSuggestions {
     contextLength: number;
@@ -196,6 +198,14 @@ export class ModelManager {
                 '--rope-freq-base', String(config.ropeFreqBase || 10000),
                 '--rope-freq-scale', String(config.ropeFreqScale || 1.0),
             ];
+
+            if (config.draftModel) {
+                const draft = this.models.get(config.draftModel);
+                if (draft) {
+                    args.push('--draft', draft.filePath);
+                }
+            }
+
 
             if (config.keepInMemory) args.push('--mlock');
             if (config.useMmap) args.push('--mmap');
