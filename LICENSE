@@ -3,19 +3,21 @@ MIT License
 Copyright (c) 2026 LocalAI Insight Studio Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of this software and associated documentation files (the "Software"), strictly subject to prior written authorization from the Developer. Dealing in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, is strictly prohibited without explicit, unrestricted permission from the Developer.
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
+ADDITIONAL TERMS AND CONDITIONS:
+1. Mandatory Authorization: Any individual or entity wishing to obtain, access, or use this Software must first receive express written consent from the Developer.
+2. No Liability for Modified Versions: The Developer shall not be held responsible or liable for any versions of this Software that have been modified, altered, or redistributed by third parties. Any issues, damages, or consequences arising from modified versions are the sole responsibility of the party who made the modifications.
+3. Strict Project Ownership: Taking, cloning, or utilizing this project or its source code without explicit, unrestricted permission from the Developer is strictly forbidden.
+
+DISCLAIMER:
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
