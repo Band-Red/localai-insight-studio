@@ -25,6 +25,7 @@ class MainApp {
     private ragManager = new RagManager();
     private engineSetup = new EngineSetupManager();
     private readonly mcpConfigPath = path.join(os.homedir(), '.localai-insight-studio', 'mcp.json');
+    private lastCpuInfo: { idle: number, total: number } | null = null;
 
     constructor() {
         this.initApp();
@@ -239,15 +240,36 @@ class MainApp {
         ipcMain.handle('rag:clear', () => { this.ragManager.clear(); return { success: true }; });
 
         ipcMain.handle('system:stats', async () => {
-            const getOSStats = () => {
+            const getCPUUsage = () => {
                 const cpus = os.cpus();
+                let idle = 0;
+                let total = 0;
+                cpus.forEach(cpu => {
+                    for (const type in cpu.times) {
+                        total += (cpu.times as any)[type];
+                    }
+                    idle += cpu.times.idle;
+                });
+
+                if (!this.lastCpuInfo) {
+                    this.lastCpuInfo = { idle, total };
+                    return 0;
+                }
+
+                const idleDiff = idle - this.lastCpuInfo.idle;
+                const totalDiff = total - this.lastCpuInfo.total;
+                this.lastCpuInfo = { idle, total };
+
+                if (totalDiff === 0) return 0;
+                return Math.max(0, Math.min(100, Math.round(100 * (1 - idleDiff / totalDiff))));
+            };
+
+            const getOSStats = () => {
                 const load = os.loadavg();
                 const totalMem = os.totalmem();
                 const freeMem = os.freemem();
                 const ramPercent = Math.round(((totalMem - freeMem) / totalMem) * 100);
-                
-                // Calculate pseudo CPU usage from load average
-                const cpuUsage = Math.min(Math.round((load[0] / cpus.length) * 100), 100);
+                const cpuUsage = getCPUUsage();
                 
                 return {
                     cpuUsage,
