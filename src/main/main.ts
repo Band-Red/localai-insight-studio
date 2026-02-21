@@ -174,10 +174,21 @@ class MainApp {
 
 
         // ── System ───────────────────────────────────────────────────────
-        ipcMain.handle('open-external', async (_e, url) => {
-            try { await shell.openExternal(url); return { success: true }; }
-            catch (err: any) { return { success: false, error: err.message }; }
+        ipcMain.handle('open-external', async (_e, url, browser?: string) => {
+            try {
+                if (process.platform === 'win32' && browser) {
+                    const cmd = browser === 'chrome' ? 'chrome' : 'msedge';
+                    spawn('cmd', ['/c', 'start', cmd, url]);
+                    return { success: true };
+                }
+                await shell.openExternal(url);
+                return { success: true };
+            }
+            catch (err: any) {
+                return { success: false, error: err.message };
+            }
         });
+
 
         ipcMain.handle('settings:save', (_e, settings) => {
             try { return saveSettings(settings); }

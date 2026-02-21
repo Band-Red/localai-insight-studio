@@ -77,18 +77,27 @@ const App: React.FC = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const openInBrowser = () => {
-    const code = sandboxMode === 'preview' ? currentCode : currentCode; // Placeholder if logic changes
-    if ((window as any).electronAPI && (window as any).electronAPI.openExternal) {
-      if (code.startsWith('<html') || code.includes('<!DOCTYPE')) {
-        const blob = new Blob([code], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        (window as any).electronAPI.openExternal(url);
-      } else {
-        (window as any).electronAPI.openExternal('https://google.com'); // Default fallback
-      }
+  const [showBrowserOptions, setShowBrowserOptions] = useState(false);
+  
+  const openInBrowser = (browser?: 'chrome' | 'edge') => {
+    const code = sandboxMode === 'preview' ? currentCode : currentCode;
+    const electron = (window as any).electronAPI;
+    
+    if (!electron || !electron.openExternal) return;
+
+    if (!browser && !showBrowserOptions) {
+      setShowBrowserOptions(true);
+      return;
     }
+
+    const fullHtml = code.includes('<html>') ? code : `<html><body style="background:#050507;color:#fff;padding:20px;">${code}</body></html>`;
+    const blob = new Blob([fullHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    electron.openExternal(url, browser);
+    setShowBrowserOptions(false);
   };
+
 
   const injectInspector = (html: string) => {
     const script = `
@@ -251,12 +260,31 @@ const App: React.FC = () => {
                 >{isInspectMode ? 'نشط' : 'معطل'}</button>
 
                 <button
-                  onClick={openInBrowser}
+                  onClick={() => openInBrowser()}
                   title="فتح في المتصفح الخارجي"
                   className={styles.externalBtn}
                 ><ExternalLink size={14} /></button>
+
+                {showBrowserOptions && (
+                  <div className={styles.browserSelectPopover}>
+                    <button className={styles.browserBtn} onClick={() => openInBrowser('chrome')}>
+                      <span>Google Chrome</span>
+                    </button>
+                    <button className={styles.browserBtn} onClick={() => openInBrowser('edge')}>
+                      <span>Microsoft Edge</span>
+                    </button>
+                    <button 
+                      className={styles.browserBtn} 
+                      style={{ borderTop: '1px solid #1f1f23', color: '#71717a' }}
+                      onClick={() => setShowBrowserOptions(false)}
+                    >
+                      <span>إلغاء</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
+
 
 
             <div className={styles.viewportContent}>
