@@ -136,9 +136,12 @@ const App: React.FC = () => {
   };
 
   const handleRunInChat = (code: string) => {
-    setChatPreviewCode(code);
+    const cleanCode = extractCode(code);
+    setChatPreviewCode(cleanCode);
+    setCurrentCode(cleanCode);
     setIsChatPreviewOpen(true);
   };
+
 
   const extractCode = (text: string) => {
     const codeMatch = text.match(/```html\n?([\s\S]*?)```/) || 
