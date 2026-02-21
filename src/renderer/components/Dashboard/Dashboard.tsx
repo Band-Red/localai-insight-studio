@@ -22,6 +22,7 @@ interface SystemStats {
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [history, setHistory] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   // Simulation of receiving data from IPC bridge
   useEffect(() => {
@@ -32,6 +33,11 @@ const Dashboard: React.FC = () => {
 
         // 1. جلب بيانات حقيقية من محرك Python (Task 2.3)
         const pythonStats = await electron.getSystemStats();
+
+        if (pythonStats.error) {
+          setError(pythonStats.error);
+          return;
+        }
 
         const currentStats: SystemStats = {
           cpuUsage: pythonStats.cpuUsage || 0,
@@ -46,6 +52,8 @@ const Dashboard: React.FC = () => {
         };
 
         setStats(currentStats);
+        setError(null);
+
 
         // 2. تسجيل البيانات في ملف CSV المحلي (Task 1.2)
         await electron.logMetrics({
@@ -77,7 +85,22 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  if (error) return (
+    <div className={styles.loading} style={{ color: '#ef4444' }}>
+      <AlertTriangle size={48} style={{ marginBottom: 15 }} />
+      <h3>فشل الاتصال بمحرك Python المحامي</h3>
+      <p style={{ fontSize: 14, marginTop: 10 }}>{error}</p>
+      <button 
+        onClick={() => window.location.reload()} 
+        style={{ marginTop: 20, padding: '8px 20px', background: '#00ffcc', color: '#000', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' }}
+      >
+        إعادة المحاولة
+      </button>
+    </div>
+  );
+
   if (!stats) return <div className={styles.loading}>جاري جلب البيانات من المحرك المحلي...</div>;
+
 
   return (
     <div className={styles.dashboardWrapper} dir="rtl">

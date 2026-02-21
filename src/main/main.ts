@@ -243,26 +243,37 @@ class MainApp {
             const tryPython = (cmd: string) => {
                 const child = spawn(cmd, [scriptPath]);
                 let dataString = '';
+                let errorString = '';
                 child.stdout.on('data', (data) => { dataString += data.toString(); });
+                child.stderr.on('data', (data) => { errorString += data.toString(); });
+                
                 child.on('error', (err: any) => {
-                    if (err.code === 'ENOENT') {
-                        if (cmd === 'python') tryPython('python3');
-                        else resolve({ error: 'Python not found' });
+                    if (err.code === 'ENOENT' && cmd === 'python') {
+                        tryPython('python3');
                     } else {
-                        resolve({ error: err.message });
+                        resolve({ error: err.message || 'Python execution error' });
                     }
                 });
+
                 child.on('close', (code) => {
                     if (code === 0) {
-                        try { resolve(JSON.parse(dataString)); }
-                        catch { resolve({ error: 'Failed to parse python output' }); }
-                    } else if (cmd === 'python3') {
-                        resolve({ error: `Python process exited with code ${code}` });
+                        try {
+                            resolve(JSON.parse(dataString));
+                        } catch {
+                            resolve({ error: 'Failed to parse python output', output: dataString });
+                        }
+                    } else {
+                        if (cmd === 'python') {
+                            tryPython('python3');
+                        } else {
+                            resolve({ error: `Python exited with code ${code}`, stderr: errorString });
+                        }
                     }
                 });
             };
             tryPython('python');
         }));
+
 
     }
 }
