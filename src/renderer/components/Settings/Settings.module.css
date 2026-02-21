@@ -61,14 +61,30 @@
 }
 
 .select,
-.input {
+.input,
+.inputReadOnly {
     background: #18181b;
     color: #fff;
     border: 1px solid #27272a;
     padding: 10px;
     border-radius: 6px;
     outline: none;
+    position: relative;
+    z-index: 100;
+    pointer-events: auto;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+.select {
+    cursor: pointer !important;
+}
+
+.input,
+.inputReadOnly {
+    cursor: text !important;
+}
+
+
 
 .select:focus,
 .input:focus {
@@ -95,9 +111,12 @@
     border: none;
     padding: 0 15px;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: pointer !important;
     transition: background 0.2s;
+    position: relative;
+    z-index: 5;
 }
+
 
 .browseBtn:hover {
     background: #3f3f46;
@@ -133,13 +152,16 @@
     border: none;
     padding: 12px 30px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: pointer !important;
     font-weight: bold;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: transform 0.1s, box-shadow 0.2s;
+    position: relative;
+    z-index: 50;
 }
+
 
 .saveBtn:hover:not(:disabled) {
     transform: translateY(-1px);

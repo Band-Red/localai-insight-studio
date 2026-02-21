@@ -48,7 +48,9 @@ const ModelDropZone: React.FC<ModelDropZoneProps> = ({ onModelAdded, disabled = 
     };
 
     const handleClickZone = async () => {
+        console.log('ModelDropZone clicked');
         if (disabled || isLoading) return;
+
         setError(null);
         const electron = (window as any).electronAPI;
         if (electron?.selectGgufFile) {

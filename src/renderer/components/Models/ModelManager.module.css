@@ -58,13 +58,16 @@
 }
 
 .tab:hover {
-    color: #a1a1aa;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .tab.activeTab {
     color: #00ffcc;
     border-bottom-color: #00ffcc;
+    background: rgba(0, 255, 204, 0.05);
 }
+
 
 .tab,
 .btnSave,
@@ -90,7 +93,10 @@
     padding: 28px;
     scrollbar-width: thin;
     scrollbar-color: #1f1f23 transparent;
+    position: relative;
+    z-index: 10;
 }
+
 
 /* ── Split Layout (Library tab) ─────────────────────────────── */
 .libraryLayout {

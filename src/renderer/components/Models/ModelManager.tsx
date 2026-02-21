@@ -139,6 +139,7 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
     };
 
     const handleSaveAll = async () => {
+        console.log('handleSaveAll called');
         setIsSaving(true);
         setSaveStatus(null);
         try {
@@ -175,7 +176,10 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                             type="button"
                             key={tab.id}
                             className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => {
+                                console.log(`Switching tab to: ${tab.id}`);
+                                setActiveTab(tab.id);
+                            }}
                         >
                             {tab.icon}
                             {tab.label}

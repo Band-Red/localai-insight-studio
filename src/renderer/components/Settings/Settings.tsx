@@ -6,9 +6,10 @@ import styles from './Settings.module.css';
 interface AppSettings {
     theme: string;
     aiModel: string;
-    contextLimit: number;
+    contextLimit: number | string;
     obsidianVaultPath: string;
 }
+
 
 const Settings: React.FC = () => {
     const [settings, setSettings] = useState<AppSettings>({
@@ -22,21 +23,34 @@ const Settings: React.FC = () => {
 
     useEffect(() => {
         const loadData = async () => {
+            console.log('Fetching settings...');
             const electron = (window as any).electronAPI;
             if (electron && electron.loadSettings) {
                 const data = await electron.loadSettings();
+                console.log('Settings loaded:', data);
                 if (data) setSettings(data);
             }
         };
         loadData();
     }, []);
 
+    const toEnglishDigits = (str: string) => {
+        return str.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d).toString());
+    };
+
+
     const handleSave = async () => {
+        console.log('Saving settings:', settings);
         setIsSaving(true);
         setStatus(null);
         const electron = (window as any).electronAPI;
         if (electron && electron.saveSettings) {
-            const result = await electron.saveSettings(settings);
+            // Convert contextLimit back to number before saving
+            const cleanSettings = {
+                ...settings,
+                contextLimit: parseInt(toEnglishDigits(settings.contextLimit.toString())) || 4096
+            };
+            const result = await electron.saveSettings(cleanSettings);
             if (result.success) {
                 setStatus({ type: 'success', msg: 'تم حفظ الإعدادات بنجاح' });
             } else {
@@ -45,6 +59,7 @@ const Settings: React.FC = () => {
         }
         setIsSaving(false);
     };
+
 
     const handleBrowseVault = async () => {
         const electron = (window as any).electronAPI;
@@ -78,7 +93,7 @@ const Settings: React.FC = () => {
                             <label>النموذج النشط (Ollama)</label>
                             <select
                                 value={settings.aiModel}
-                                onChange={(e) => setSettings({ ...settings, aiModel: e.target.value })}
+                                onChange={(e) => setSettings(prev => ({ ...prev, aiModel: e.target.value }))}
                                 className={styles.select}
                             >
                                 <option value="llama3">Llama 3 (8B)</option>
@@ -91,15 +106,16 @@ const Settings: React.FC = () => {
                         <div className={styles.field}>
                             <label>حد السياق (Context Limit)</label>
                             <input
-                                type="number"
-                                value={settings.contextLimit || ''}
+                                type="text"
+                                value={settings.contextLimit}
                                 onChange={(e) => {
-                                    const val = e.target.value === '' ? 0 : parseInt(e.target.value);
-                                    setSettings({ ...settings, contextLimit: val });
+                                    const val = e.target.value;
+                                    setSettings(prev => ({ ...prev, contextLimit: val }));
                                 }}
                                 className={styles.input}
                             />
                         </div>
+
 
                     </div>
                 </section>
@@ -118,14 +134,25 @@ const Settings: React.FC = () => {
                                 type="text"
                                 placeholder="لم يتم اختيار مسار بعد..."
                                 value={settings.obsidianVaultPath}
-                                onChange={(e) => setSettings({ ...settings, obsidianVaultPath: e.target.value })}
-                                className={styles.inputReadOnly}
+                                onChange={(e) => {
+                                    console.log('Vault path manual entry:', e.target.value);
+                                    const val = e.target.value;
+                                    setSettings(prev => ({ ...prev, obsidianVaultPath: val }));
+                                }}
+                                className={styles.input}
+
+                                style={{ flex: 1 }}
                             />
                             <button
-                                onClick={handleBrowseVault}
+                                type="button"
+                                onClick={() => {
+                                    console.log('Browse button clicked');
+                                    handleBrowseVault();
+                                }}
                                 className={styles.browseBtn}
                             >تغيير</button>
                         </div>
+
 
                         <p className={styles.hint}>سيتم حفظ كافة الجلسات والتقارير في هذا المجلد بصيغة Markdown.</p>
                     </div>
@@ -145,6 +172,7 @@ const Settings: React.FC = () => {
                 {/* Action Bar */}
                 <div className={styles.actionBar}>
                     <button
+                        type="button"
                         onClick={handleSave}
                         disabled={isSaving}
                         className={styles.saveBtn}
