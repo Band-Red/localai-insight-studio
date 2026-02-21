@@ -115,8 +115,19 @@ body {
 .inspectBtnAction,
 .closeBtn,
 .ragClearBtn {
-  cursor: pointer;
+  cursor: pointer !important;
 }
+
+.modeBtn:hover {
+  color: var(--accent);
+  background: rgba(0, 255, 204, 0.05);
+}
+
+.externalBtn:hover {
+  background: rgba(0, 255, 204, 0.1) !important;
+  color: var(--accent) !important;
+}
+
 
 
 .sidebarBottom {
