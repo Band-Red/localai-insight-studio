@@ -13,7 +13,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 }
+
 
 .headerInfo {
   display: flex;
@@ -47,13 +51,22 @@
   background: transparent;
   border: none;
   color: #52526b;
-  cursor: pointer;
-  transition: color 0.2s;
+  cursor: pointer !important;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  pointer-events: auto;
 }
 
 .headerAction:hover {
-  color: #ef4444;
+  color: #fafafa;
+  background: rgba(255, 255, 255, 0.05);
 }
+
 
 .messagesList {
   flex: 1;
@@ -186,8 +199,12 @@
 .inputContainer {
   padding: 20px;
   background: #050507;
+  border-top: 1px solid #1f1f23;
+  position: relative;
+  z-index: 10;
   /* تم التغيير لمطابقة صفحة الترحيب */
 }
+
 
 .inputWrapper {
   background: #121217;
@@ -196,7 +213,9 @@
   display: flex;
   align-items: center;
   padding: 4px 8px;
+  pointer-events: auto;
 }
+
 
 .chatInput {
   flex: 1;
@@ -204,9 +223,12 @@
   border: none;
   padding: 12px;
   color: #fff;
+  color: #fff;
   outline: none;
   font-size: 14px;
+  pointer-events: auto;
 }
+
 
 .attachBtn,
 .sendBtn {
@@ -217,10 +239,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: pointer !important;
   border-radius: 8px;
   transition: all 0.2s;
+  pointer-events: auto;
 }
+
 
 .attachBtn {
   color: #52526b;

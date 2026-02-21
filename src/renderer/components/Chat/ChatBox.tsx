@@ -164,13 +164,23 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           )}
         </div>
         <div className={styles.headerActions}>
-          <button onClick={handleExport} className={styles.headerAction} title="تصدير إلى Obsidian" disabled={messages.length === 0}>
+          <button 
+            onClick={handleExport} 
+            className={styles.headerAction} 
+            title="تصدير هذه المحادثة إلى Obsidian" 
+            disabled={messages.length === 0}
+          >
             <BookOpen size={16} />
           </button>
-          <button onClick={clearChat} className={styles.headerAction} title="مسح المحادثة">
+          <button 
+            onClick={clearChat} 
+            className={styles.headerAction} 
+            title="مسح كافة الرسائل في هذه الجلسة"
+          >
             <Eraser size={16} />
           </button>
         </div>
+
       </div>
 
 
@@ -239,10 +249,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
             className={styles.sendBtn}
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
+            title="إرسال الرسالة للذكاء الاصطناعي"
           >
             <Send size={18} />
           </button>
         </div>
+
       </div>
     </div>
   );
