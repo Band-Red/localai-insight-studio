@@ -6,7 +6,8 @@ import { app } from 'electron';
 export class EngineSetupManager {
     private getBinPath(): string {
         const isPackaged = app.isPackaged;
-        const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..', '..');
+        const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..');
+
         const binFolder = path.join(rootDir, 'bin');
         if (!fs.existsSync(binFolder)) {
             fs.mkdirSync(binFolder, { recursive: true });

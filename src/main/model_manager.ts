@@ -205,7 +205,8 @@ export class ModelManager {
             try {
                 // Determine the correct path to llama-server
                 const isPackaged = __dirname.includes('app.asar');
-                const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..', '..');
+                const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..');
+
                 const binFolder = path.join(rootDir, 'bin');
                 const exePath = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
                 const localServerPath = path.join(binFolder, exePath);
