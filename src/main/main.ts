@@ -291,20 +291,22 @@ class MainApp {
                     child.on('close', (code) => {
                         if (code === 0) {
                             try {
-                                resolve(JSON.parse(dataString));
-                            } catch {
-                                resolve(getOSStats());
+                                const parsed = JSON.parse(dataString);
+                                resolve({ ...parsed, error: null });
+                            } catch (e) {
+                                console.log('[Dashboard] Parse failed, using Node OS fallback');
+                                resolve({ ...getOSStats(), error: null });
                             }
                         } else {
                             if (cmd === 'python') {
                                 tryPython('python3');
                             } else {
-                                // Python existed but failed, use Node OS fallback
-                                console.log('[Dashboard] Python failed with code ' + code + ', using Node OS fallback');
-                                resolve(getOSStats());
+                                console.log('[Dashboard] Python failed (code ' + code + '), using Node OS fallback');
+                                resolve({ ...getOSStats(), error: null }); // Explicitly return error: null
                             }
                         }
                     });
+
                 };
                 tryPython('python');
             });

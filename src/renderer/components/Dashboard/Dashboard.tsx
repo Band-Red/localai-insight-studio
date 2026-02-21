@@ -34,10 +34,18 @@ const Dashboard: React.FC = () => {
         // 1. جلب بيانات حقيقية من محرك Python (Task 2.3)
         const pythonStats = await electron.getSystemStats();
 
-        if (pythonStats.error) {
+        if (pythonStats && pythonStats.error) {
           setError(pythonStats.error);
           return;
         }
+
+        setError(null); // Clear any previous errors if we got something
+        
+        if (!pythonStats) {
+          setError("لم يتم استلام أي بيانات من المحرك");
+          return;
+        }
+
 
         const currentStats: SystemStats = {
           cpuUsage: pythonStats.cpuUsage || 0,
