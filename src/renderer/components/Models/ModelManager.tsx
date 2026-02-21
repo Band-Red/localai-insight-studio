@@ -172,6 +172,7 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                 <div className={styles.tabBar}>
                     {tabs.map(tab => (
                         <button
+                            type="button"
                             key={tab.id}
                             className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ''}`}
                             onClick={() => setActiveTab(tab.id)}
@@ -280,8 +281,8 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
 
             {activeTab !== 'mcp' && (
                 <div className={styles.saveBar}>
-                    <button className={styles.btnSave} onClick={handleSaveAll} disabled={isSaving}>
-                        {isSaving ? <RefreshCw size={16} /> : <Save size={16} />}
+                    <button type="button" className={styles.btnSave} onClick={handleSaveAll} disabled={isSaving}>
+                        {isSaving ? <RefreshCw size={16} className={styles.spin} /> : <Save size={16} />}
                         حفظ التغييرات
                     </button>
                     {saveStatus === 'success' && <span className={`${styles.statusMsg} ${styles.statusSuccess}`}>✓ تم الحفظ</span>}

@@ -19,7 +19,11 @@
     padding: 24px 28px 0;
     border-bottom: 1px solid #1f1f23;
     flex-shrink: 0;
+    position: relative;
+    z-index: 50;
+    pointer-events: auto;
 }
+
 
 .managerHeader h2 {
     font-size: 22px;
@@ -75,8 +79,9 @@
 .input,
 .select,
 .toggleSlider {
-    cursor: pointer;
+    cursor: pointer !important;
 }
+
 
 
 .managerBody {
@@ -697,7 +702,11 @@
     padding: 16px 28px;
     border-top: 1px solid #1f1f23;
     flex-shrink: 0;
+    position: relative;
+    z-index: 50;
+    pointer-events: auto;
 }
+
 
 .btnSave {
     display: flex;

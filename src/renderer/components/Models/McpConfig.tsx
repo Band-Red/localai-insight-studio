@@ -67,10 +67,11 @@ const McpConfig: React.FC = () => {
             </div>
 
             <div className={styles.saveBar}>
-                <button className={styles.btnSave} onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? <RefreshCw size={16} /> : <Save size={16} />}
+                <button type="button" className={styles.btnSave} onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? <RefreshCw size={16} className={styles.spin} /> : <Save size={16} />}
                     حفظ mcp.json
                 </button>
+
                 {status && (
                     <span className={`${styles.statusMsg} ${status.type === 'success' || status.type === 'warn' ? styles.statusSuccess : styles.statusError}`}>
                         {status.msg}

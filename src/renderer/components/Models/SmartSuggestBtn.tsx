@@ -10,11 +10,13 @@ interface SmartSuggestBtnProps {
 const SmartSuggestBtn: React.FC<SmartSuggestBtnProps> = ({ onSuggest, loading = false }) => {
     return (
         <button
+            type="button"
             className={styles.smartBtn}
             onClick={onSuggest}
             disabled={loading}
             title="اقتراحات ذكية مبنية على حجم النموذج وإمكانيات جهازك"
         >
+
             {loading ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
             ⚡ اقتراحات ذكية
         </button>

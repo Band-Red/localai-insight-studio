@@ -65,9 +65,10 @@ const ModelList: React.FC<ModelListProps> = ({ models, activeModelId, onLoad, on
                     </div>
                     <div className={styles.modelActions}>
                         {model.status === 'ready' && model.id === activeModelId ? (
-                            <button className={styles.btnStop} onClick={() => onStop(model.id)}>إيقاف</button>
+                            <button type="button" className={styles.btnStop} onClick={() => onStop(model.id)}>إيقاف</button>
                         ) : (
                             <button
+                                type="button"
                                 className={styles.btnLoad}
                                 onClick={() => onLoad(model.id)}
                                 disabled={model.status === 'loading'}
@@ -75,7 +76,7 @@ const ModelList: React.FC<ModelListProps> = ({ models, activeModelId, onLoad, on
                                 {model.status === 'loading' ? <Loader2 size={12} /> : 'تحميل'}
                             </button>
                         )}
-                        <button className={styles.btnDelete} onClick={() => onDelete(model.id)} title="حذف النموذج">
+                        <button type="button" className={styles.btnDelete} onClick={() => onDelete(model.id)} title="حذف النموذج">
                             <Trash2 size={14} />
                         </button>
                     </div>
