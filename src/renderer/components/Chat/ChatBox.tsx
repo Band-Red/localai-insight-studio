@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap } from 'lucide-react';
+import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History } from 'lucide-react';
 import CodeSandbox from './CodeSandbox';
 import styles from './ChatBox.module.css';
 
@@ -23,6 +23,35 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   const [isLoading, setIsLoading] = useState(false);
   const [attachedInfo, setAttachedInfo] = useState<{ count: number, path?: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const electron = (window as any).electronAPI;
+      if (electron && electron.loadChatHistory) {
+        const result = await electron.loadChatHistory();
+        if (result.success && result.data && result.data.length > 0) {
+          // Parse dates correctly
+          const loadedMsg = result.data.map((m: any) => ({
+            ...m,
+            timestamp: new Date(m.timestamp)
+          }));
+          setMessages(loadedMsg);
+        }
+      }
+      setIsHistoryLoaded(true);
+    };
+    fetchHistory();
+  }, []);
+
+  useEffect(() => {
+    if (isHistoryLoaded) {
+      const electron = (window as any).electronAPI;
+      if (electron && electron.saveChatHistory) {
+        electron.saveChatHistory(messages);
+      }
+    }
+  }, [messages, isHistoryLoaded]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -104,22 +133,40 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     });
   };
 
-  const clearChat = () => setMessages([]);
+  const clearChat = () => {
+    if (confirm('هل أنت متأكد من مسح جميع المحادثات وتفريغ السجل؟')) {
+       setMessages([]);
+    }
+  };
 
-  const handleExport = async () => {
-    if (messages.length === 0) return;
-
+  const handleExportIndividual = async (msgText: string) => {
     const electron = (window as any).electronAPI;
     if (electron && electron.exportChat) {
       const session = {
-        title: `جلسة_${new Date().toLocaleDateString('ar-EG').replace(/\//g, '-')}`,
-        messages: messages
+        title: `رد_مخصص_${new Date().toLocaleDateString('ar-EG').replace(/\//g, '-')}`,
+        messages: [{ sender: 'ai', text: msgText, timestamp: new Date() }]
       };
       const result = await electron.exportChat(session);
       if (result.success) {
-        alert(`تم تصدير المحادثة بنجاح إلى: ${result.filePath}`);
+        alert(`تم تصدير الرد بنجاح إلى: ${result.filePath}`);
       }
     }
+  };
+
+  const handleManualHistoryLoad = async () => {
+      const electron = (window as any).electronAPI;
+      if (electron && electron.loadChatHistory) {
+        const result = await electron.loadChatHistory();
+        if (result.success && result.data && result.data.length > 0) {
+          const loadedMsg = result.data.map((m: any) => ({
+            ...m,
+            timestamp: new Date(m.timestamp)
+          }));
+          setMessages(loadedMsg);
+        } else {
+            alert('لا توجد محادثات سابقة محفوظة.');
+        }
+      }
   };
 
   const handleAttach = async () => {
@@ -165,17 +212,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         </div>
         <div className={styles.headerActions}>
           <button 
-            onClick={handleExport} 
+            onClick={handleManualHistoryLoad} 
             className={styles.headerAction} 
-            title="تصدير هذه المحادثة إلى Obsidian" 
-            disabled={messages.length === 0}
+            title="تحميل وعرض المحادثات السابقة المكتوبة مسبقاً"
           >
-            <BookOpen size={16} />
+            <History size={16} />
           </button>
           <button 
             onClick={clearChat} 
             className={styles.headerAction} 
-            title="مسح كافة الرسائل في هذه الجلسة"
+            title="مسح كافة الرسائل في هذه الجلسة وتفريغ السجل"
           >
             <Eraser size={16} />
           </button>
@@ -207,6 +253,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
               {renderMessageText(msg.text)}
               <div className={styles.messageTime}>
                 {msg.timestamp.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                {msg.sender === 'ai' && (
+                  <button 
+                    onClick={() => handleExportIndividual(msg.text)} 
+                    className={styles.msgExportBtn} 
+                    title="تصدير هذا الرد إلى Obsidian"
+                  >
+                    <BookOpen size={12} /> تصدير
+                  </button>
+                )}
               </div>
             </div>
           </div>

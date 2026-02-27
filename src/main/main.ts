@@ -159,6 +159,28 @@ class MainApp {
             }
         });
 
+        ipcMain.handle('chat:load-history', () => {
+            try {
+                const historyPath = path.join(os.homedir(), '.localai-insight-studio', 'chat_history.json');
+                if (fs.existsSync(historyPath)) {
+                    return { success: true, data: JSON.parse(fs.readFileSync(historyPath, 'utf8')) };
+                }
+                return { success: true, data: [] };
+            } catch (err: any) {
+                return { success: false, error: err.message };
+            }
+        });
+
+        ipcMain.handle('chat:save-history', (_e, messages: any) => {
+            try {
+                const historyPath = path.join(os.homedir(), '.localai-insight-studio', 'chat_history.json');
+                fs.writeFileSync(historyPath, JSON.stringify(messages), 'utf8');
+                return { success: true };
+            } catch (err: any) {
+                return { success: false, error: err.message };
+            }
+        });
+
         // ── Export ───────────────────────────────────────────────────────
         ipcMain.handle('export:chat', async (_e, session, vaultPath) => {
             const settings = loadSettings();
