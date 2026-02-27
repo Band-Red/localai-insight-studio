@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // وظائف النماذج القديمة (Ollama)
     checkModelStatus: () => ipcRenderer.invoke('model:status'),
     sendMessage: (message: string, model?: string) => ipcRenderer.invoke('chat:send', message, model),
+    loadChatHistory: () => ipcRenderer.invoke('chat:load-history'),
+    saveChatHistory: (messages: any) => ipcRenderer.invoke('chat:save-history', messages),
 
     // وظائف التصدير
     exportChat: (session: any, vaultPath?: string) => ipcRenderer.invoke('export:chat', session, vaultPath),

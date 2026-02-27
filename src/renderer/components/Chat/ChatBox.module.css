@@ -193,9 +193,36 @@
 }
 
 .messageTime {
-  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   color: #52526b;
-  align-self: flex-end;
+  margin-top: 5px;
+  font-size: 11px;
+}
+
+.msgExportBtn {
+  background: transparent;
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  color: var(--neon-cyan);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 8px; /* RTL spacing */
+}
+
+.msgExportBtn:hover {
+  background: rgba(0, 255, 204, 0.1);
+  border-color: var(--neon-cyan);
+}
+
+.ai {
+  align-self: flex-start;
 }
 
 .inputContainer {
