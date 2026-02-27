@@ -234,7 +234,7 @@ class MainApp {
             try {
                 const result = await dialog.showOpenDialog(this.mainWindow!, {
                     properties: ['openFile'],
-                    filters: [{ name: 'Documents', extensions: ['txt', 'md', 'pdf', 'js', 'ts', 'html', 'py'] }]
+                    filters: [{ name: 'Project Files', extensions: ['txt', 'md', 'pdf', 'js', 'ts', 'html', 'py', 'png', 'jpg', 'jpeg', 'ppt', 'pptx'] }]
                 });
                 if (!result.canceled && result.filePaths.length > 0) {
                     const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
