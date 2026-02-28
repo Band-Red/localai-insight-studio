@@ -17,7 +17,7 @@ const SmartSuggestBtn: React.FC<SmartSuggestBtnProps> = ({ onSuggest, loading = 
             title="اقتراحات ذكية مبنية على حجم النموذج وإمكانيات جهازك"
         >
 
-            {loading ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
+            {loading ? <Loader2 size={14} className={styles.spin} /> : <Sparkles size={14} />}
             ⚡ اقتراحات ذكية
         </button>
     );

@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-
 import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History, Plus, Edit2, Check, X } from 'lucide-react';
 import CodeSandbox from './CodeSandbox';
 import ConfirmModal from '../UI/ConfirmModal';
@@ -182,7 +181,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           />
         );
       }
-      return <div key={index} className={styles.messageText}>{part}</div>;
+      return (
+        <div key={index} className={styles.messageText}>
+          {part}
+        </div>
+      );
     });
   };
 
