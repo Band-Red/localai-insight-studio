@@ -116,6 +116,8 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
             setActiveModelId(id);
             onActiveModelChange?.(modelName);
             setRestartNeeded(false);
+        } else {
+            alert(`فشل تشغيل النموذج:\n${result.error || 'حدث خطأ غير معروف'}`);
         }
     };
 

@@ -215,7 +215,8 @@ export class ModelManager {
             try {
                 // Determine the correct path to llama-server
                 const isPackaged = __dirname.includes('app.asar');
-                const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..');
+                // In dev, __dirname is dist/main so project root is ../..
+                const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..', '..');
 
                 const binFolder = path.join(rootDir, 'bin');
                 const exePath = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
@@ -319,10 +320,15 @@ export class ModelManager {
 
         // Fallback to Ollama
         return new Promise((resolve, reject) => {
-            exec(`ollama run ${model} "${message.replace(/"/g, '\\"')}"`, { encoding: 'utf8' }, (error, stdout, stderr) => {
+            const safeModel = model && model !== 'null' ? model : 'llama3';
+            exec(`ollama run ${safeModel} "${message.replace(/"/g, '\\"')}"`, { encoding: 'utf8' }, (error, stdout, stderr) => {
                 if (error) {
-                    console.error('Ollama Error:', stderr);
-                    reject(error);
+                    console.error('Ollama Error:', stderr || error.message);
+                    if (error.message.includes('not recognized') || error.code === 1) {
+                        resolve('عذراً، محرك الذكاء الاصطناعي (Ollama) غير مثبت لديك، ولم تقم بتشغيل أي نموذج محلي (GGUF). يرجى الذهاب إلى قسم "النماذج المحلية" وتشغيل نموذج للمحادثة معه.');
+                    } else {
+                        reject(error);
+                    }
                 } else {
                     resolve(stdout.trim());
                 }
