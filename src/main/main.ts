@@ -159,6 +159,24 @@ class MainApp {
             }
         });
 
+        // ── Window Controls ────────────────────────────────────────────────
+        ipcMain.handle('window:minimize', () => {
+            this.mainWindow?.minimize();
+        });
+
+        ipcMain.handle('window:toggle-maximize', () => {
+            if (this.mainWindow?.isMaximized()) {
+                this.mainWindow.unmaximize();
+            } else {
+                this.mainWindow?.maximize();
+            }
+        });
+
+        ipcMain.handle('window:close', () => {
+            this.mainWindow?.close();
+        });
+
+
         ipcMain.handle('chat:load-history', () => {
             try {
                 const historyPath = path.join(os.homedir(), '.localai-insight-studio', 'chat_history.json');

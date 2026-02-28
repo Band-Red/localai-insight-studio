@@ -116,8 +116,13 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
             setActiveModelId(id);
             onActiveModelChange?.(modelName);
             setRestartNeeded(false);
+            window.dispatchEvent(new CustomEvent('app:toast', { 
+                detail: { msg: `🚀 تم تشغيل النموذج ${modelName} بنجاح`, type: 'success' } 
+            }));
         } else {
-            alert(`فشل تشغيل النموذج:\n${result.error || 'حدث خطأ غير معروف'}`);
+            window.dispatchEvent(new CustomEvent('app:toast', { 
+                detail: { msg: `❌ فشل تشغيل النموذج: ${result.error || 'حدث خطأ غير معروف'}`, type: 'error' } 
+            }));
         }
     };
 

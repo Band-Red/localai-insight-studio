@@ -52,4 +52,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     generateApiKey: () => ipcRenderer.invoke('gguf:generate-api-key'),
     loadMcpConfig: () => ipcRenderer.invoke('gguf:load-mcp'),
     saveMcpConfig: (content: string) => ipcRenderer.invoke('gguf:save-mcp', content),
+
+    // Window Controls
+    minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+    toggleMaximize: () => ipcRenderer.invoke('window:toggle-maximize'),
+    closeWindow: () => ipcRenderer.invoke('window:close'),
 });
