@@ -202,7 +202,7 @@ export class ModelManager {
             if (config.draftModel) {
                 const draft = this.models.get(config.draftModel);
                 if (draft) {
-                    args.push('--draft', draft.filePath);
+                    args.push('--model-draft', draft.filePath);
                 }
             }
 
