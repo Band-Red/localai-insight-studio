@@ -56,6 +56,23 @@ const McpConfig: React.FC = () => {
                 className={styles.mcpEditor}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                onPaste={(e) => {
+                    e.preventDefault();
+                    // Get pasted text
+                    const paste = (e.clipboardData || (window as any).clipboardData).getData('text');
+                    try {
+                        // Parse and re-stringify with formatting
+                        const obj = JSON.parse(paste);
+                        const formatted = JSON.stringify(obj, null, 2);
+                        // If parsing works, replace the current selection or content
+                        setContent(formatted);
+                        setStatus({ type: 'success', msg: '✅ تم تنسيق JSON بنجاح' });
+                        setTimeout(() => setStatus(null), 3000);
+                    } catch (err) {
+                        // If it's not valid JSON, just paste as is
+                        setContent(paste);
+                    }
+                }}
                 spellCheck={false}
                 dir="ltr"
                 rows={20}

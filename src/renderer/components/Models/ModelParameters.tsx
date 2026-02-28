@@ -124,8 +124,20 @@ const ModelParameters: React.FC<ModelParametersProps> = ({ params, modelId, mode
                     className={styles.textarea}
                     value={params.systemPrompt}
                     onChange={(e) => set({ systemPrompt: e.target.value })}
+                    onPaste={(e) => {
+                        e.preventDefault();
+                        const paste = (e.clipboardData || (window as any).clipboardData).getData('text');
+                        try {
+                            const obj = JSON.parse(paste);
+                            const formatted = JSON.stringify(obj, null, 2);
+                            set({ systemPrompt: formatted });
+                        } catch (err) {
+                            set({ systemPrompt: paste });
+                        }
+                    }}
                     rows={4}
-                    dir="rtl"
+                    dir="ltr"
+                    placeholder="Enter system prompt here... (JSON supported)"
                 />
             </div>
 
