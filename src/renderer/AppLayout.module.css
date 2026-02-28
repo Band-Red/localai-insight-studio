@@ -25,6 +25,7 @@
     flex-direction: column;
     position: relative;
     animation: slideLeft 0.3s ease-out;
+    pointer-events: auto;
 }
 
 .previewHeader {
@@ -42,9 +43,10 @@
     background: transparent;
     border: none;
     color: #71717a;
-    cursor: pointer;
+    cursor: pointer !important;
     padding: 4px;
     border-radius: 4px;
+    pointer-events: auto !important;
 }
 
 .closePreviewBtn:hover {

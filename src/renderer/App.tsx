@@ -14,6 +14,7 @@ import Settings from './components/Settings/Settings';
 import VisualEditorOverlay from './components/Emulator/VisualEditorOverlay';
 import ModelManager from './components/Models/ModelManager';
 
+import appLogo from '@/assets/logo.png';
 import styles from './App.module.css';
 import layoutStyles from './AppLayout.module.css';
 
@@ -65,6 +66,10 @@ const App: React.FC = () => {
     if (electron?.onEngineSetupStatus) {
       electron.onEngineSetupStatus((msg: string) => {
         addToast(msg, msg.includes('فشل') ? 'error' : 'success');
+      });
+      electron.onServerStopped(() => {
+        setActiveModelName(null);
+        addToast('⚠️ توقف خادم النموذج المحلي بشكل مفاجئ. قد يكون بسبب نقص في موارد النظام (RAM/VRAM).', 'warning');
       });
     }
 
@@ -224,7 +229,7 @@ const App: React.FC = () => {
       {/* Title Bar - Drag Region & Window Controls */}
       <div className={styles.titleBar}>
         <div className={styles.titleText}>
-          <Zap size={14} color="#00ffcc" />
+          <img src={appLogo} alt="Logo" className={styles.appLogoMini} />
           <span>LocalAI Insight Studio</span>
         </div>
         <div className={styles.windowControls}>

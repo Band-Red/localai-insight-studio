@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Zap } from 'lucide-react';
 import styles from './SplashScreen.module.css';
+import appLogo from '@/assets/logo.png';
 
 const SplashScreen: React.FC<{ onFinish: () => void }> = ({ onFinish }) => {
     const [progress, setProgress] = useState(0);

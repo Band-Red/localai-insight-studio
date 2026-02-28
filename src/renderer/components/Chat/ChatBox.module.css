@@ -75,6 +75,14 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.messagesList::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .welcomeArea {
@@ -137,6 +145,7 @@
   display: flex;
   gap: 12px;
   max-width: 85%;
+  pointer-events: auto;
 }
 
 .messageRow.user {
@@ -170,6 +179,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  pointer-events: auto;
 }
 
 .messageText {
@@ -199,6 +209,7 @@
   color: #52526b;
   margin-top: 5px;
   font-size: 11px;
+  pointer-events: auto !important;
 }
 
 .msgExportBtn {
@@ -211,14 +222,96 @@
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10px;
-  cursor: pointer;
+  cursor: pointer !important;
   transition: all 0.2s ease;
   margin-right: 8px; /* RTL spacing */
+  pointer-events: auto !important;
 }
 
 .msgExportBtn:hover {
   background: rgba(0, 255, 204, 0.1);
   border-color: var(--neon-cyan);
+}
+
+.msgActionBtn {
+  background: transparent;
+  border: none;
+  color: #52526b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer !important;
+  transition: all 0.2s ease;
+  margin-right: 8px; /* RTL spacing */
+  pointer-events: auto !important;
+}
+
+.msgActionBtn:hover {
+  color: #fafafa;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.editArea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #1f1f2e;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #00ffcc;
+  min-width: 300px;
+}
+
+.editTextarea {
+  background: transparent;
+  border: none;
+  color: #fff;
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.saveEditBtn, .cancelEditBtn {
+  background: transparent;
+  border: 1px solid #33334d;
+  color: #a1a1aa;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto !important;
+}
+
+.saveEditBtn {
+  color: #00ffcc;
+  border-color: rgba(0, 255, 204, 0.3);
+}
+
+.saveEditBtn:hover {
+  background: rgba(0, 255, 204, 0.1);
+}
+
+.cancelEditBtn:hover {
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
+}
+
+.editArea {
+  pointer-events: auto !important;
+  z-index: 100;
 }
 
 .ai {
@@ -252,10 +345,21 @@
   border: none;
   padding: 12px;
   color: #fff;
-  color: #fff;
   outline: none;
   font-size: 14px;
   pointer-events: auto;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.5;
+  max-height: 90px; /* ~3 lines */
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chatInput::-webkit-scrollbar {
+  width: 0;
+  display: none;
 }
 
 
@@ -298,6 +402,7 @@
 
 .sendBtn:disabled {
   color: #2d2d3f;
+  cursor: default !important;
 }
 
 .spin {
@@ -339,17 +444,14 @@
 }
 
 @keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.9; }
+}
 
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.1);
-    opacity: 0.9;
-  }
+.chatWelcomeLogo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .headerActions {

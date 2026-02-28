@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History } from 'lucide-react';
+import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History, Plus, Edit2, Check, X } from 'lucide-react';
 import CodeSandbox from './CodeSandbox';
 import styles from './ChatBox.module.css';
 
@@ -24,6 +24,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   const [attachedInfo, setAttachedInfo] = useState<{ count: number, path?: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -110,6 +112,31 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
       console.error('Chat Error:', error);
       setIsLoading(false);
     }
+  };
+
+  const handleEditMessage = (msg: Message) => {
+    setEditingMessageId(msg.id);
+    setEditingText(msg.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditingText('');
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingText.trim() || !editingMessageId) return;
+
+    setMessages(prev => prev.map(m => 
+      m.id === editingMessageId ? { ...m, text: editingText, timestamp: new Date() } : m
+    ));
+    
+    setEditingMessageId(null);
+    setEditingText('');
+    
+    // Suggestion: Re-send if user wants? For now just local update.
+    // Usually editing a message in LLM chat might trigger a re-generation.
+    // But user just asked for "ability to edit".
   };
 
   const renderMessageText = (text: string) => {
@@ -212,6 +239,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         </div>
         <div className={styles.headerActions}>
           <button 
+            onClick={() => { if(confirm('بدء محادثة جديدة؟')) setMessages([]); }} 
+            className={styles.headerAction} 
+            title="محادثة جديدة"
+          >
+            <Plus size={16} />
+          </button>
+          <button 
             onClick={handleManualHistoryLoad} 
             className={styles.headerAction} 
             title="تحميل وعرض المحادثات السابقة المكتوبة مسبقاً"
@@ -250,19 +284,45 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
               {msg.sender === 'user' ? <User size={16} /> : <Bot size={16} />}
             </div>
             <div className={styles.messageContent}>
-              {renderMessageText(msg.text)}
-              <div className={styles.messageTime}>
-                {msg.timestamp.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
-                {msg.sender === 'ai' && (
-                  <button 
-                    onClick={() => handleExportIndividual(msg.text)} 
-                    className={styles.msgExportBtn} 
-                    title="تصدير هذا الرد إلى Obsidian"
-                  >
-                    <BookOpen size={12} /> تصدير
-                  </button>
-                )}
-              </div>
+              {String(editingMessageId) === String(msg.id) ? (
+                <div className={styles.editArea}>
+                  <textarea 
+                    className={styles.editTextarea}
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    autoFocus
+                  />
+                  <div className={styles.editActions}>
+                    <button onClick={handleSaveEdit} className={styles.saveEditBtn}><Check size={14} /></button>
+                    <button onClick={handleCancelEdit} className={styles.cancelEditBtn}><X size={14} /></button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {renderMessageText(msg.text)}
+                  <div className={styles.messageTime}>
+                    {msg.timestamp.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                    {msg.sender === 'user' && (
+                      <button 
+                        onClick={() => handleEditMessage(msg)} 
+                        className={styles.msgActionBtn} 
+                        title="تعديل السؤال"
+                      >
+                        <Edit2 size={12} />
+                      </button>
+                    )}
+                    {msg.sender === 'ai' && (
+                      <button 
+                        onClick={() => handleExportIndividual(msg.text)} 
+                        className={styles.msgExportBtn} 
+                        title="تصدير هذا الرد إلى Obsidian"
+                      >
+                        <BookOpen size={12} /> تصدير
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         ))}
@@ -292,13 +352,23 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           >
             <Paperclip size={18} />
           </button>
-          <input
-            type="text"
+          <textarea
             className={styles.chatInput}
             placeholder="اسأل الذكاء الاصطناعي عن كود أو أداء النظام..."
             value={inputValue}
+            rows={1}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            onInput={(e: any) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = (e.target.scrollHeight) + 'px';
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+                (e.target as any).style.height = 'auto';
+              }
+            }}
           />
           <button
             className={styles.sendBtn}
