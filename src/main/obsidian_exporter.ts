@@ -5,7 +5,7 @@ import { app } from 'electron';
 export class ObsidianExporter {
     public async exportChat(session: { title: string, messages: any[] }, vaultPath?: string) {
         try {
-            const fileName = `${session.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-${Date.now()}.md`;
+            const fileName = `${session.title.replace(/[\\/:*?"<>|]/g, '_')}-${Date.now()}.md`;
             const targetDir = vaultPath && fs.existsSync(vaultPath)
                 ? vaultPath
                 : path.join(app.getPath('userData'), 'obsidian_vault');

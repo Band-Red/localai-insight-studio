@@ -59,11 +59,30 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
     const [saveStatus, setSaveStatus] = useState<'success' | 'error' | null>(null);
     const [restartNeeded, setRestartNeeded] = useState(false);
 
+    const refreshModels = useCallback(async () => {
+        const electron = (window as any).electronAPI;
+        if (electron?.listModels) {
+            const list = await electron.listModels();
+            setModels(list || []);
+        }
+    }, [setModels]);
+
+    const loadSystemResources = useCallback(async () => {
+        const electron = (window as any).electronAPI;
+        if (electron?.getSystemResources) {
+            const res = await electron.getSystemResources();
+            setResources(res);
+            if (res?.totalRamGb) {
+                setServerConfig(prev => ({ ...prev, ramGb: Math.min(res.totalRamGb - 2, 32) }));
+            }
+        }
+    }, [setResources, setServerConfig]);
+
     // Load models and system resources on mount
     useEffect(() => {
         refreshModels();
         loadSystemResources();
-    }, []);
+    }, [refreshModels, loadSystemResources]);
 
     // Persist settings on change
     useEffect(() => {
@@ -76,26 +95,21 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY_QUANT, selectedQuant);
-    }, [selectedQuant]);
-
-    const refreshModels = useCallback(async () => {
-        const electron = (window as any).electronAPI;
-        if (electron?.listModels) {
-            const list = await electron.listModels();
-            setModels(list || []);
-        }
-    }, []);
-
-    const loadSystemResources = async () => {
-        const electron = (window as any).electronAPI;
-        if (electron?.getSystemResources) {
-            const res = await electron.getSystemResources();
-            setResources(res);
-            if (res?.totalRamGb) {
-                setServerConfig(prev => ({ ...prev, ramGb: Math.min(res.totalRamGb - 2, 32) }));
+        if (activeModelId) {
+            const electron = (window as any).electronAPI;
+            if (electron?.updateGgufModel) {
+                electron.updateGgufModel(activeModelId, { quantization: selectedQuant })
+                    .then(() => refreshModels());
             }
         }
-    };
+    }, [selectedQuant, activeModelId]);
+
+    useEffect(() => {
+        if (activeModelId) {
+            const m = models.find(i => i.id === activeModelId);
+            if (m) setSelectedQuant(m.quantization);
+        }
+    }, [activeModelId, models]);
 
     const handleLoad = async (id: string) => {
         const electron = (window as any).electronAPI;

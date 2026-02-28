@@ -5,6 +5,9 @@
     border: 1px solid #1f1f23;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 .codeHeader {
@@ -14,6 +17,11 @@
     padding: 8px 16px;
     background: #121217;
     border-bottom: 1px solid #1f1f23;
+    pointer-events: auto;
+}
+
+.codeTitle, .codeActions {
+    pointer-events: auto;
 }
 
 .codeTitle {
@@ -34,14 +42,15 @@
     background: transparent;
     border: none;
     color: #71717a;
-    cursor: pointer;
-    padding: 4px 8px;
+    cursor: pointer !important;
+    padding: 6px 10px;
     border-radius: 6px;
     font-size: 11px;
     display: flex;
     align-items: center;
     gap: 6px;
     transition: all 0.2s;
+    pointer-events: auto !important;
 }
 
 .actionBtn:hover {
@@ -67,6 +76,14 @@
     font-size: 13px;
     line-height: 1.5;
     background: #050507;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.codeContent::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 
 .codeText {

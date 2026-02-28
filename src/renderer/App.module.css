@@ -43,6 +43,8 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  padding-top: 36px;
+  position: relative;
 }
 
 /* Sidebar Styling */
@@ -833,16 +835,7 @@ body {
   color: white !important;
 }
 
-.appContainer {
-  display: flex;
-  height: 100vh;
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  padding-top: 36px; /* Space for title bar */
-}
+/* appContainer merged above */
 
 .toastList {
   position: fixed;
@@ -885,4 +878,11 @@ body {
 @keyframes toastIn {
   from { transform: translateY(-30px); opacity: 0; scale: 0.95; }
   to { transform: translateY(0); opacity: 1; scale: 1; }
+}
+
+.appLogoMini {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px var(--accent-glow));
 }

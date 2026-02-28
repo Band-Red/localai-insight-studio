@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './ModelManager.module.css';
 
 const QUANTIZATIONS = [
+    { name: 'بدون ضغط', ratio: 1.0, note: 'النموذج الأصلي - كامل' },
     { name: 'Q2_K', ratio: 0.28, note: 'الأصغر - جودة منخفضة' },
     { name: 'Q3_K_S', ratio: 0.34, note: 'صغير جداً' },
     { name: 'Q3_K_M', ratio: 0.36, note: 'صغير متوازن' },

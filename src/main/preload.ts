@@ -45,6 +45,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     registerGgufPath: (filePath: string) => ipcRenderer.invoke('gguf:register-path', filePath),
     listModels: () => ipcRenderer.invoke('gguf:list'),
     removeModel: (id: string) => ipcRenderer.invoke('gguf:remove', id),
+    updateGgufModel: (id: string, updates: any) => ipcRenderer.invoke('gguf:update-model', id, updates),
+    onServerStopped: (callback: (modelId: string) => void) => {
+        ipcRenderer.on('gguf:server-stopped', (_e, modelId) => callback(modelId));
+    },
     startServer: (config: any) => ipcRenderer.invoke('gguf:start-server', config),
     stopServer: () => ipcRenderer.invoke('gguf:stop-server'),
     getSmartSuggestions: (modelId: string) => ipcRenderer.invoke('gguf:smart-suggest', modelId),

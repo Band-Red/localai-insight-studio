@@ -62,6 +62,7 @@ class MainApp {
                 sandbox: false // Recommended for better tool communication in dev
             },
             backgroundColor: '#050507',
+            icon: path.join(__dirname, '../src/assets/logo.png'),
             frame: false,
             show: false // Don't show until ready-to-show
         });
@@ -122,9 +123,14 @@ class MainApp {
         ipcMain.handle('gguf:list', () => this.modelManager.listModels());
 
         ipcMain.handle('gguf:remove', (_e, id: string) => this.modelManager.removeModel(id));
+        ipcMain.handle('gguf:update-model', (_e, id: string, updates: any) => this.modelManager.updateModel(id, updates));
 
         ipcMain.handle('gguf:start-server', async (_e, config) =>
-            await this.modelManager.startServer(config));
+            await this.modelManager.startServer(config, (modelId) => {
+                if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+                    this.mainWindow.webContents.send('gguf:server-stopped', modelId);
+                }
+            }));
 
         ipcMain.handle('gguf:stop-server', () => this.modelManager.stopServer());
 

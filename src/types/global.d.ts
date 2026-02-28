@@ -7,6 +7,10 @@
 declare module 'react';
 declare module 'react-dom';
 declare module '*.module.css';
+declare module '*.png';
+declare module '*.jpg';
+declare module '*.jpeg';
+declare module '*.svg';
 
 export interface IElectronAPI {
     // وظائف مراقبة النظام والمقاييس الـ 13

@@ -12,8 +12,48 @@ html {
   height: 100vh;
   background-color: var(--bg);
   color: white;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow: hidden;
+  direction: rtl; /* Ensure RTL globally */
+}
+
+/* Global Scrollbar Hiding while keeping functionality */
+* {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  /* display: none !important; */
+}
+
+/* Global Cursor and Interactivity Fixes */
+button, 
+select, 
+input[type="button"], 
+input[type="submit"], 
+label[for],
+.clickable,
+[role="button"] {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+input, 
+textarea, 
+select {
+  pointer-events: auto !important;
+}
+
+/* Consistent Glassmorphism Container */
+.glass-container {
+  background: rgba(18, 18, 23, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 #root {
@@ -93,6 +133,7 @@ html {
   margin-bottom: 10px;
   background: linear-gradient(to bottom, #fff, #888);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

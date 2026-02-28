@@ -61,7 +61,7 @@ export interface SmartSuggestions {
 const QUANT_KEYS = [
     'Q2_K', 'Q3_K_S', 'Q3_K_M', 'Q3_K_L',
     'Q4_K_S', 'Q4_0', 'Q4_K_M', 'Q5_K_S',
-    'Q5_0', 'Q5_K_M', 'Q6_K', 'Q8_0', 'F16', 'F32'
+    'Q5_0', 'Q5_K_M', 'Q6_K', 'Q8_0', 'F16', 'F32', 'بدون ضغط'
 ];
 
 function detectQuantization(filename: string): string {
@@ -169,6 +169,15 @@ export class ModelManager {
         return Array.from(this.models.values());
     }
 
+    public updateModel(id: string, updates: Partial<GgufModel>): { success: boolean } {
+        const model = this.models.get(id);
+        if (!model) return { success: false };
+        const updated = { ...model, ...updates };
+        this.models.set(id, updated);
+        this.saveToDisk();
+        return { success: true };
+    }
+
     public getActiveServer() {
         return { id: this.activeServerId, port: this.activePort };
     }
@@ -176,7 +185,7 @@ export class ModelManager {
     // ----------------------------------------------------------------
     // Server
     // ----------------------------------------------------------------
-    public async startServer(config: ServerConfig): Promise<{ success: boolean; error?: string }> {
+    public async startServer(config: ServerConfig, onStop?: (id: string) => void): Promise<{ success: boolean; error?: string }> {
         const model = this.models.get(config.modelId);
         if (!model) return { success: false, error: 'Model not found' };
 
@@ -283,6 +292,7 @@ export class ModelManager {
                 this.serverProcess.on('close', () => {
                     if (this.activeServerId === model.id) {
                         model.status = 'idle';
+                        onStop?.(model.id);
                         this.activeServerId = null;
                         this.models.set(model.id, model);
                     }
@@ -467,8 +477,12 @@ export class ModelManager {
         }
 
         const quant = model.quantization;
-        if (quant.includes('Q8') || quant.includes('F16') || quant.includes('F32')) {
+        if (quant.includes('Q8') || quant.includes('F16') || quant.includes('F32') || quant === 'بدون ضغط') {
             temperature = 0.5;
+            // If it's uncompressed, we need much more RAM
+            if (quant === 'بدون ضغط' || quant === 'F16' || quant === 'F32') {
+                suggestedRamGb = Math.max(suggestedRamGb, Math.ceil(modelSizeMB / 1024) + 4);
+            }
         }
 
         const reasoning = `النموذج حجمه ${Math.round(modelSizeMB / 1024)} GB، النظام يملك ${ramGb} GB RAM ${hasGpu ? `و GPU بـ ${Math.round(maxVramGb)} GB VRAM` : 'بدون GPU مخصص'}. الإعدادات مُحسَّنة للأداء الأمثل.`;
