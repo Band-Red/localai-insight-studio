@@ -215,8 +215,8 @@ export class ModelManager {
             try {
                 // Determine the correct path to llama-server
                 const isPackaged = __dirname.includes('app.asar');
-                // In dev, __dirname is dist/main so project root is ../..
-                const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..', '..');
+                // dist/main.js -> dist -> root
+                const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..');
 
                 const binFolder = path.join(rootDir, 'bin');
                 const exePath = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
@@ -230,34 +230,50 @@ export class ModelManager {
                 });
 
                 let started = false;
+                let lastErrorLog = '';
+
                 const timeout = setTimeout(() => {
                     if (!started) {
                         model.status = 'error';
-                        model.errorMsg = 'Server startup timed out (30s)';
+                        model.errorMsg = lastErrorLog ? `Timeout. Last log: ${lastErrorLog.substring(0, 50)}...` : 'Server startup timed out (30s)';
                         this.models.set(model.id, model);
                         resolve({ success: false, error: model.errorMsg });
                     }
                 }, 30000);
 
-                this.serverProcess.stdout?.on('data', (data: Buffer) => {
+                const checkOutput = (data: Buffer) => {
                     const out = data.toString();
-                    if (!started && (out.includes('HTTP server listening') || out.includes('llama server listening'))) {
-                        started = true;
-                        clearTimeout(timeout);
-                        model.status = 'ready';
-                        model.errorMsg = undefined;
-                        this.activeServerId = model.id;
-                        this.models.set(model.id, model);
-                        resolve({ success: true });
+                    if (!started) {
+                        lastErrorLog = out; // Keep last output for error reporting
+                        if (out.toLowerCase().includes('http server listening') || out.toLowerCase().includes('llama server listening')) {
+                            started = true;
+                            clearTimeout(timeout);
+                            model.status = 'ready';
+                            model.errorMsg = undefined;
+                            this.activeServerId = model.id;
+                            this.models.set(model.id, model);
+                            resolve({ success: true });
+                        } else if (out.toLowerCase().includes('failed to') || out.toLowerCase().includes('error:')) {
+                            // If it explicitly failed early
+                            started = true; // prevent timeout
+                            clearTimeout(timeout);
+                            model.status = 'error';
+                            model.errorMsg = out.split('\n')[0].substring(0, 100);
+                            this.models.set(model.id, model);
+                            resolve({ success: false, error: model.errorMsg });
+                        }
                     }
-                });
+                };
+
+                this.serverProcess.stdout?.on('data', checkOutput);
+                this.serverProcess.stderr?.on('data', checkOutput);
 
                 this.serverProcess.on('error', (err: NodeJS.ErrnoException) => {
                     if (!started) {
                         clearTimeout(timeout);
                         model.status = 'error';
                         model.errorMsg = err.code === 'ENOENT'
-                            ? 'llama-server غير موجود في مجلد bin أو PATH — يرجى وضع llama-server.exe في مجلد bin داخل المشروع'
+                            ? `llama-server غير موجود في ${localServerPath}`
                             : `فشل في تشغيل الخادم: ${err.message}`;
                         this.models.set(model.id, model);
                         resolve({ success: false, error: model.errorMsg });
