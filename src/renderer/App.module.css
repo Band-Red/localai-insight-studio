@@ -875,6 +875,24 @@ body {
   flex: 1;
 }
 
+.toastClose {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.toastClose:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
 @keyframes toastIn {
   from { transform: translateY(-30px); opacity: 0; scale: 0.95; }
   to { transform: translateY(0); opacity: 1; scale: 1; }

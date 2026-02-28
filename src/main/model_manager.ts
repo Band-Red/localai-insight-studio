@@ -289,7 +289,8 @@ export class ModelManager {
                     }
                 });
 
-                this.serverProcess.on('close', () => {
+                this.serverProcess.on('close', (code) => {
+                    console.log(`[Model Server] Process closed with code: ${code}`);
                     if (this.activeServerId === model.id) {
                         model.status = 'idle';
                         onStop?.(model.id);

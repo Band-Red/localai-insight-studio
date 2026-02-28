@@ -41,13 +41,17 @@ const App: React.FC = () => {
   // Toast System
   const [toasts, setToasts] = useState<Array<{ id: number; msg: string; type: 'success' | 'error' | 'warning' }>>([]);
 
+  const removeToast = useCallback((id: number) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
   const addToast = useCallback((msg: string, type: 'success' | 'error' | 'warning' = 'success') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, msg, type }]);
     setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 8000); // 8 seconds as requested
-  }, []);
+      removeToast(id);
+    }, 8000); 
+  }, [removeToast]);
 
 
   const handleSplashFinish = useCallback(() => {
@@ -253,6 +257,9 @@ const App: React.FC = () => {
             {toast.type === 'error' && <AlertTriangle size={18} color="#ef4444" />}
             {toast.type === 'warning' && <InfoIcon size={18} color="#f59e0b" />}
             <span>{toast.msg}</span>
+            <button className={styles.toastClose} onClick={() => removeToast(toast.id)}>
+              <X size={14} />
+            </button>
           </div>
         ))}
       </div>
