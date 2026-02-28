@@ -46,6 +46,7 @@
     color: var(--color-text-dim);
     font-size: 0.85rem;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .tab:hover {
@@ -79,12 +80,22 @@
     }
 }
 
+.sidebarSecondary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
 /* ── Generic Card ────────────────────────────────────────────── */
 .card {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
+}
+
+.cardWithMargin {
+    margin-block-start: var(--space-md);
 }
 
 .sectionTitle {
@@ -112,6 +123,7 @@
     gap: var(--space-sm);
     transition: border-color 0.25s, background 0.25s;
     text-align: center;
+    cursor: pointer;
 }
 
 .dropZone:hover,
@@ -124,6 +136,22 @@
     animation: pulseIcon 2.5s ease-in-out infinite;
 }
 
+.dropTitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.dropSubtitle {
+    font-size: 0.75rem;
+    color: var(--color-text-dim);
+}
+
+.dropError {
+    color: var(--color-danger);
+    font-size: 0.75rem;
+    margin-block-start: 4px;
+}
+
 @keyframes pulseIcon {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(0.95); opacity: 0.7; }
@@ -134,6 +162,15 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
+}
+
+.emptyState {
+    padding: var(--space-lg);
+    text-align: center;
+    color: var(--color-text-dim);
+    font-size: 0.9rem;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
 }
 
 .modelItem {
@@ -153,6 +190,7 @@
 
 .modelItemActive {
     border-color: var(--color-accent) !important;
+    background: hsl(var(--h-bg) var(--s-bg) 6%);
 }
 
 .statusDot {
@@ -179,6 +217,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: var(--color-text-main);
 }
 
 .modelMeta {
@@ -214,6 +253,10 @@
     border-radius: var(--radius-sm);
     font-weight: 700;
     transition: opacity 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
 }
 
 .btnLoad:hover, .btnSave:hover { opacity: 0.85; }
@@ -226,6 +269,7 @@
     border: 1px solid hsl(0 75% 20%);
     border-radius: var(--radius-sm);
     font-weight: 600;
+    cursor: pointer;
 }
 
 .btnDelete {
@@ -235,6 +279,7 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .btnDelete:hover { color: var(--color-danger); border-color: var(--color-danger); }
@@ -289,6 +334,7 @@
     background: var(--color-border);
     border-radius: 22px;
     transition: background 0.25s;
+    cursor: pointer;
 }
 
 .toggleSlider::before {
@@ -320,6 +366,7 @@
     padding: var(--space-sm);
     text-align: center;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .quantOption:hover { border-color: hsl(240 5% 30%); }
@@ -344,11 +391,18 @@
     block-size: 14px;
     border-radius: 50%;
     background: var(--color-accent);
+    cursor: pointer;
 }
 
 .sliderValue { inline-size: 40px; text-align: center; color: var(--color-accent); font-weight: bold; font-size: 0.85rem; }
 
 /* ── Resource Badges ─────────────────────────────────────────── */
+.resourceRow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
 .resourceBadge {
     display: flex;
     align-items: center;
@@ -370,4 +424,26 @@
     gap: var(--space-md);
     padding: var(--space-md);
     border-block-start: 1px solid var(--color-border);
+    background: var(--color-bg-base);
+}
+
+.statusMsg {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.statusSuccess { color: var(--color-success); }
+.statusError { color: var(--color-danger); }
+.warningText { color: var(--color-warning); }
+
+.marginRightAuto {
+    margin-inline-start: auto;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
