@@ -210,7 +210,6 @@ export class ModelManager {
             if (config.keepInMemory) args.push('--mlock');
             if (!config.useMmap) args.push('--no-mmap');
             if (config.serveOnLan) args.push('--host', '0.0.0.0');
-            if (config.enableCors) args.push('--cors');
 
             try {
                 // Determine the correct path to llama-server
