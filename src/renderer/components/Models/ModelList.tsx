@@ -73,7 +73,7 @@ const ModelList: React.FC<ModelListProps> = ({ models, activeModelId, onLoad, on
                                 onClick={() => onLoad(model.id)}
                                 disabled={model.status === 'loading'}
                             >
-                                {model.status === 'loading' ? <Loader2 size={12} /> : 'تحميل'}
+                                {model.status === 'loading' ? <Loader2 size={12} /> : 'تشغيل'}
                             </button>
                         )}
                         <button type="button" className={styles.btnDelete} onClick={() => onDelete(model.id)} title="حذف النموذج">
