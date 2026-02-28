@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History, Plus, Edit2, Check, X } from 'lucide-react';
 import CodeSandbox from './CodeSandbox';
+import ConfirmModal from '../UI/ConfirmModal';
 import styles from './ChatBox.module.css';
 
 interface Message {
@@ -26,6 +27,31 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
+
+  // Custom Confirm Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => { },
+  });
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: () => {
+        onConfirm();
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -161,9 +187,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   };
 
   const clearChat = () => {
-    if (confirm('هل أنت متأكد من مسح جميع المحادثات وتفريغ السجل؟')) {
-       setMessages([]);
-    }
+    showConfirm('مسح المحادثة', 'هل أنت متأكد من مسح جميع المحادثات وتفريغ السجل؟', () => {
+      setMessages([]);
+    });
   };
 
   const handleExportIndividual = async (msgText: string) => {
@@ -175,7 +201,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
       };
       const result = await electron.exportChat(session);
       if (result.success) {
-        alert(`تم تصدير الرد بنجاح إلى: ${result.filePath}`);
+        window.dispatchEvent(new CustomEvent('app:toast', { 
+          detail: { msg: `✅ تم تصدير الرد بنجاح إلى: ${result.filePath}`, type: 'success' } 
+        }));
       }
     }
   };
@@ -191,7 +219,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           }));
           setMessages(loadedMsg);
         } else {
-            alert('لا توجد محادثات سابقة محفوظة.');
+          window.dispatchEvent(new CustomEvent('app:toast', { 
+            detail: { msg: 'ℹ️ لا توجد محادثات سابقة محفوظة.', type: 'warning' } 
+          }));
         }
       }
   };
@@ -239,7 +269,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         </div>
         <div className={styles.headerActions}>
           <button 
-            onClick={() => { if(confirm('بدء محادثة جديدة؟')) setMessages([]); }} 
+            onClick={() => { 
+              showConfirm('محادثة جديدة', 'بدء محادثة جديدة؟', () => setMessages([]));
+            }} 
             className={styles.headerAction} 
             title="محادثة جديدة"
           >
@@ -381,6 +413,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         </div>
 
       </div>
+      <ConfirmModal 
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };

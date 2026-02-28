@@ -1,0 +1,168 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background-color: hsl(var(--h-bg) var(--s-bg) 2% / 0.85);
+    backdrop-filter: blur(12px) saturate(180%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20000;
+    padding: var(--space-md);
+    animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    inline-size: min(100%, 450px);
+    box-shadow: 0 40px 100px hsl(0 0% 0% / 0.8), 0 0 20px var(--color-accent-glow);
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cyberpunk Corner Decor */
+.cornerDecor {
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-start: 10px;
+    inline-size: 20px;
+    block-size: 20px;
+    border-block-start: 2px solid var(--color-accent);
+    border-inline-start: 2px solid var(--color-accent);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.glitchLine {
+    position: absolute;
+    inset-block-start: 0;
+    inline-size: 100%;
+    block-size: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--color-accent) 20%, 
+        var(--color-accent) 80%, 
+        transparent 100%
+    );
+    opacity: 0.7;
+    animation: scanLine 3s infinite linear;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md);
+    background-color: var(--color-bg-sidebar);
+    border-block-end: 1px solid var(--color-border);
+    position: relative;
+}
+
+.titleArea {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.warningIcon {
+    color: var(--color-warning);
+    filter: drop-shadow(0 0 5px hsl(45 100% 50% / 0.4));
+}
+
+.header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin: 0;
+}
+
+.closeBtn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-dim);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+    background-color: hsl(0 75% 50% / 0.1);
+    color: var(--color-danger);
+}
+
+.body {
+    padding: var(--space-md);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-main);
+}
+
+.body p {
+    margin: 0;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background-color: var(--color-bg-sidebar);
+    border-block-start: 1px solid var(--color-border);
+}
+
+.cancelBtn, .confirmBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cancelBtn {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-dim);
+}
+
+.cancelBtn:hover {
+    background-color: var(--color-border);
+    color: var(--color-text-main);
+}
+
+.confirmBtn {
+    background-color: var(--color-accent);
+    color: var(--color-bg-base);
+    border: none;
+}
+
+.confirmBtn:hover {
+    box-shadow: 0 0 20px var(--color-accent-glow);
+    transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scanLine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
