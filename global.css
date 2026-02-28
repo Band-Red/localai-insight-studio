@@ -1,218 +1,142 @@
 :root {
-  --accent: #00ffcc;
-  --accent-glow: rgba(0, 255, 204, 0.4);
-  --bg: #050507;
+  /* ── Cyberpunk Design Tokens ───────────────────────────────── */
+  
+  /* Colors - using HSL for easy opacity manipulation */
+  --h-cyan: 168;
+  --s-cyan: 100%;
+  --l-cyan: 50%;
+  --color-accent: hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan));
+  --color-accent-glow: hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.3);
+  
+  --h-bg: 240;
+  --s-bg: 17%;
+  --l-bg: 2%;
+  --color-bg-base: hsl(var(--h-bg) var(--s-bg) var(--l-bg));
+  --color-bg-sidebar: hsl(240 20% 6%);
+  --color-bg-card: hsl(240 18% 8%);
+  
+  --color-text-main: #fafafa;
+  --color-text-dim: #71717a;
+  --color-border: hsl(240 6% 13%);
+  
+  --color-danger: #ef4444;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+
+  /* Spacing & Sizing - using clamp for fluidity */
+  --space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+  --space-sm: clamp(0.5rem, 0.4rem + 0.5vw, 1rem);
+  --space-md: clamp(1rem, 0.8rem + 1vw, 2rem);
+  --space-lg: clamp(2rem, 1.6rem + 2vw, 4rem);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* Typography */
+  --font-size-base: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  --font-size-lg: clamp(1.125rem, 1rem + 0.625vw, 1.5rem);
+  --font-size-xl: clamp(1.5rem, 1.25rem + 1.25vw, 2.5rem);
+  
+  /* Layout */
+  --sidebar-width: 72px;
+  --header-height: 36px;
 }
 
-body,
-html {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: var(--bg);
-  color: white;
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+}
+
+html, body {
+  inline-size: 100vw;
+  block-size: 100vh;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-main);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   overflow: hidden;
-  direction: rtl; /* Ensure RTL globally */
-}
-
-/* Global Scrollbar Hiding while keeping functionality */
-* {
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE/Edge */
-}
-
-::-webkit-scrollbar {
-  width: 0 !important;
-  height: 0 !important;
-  /* display: none !important; */
-}
-
-/* Global Cursor and Interactivity Fixes */
-button, 
-select, 
-input[type="button"], 
-input[type="submit"], 
-label[for],
-.clickable,
-[role="button"] {
-  cursor: pointer !important;
-  pointer-events: auto !important;
-}
-
-input, 
-textarea, 
-select {
-  pointer-events: auto !important;
-}
-
-/* Consistent Glassmorphism Container */
-.glass-container {
-  background: rgba(18, 18, 23, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  direction: rtl;
+  font-size: var(--font-size-base);
 }
 
 #root {
-  width: 100%;
-  height: 100%;
+  inline-size: 100%;
+  block-size: 100%;
   position: relative;
 }
 
-/* خلفية الشبكة العصبية المتحركة */
-.bg-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  opacity: 0.4;
+/* ── Global Scrollbar Hiding ─────────────────────────────────── */
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
-.main-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  text-align: center;
-  animation: fadeIn 1.5s ease-out;
+::-webkit-scrollbar {
+  inline-size: 0 !important;
+  block-size: 0 !important;
 }
 
-/* حاوية الشعار */
-.logo-container {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* ── Global Interactivity ────────────────────────────────────── */
+button, select, input, textarea, [role="button"] {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  font-family: inherit;
+  font-size: inherit;
 }
 
-/* الحلقة الخارجية المتحركة */
-.logo-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 4px solid var(--accent);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 2s linear infinite;
-  box-shadow: 0 0 20px var(--accent-glow);
+input:not([type="button"]):not([type="submit"]), textarea {
+  cursor: text !important;
 }
 
-/* قلب الشعار الممركز */
-.logo-inner {
-  position: relative;
-  width: 70px;
-  height: 70px;
-  background: var(--accent);
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 0 40px var(--accent);
-  animation: pulse 2s ease-in-out infinite;
-  z-index: 2;
+/* ── Shared Cyberpunk Utilities ─────────────────────────────── */
+
+.neon-border {
+  border: 1px solid var(--color-border);
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ضبط أيقونة الـ SVG لتكون في المنتصف تماماً */
-.logo-inner svg {
-  display: block;
+.neon-border:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 10px var(--color-accent-glow);
 }
 
-.title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: -1px;
-  margin-bottom: 10px;
-  background: linear-gradient(to bottom, #fff, #888);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+.neon-text {
+  color: var(--color-accent);
+  text-shadow: 0 0 8px var(--color-accent-glow);
 }
 
-.subtitle {
-  font-size: 1rem;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  opacity: 0.8;
-  margin-bottom: 40px;
+.glass-panel {
+  background: hsl(var(--h-bg) var(--s-bg) var(--l-bg) / 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px hsl(0 0% 0% / 0.4);
 }
 
-/* شريط تحميل احترافي */
-.loader-bar {
-  width: 250px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  margin: 0 auto;
-  position: relative;
-  overflow: hidden;
+/* Fluid Layout Grid Helper */
+.adaptive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-md);
 }
 
-.loader-progress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 0%;
-  background: var(--accent);
-  box-shadow: 0 0 15px var(--accent);
-  animation: load 3s cubic-bezier(0.1, 0, 0.2, 1) forwards;
-}
+/* ── Logical Spacing Utilities ──────────────────────────────── */
+.p-inline { padding-inline: var(--space-md); }
+.p-block { padding-block: var(--space-md); }
+.m-block-end { margin-block-end: var(--space-md); }
 
-.status-text {
-  margin-top: 15px;
-  font-size: 0.8rem;
-  color: #666;
-  letter-spacing: 1px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* Animation Keyframes */
+@keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.1);
-    opacity: 0.9;
-  }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
 }
-
 @keyframes load {
-  0% {
-    width: 0%;
-  }
-
-  100% {
-    width: 100%;
-  }
+  from { inline-size: 0%; }
+  to { inline-size: 100%; }
 }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes fadeInSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

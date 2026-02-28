@@ -1,265 +1,207 @@
 .dashboardWrapper {
-  padding: 24px;
-  background-color: #050507;
-  height: 100%;
-  width: 100%;
+  padding: var(--space-md);
+  background-color: var(--color-bg-base);
+  block-size: 100%;
+  inline-size: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
+@media (min-width: 1440px) {
+  .dashboardWrapper {
+    padding-inline: var(--space-lg);
+    padding-block: var(--space-lg);
+  }
+}
+
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-md);
+  margin-block-end: var(--space-md);
 }
 
 .statCard {
-  background: #121217;
-  border: 1px solid #1f1f23;
-  padding: 20px;
-  border-radius: 12px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
-  gap: 16px;
-  transition: transform 0.3s ease;
+  gap: var(--space-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .statCard:hover {
   transform: translateY(-5px);
-  border-color: #00ffcc;
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 30px hsl(0 0% 0% / 0.4);
 }
 
 .statIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
+  inline-size: 48px;
+  block-size: 48px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.statIcon.cpu {
-  background: rgba(0, 255, 204, 0.1);
-  color: #00ffcc;
-}
-
-.statIcon.ram {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
-
-.statIcon.security {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
-}
-
-.statIcon.accuracy {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
-}
+.statIcon.cpu { background: var(--color-accent-glow); color: var(--color-accent); }
+.statIcon.ram { background: hsl(220 70% 50% / 0.1); color: hsl(220 70% 50%); }
+.statIcon.security { background: hsl(150 70% 40% / 0.1); color: var(--color-success); }
+.statIcon.accuracy { background: hsl(260 70% 60% / 0.1); color: hsl(260 70% 60%); }
 
 .statInfo span {
-  font-size: 12px;
-  color: #71717a;
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
   display: block;
-  margin-bottom: 4px;
+  margin-block-end: 4px;
 }
 
 .statInfo h3 {
-  font-size: 22px;
+  font-size: var(--font-size-lg);
   margin: 0;
-  color: #fafafa;
+  color: var(--color-text-main);
 }
 
 .chartsContainer {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  gap: var(--space-md);
+  margin-block-end: var(--space-md);
+}
+
+@media (min-width: 1200px) {
+  .chartsContainer {
+    grid-template-columns: 2fr 1fr;
+  }
 }
 
 .chartBox {
-  background: #121217;
-  border: 1px solid #1f1f23;
-  padding: 20px;
-  border-radius: 12px;
+  background: var(--color-bg-sidebar);
+  border: 1px solid var(--color-border);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
 }
 
 .chartBox h4 {
-  margin-bottom: 20px;
-  color: #fafafa;
-  font-size: 14px;
+  margin-block-end: var(--space-md);
+  color: var(--color-text-main);
+  font-size: 0.9rem;
   font-weight: 500;
 }
 
 .alertsSection {
-  background: #121217;
-  border: 1px solid #1f1f23;
-  padding: 20px;
-  border-radius: 12px;
+  background: var(--color-bg-sidebar);
+  border: 1px solid var(--color-border);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
 }
 
 .alertsSection h4 {
-  margin-bottom: 15px;
-  font-size: 14px;
-  color: #ef4444;
+  margin-block-end: var(--space-sm);
+  font-size: 0.9rem;
+  color: var(--color-danger);
 }
 
 .alertItem {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-sm);
   padding: 12px;
-  background: rgba(239, 68, 68, 0.05);
-  border: 1px solid rgba(239, 68, 68, 0.1);
-  border-radius: 8px;
+  background: hsl(0 75% 5% / 0.5);
+  border: 1px solid hsl(0 75% 10%);
+  border-radius: var(--radius-sm);
 }
 
 .alertItem p {
   flex: 1;
-  font-size: 13px;
-  color: #e2e2e8;
+  font-size: 0.85rem;
+  color: hsl(240 5% 90%);
   margin: 0;
 }
 
 .alertItem span {
-  font-size: 11px;
-  color: #52526b;
+  font-size: 0.7rem;
+  color: var(--color-text-dim);
 }
 
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  color: #00ffcc;
-}
-
-@media (max-width: 1024px) {
-  .chartsContainer {
-    grid-template-columns: 1fr;
-  }
+  block-size: 100%;
+  color: var(--color-accent);
 }
 
 .funnelWrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-xs);
   padding: 10px 0;
-  width: 100%;
+  inline-size: 100%;
 }
 
 .funnelStep {
-  background: linear-gradient(90deg, rgba(0, 255, 204, 0.2), rgba(0, 255, 204, 0.05));
-  border-right: 4px solid #00ffcc;
+  background: linear-gradient(90deg, var(--color-accent-glow), hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.05));
+  border-inline-end: 4px solid var(--color-accent);
   padding: 12px 20px;
   border-radius: 4px 12px 12px 4px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
-  min-height: 45px;
-  width: var(--step-width, 0%);
+  min-block-size: 45px;
+  inline-size: var(--step-width, 0%);
 }
 
 .funnelStep:hover {
-  background: linear-gradient(90deg, rgba(0, 255, 204, 0.3), rgba(0, 255, 204, 0.1));
+  background: linear-gradient(90deg, hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.3), hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.1));
   transform: translateX(-5px);
 }
 
 .stepLabel {
-  font-size: 13px;
-  color: #e4e4e7;
+  font-size: 0.8rem;
+  color: var(--color-text-main);
   font-weight: 500;
 }
 
 .stepValue {
-  font-family: monospace;
-  font-size: 14px;
-  color: #00ffcc;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  color: var(--color-accent);
   font-weight: bold;
-}
-
-.noData {
-  color: #52526b;
-  font-size: 12px;
-  text-align: center;
-  padding: 20px;
 }
 
 .healthBar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: var(--space-sm);
+  margin-block-end: var(--space-md);
   padding: 10px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 8px;
+  background: hsl(0 0% 100% / 0.02);
+  border-radius: var(--radius-sm);
 }
 
 .healthDot {
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
   border-radius: 50%;
   transition: all 0.3s;
 }
 
-.healthDot.healthy {
-  background-color: #10b981;
-  box-shadow: 0 0 10px #10b981;
-}
-
-.healthDot.warning {
-  background-color: #f59e0b;
-  box-shadow: 0 0 10px #f59e0b;
-}
-
-.healthDot.critical {
-  background-color: #ef4444;
-  box-shadow: 0 0 10px #ef4444;
-}
+.healthDot.healthy { background-color: var(--color-success); box-shadow: 0 0 10px var(--color-success); }
+.healthDot.warning { background-color: var(--color-warning); box-shadow: 0 0 10px var(--color-warning); }
+.healthDot.critical { background-color: var(--color-danger); box-shadow: 0 0 10px var(--color-danger); }
 
 .healthLabel {
-  font-size: 14px;
+  font-size: 0.9rem;
   font-weight: bold;
 }
 
-.alertItem.healthy,
-.alertItem.success {
-  background: rgba(16, 185, 129, 0.05);
-  border-color: rgba(16, 185, 129, 0.1);
-}
-
-.alertItem.warning {
-  background: rgba(245, 158, 11, 0.05);
-  border-color: rgba(245, 158, 11, 0.1);
-}
-
-.alertItem.critical,
-.alertItem.error {
-  background: rgba(239, 68, 68, 0.05);
-  border-color: rgba(239, 68, 68, 0.1);
-}
-
-/* ── Large Screen Optimization ─────────────────────────────────── */
-@media (min-width: 1440px) {
-  .dashboardWrapper {
-    padding: 60px 80px;
-  }
-
-  .statsGrid {
-    gap: 30px;
-  }
-
-  .chartsContainer {
-    grid-template-columns: 2fr 1fr;
-    gap: 30px;
-  }
-
-  .statCard {
-    padding: 30px 25px;
-    border-radius: 16px;
-  }
-}
+.alertItem.healthy, .alertItem.success { border-color: hsl(150 70% 20%); background: hsl(150 70% 5% / 0.5); }
+.alertItem.warning { border-color: hsl(40 70% 20%); background: hsl(40 70% 5% / 0.5); }
+.alertItem.critical, .alertItem.error { border-color: hsl(0 75% 15%); background: hsl(0 75% 5% / 0.5); }
