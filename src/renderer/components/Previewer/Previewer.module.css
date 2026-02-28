@@ -7,7 +7,41 @@
     background-color: var(--color-bg-base);
     color: var(--color-text-main);
     border-inline-end: 1px solid var(--color-border);
-    direction: rtl;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 10;
+    direction: ltr !important; /* Force LTR for code view components */
+}
+
+.fullScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 10001; /* Must be higher than titleBar (10000) */
+    inline-size: 100vw;
+    block-size: 100vh;
+}
+
+.fullScreenCloseBtn {
+    display: none;
+    position: absolute;
+    inset-block-start: var(--space-sm);
+    inset-inline-end: var(--space-md);
+    z-index: 10005;
+    background: var(--color-danger);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px hsl(0 75% 50% / 0.4);
+    align-items: center;
+    gap: 6px;
+}
+
+.fullScreen .fullScreenCloseBtn {
+    display: flex;
 }
 
 .header {
@@ -69,11 +103,13 @@
     block-size: 100%;
     padding: var(--space-md);
     font-family: 'Fira Code', monospace;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: #d1d1d1;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #a9b1d6; /* Tokyo Night style code color */
     overflow: auto;
     white-space: pre-wrap;
+    direction: ltr; /* Code must be LTR */
+    text-align: left;
 }
 
 /* تخصيص شريط التمرير */

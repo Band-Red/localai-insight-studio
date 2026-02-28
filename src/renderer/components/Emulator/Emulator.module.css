@@ -78,71 +78,51 @@
     justify-content: center;
     align-items: center;
     background: radial-gradient(circle at center, hsl(230 30% 15%) 0%, var(--color-bg-base) 100%);
-    padding: var(--space-lg);
-    overflow: auto;
+    padding: var(--space-md);
+    overflow: hidden; /* Important to contain the scaled frame */
+    position: relative;
 }
 
 .deviceFrame {
-    background-color: #000;
-    border: 12px solid hsl(240 5% 15%);
-    border-radius: 36px;
-    box-shadow: 0 25px 60px hsl(0 0% 0% / 0.6);
+    background-color: #050507;
+    border: 10px solid #1a1a1e;
+    border-radius: 32px;
+    box-shadow: 0 40px 100px hsl(0 0% 0% / 0.8), 0 0 40px hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.1);
     position: relative;
     overflow: hidden;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s ease-out; /* Smooth scaling */
+    background: #000;
 }
 
+/* Notch / Dynamic Island effect */
 .deviceFrame::before {
     content: '';
     position: absolute;
     inset-block-start: 0;
     inset-inline-start: 50%;
-    transform: translateX(50%); /* Adjusted for RTL if needed, but centering is standard */
-    inline-size: 35%;
+    transform: translateX(-50%);
+    inline-size: min(120px, 35%); /* Use percentage to look good on phones and tablets */
     block-size: 20px;
-    background-color: var(--color-border-dark); /* Replaced hsl(240 5% 15%) */
+    background-color: #1a1a1e;
     border-end-start-radius: 12px;
     border-end-end-radius: 12px;
-    z-index: 5;
-}
-
-.prev.slider {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    block-size: 4px;
-    border-radius: 4px;
-    background: var(--color-border);
+    z-index: 50;
+    pointer-events: none;
 }
 
 .previewIframe {
     inline-size: 100%;
     block-size: 100%;
     border: none;
-    background-color: var(--color-bg-light); /* Replaced #fff */
-}
-
-/* Device Dimensions */
-.iphoneSize {
-    inline-size: 375px;
-    block-size: 812px;
-}
-
-.samsungSize {
-    inline-size: 360px;
-    block-size: 780px;
-}
-
-.tabletSize {
-    inline-size: 768px;
-    block-size: 1024px;
+    background-color: #fff;
 }
 
 .desktopSize {
-    inline-size: 100%;
-    block-size: 100%;
-    border-radius: 0;
-    border-width: 0;
+    inline-size: 100% !important;
+    block-size: 100% !important;
+    border-radius: 0 !important;
+    border-width: 0 !important;
+    transform: none !important;
 }
 
 .desktopSize::before {

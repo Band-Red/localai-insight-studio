@@ -77,6 +77,7 @@
   flex: 1;
   inline-size: 100%;
   block-size: 100%;
+  min-block-size: 0; /* Important for flex children scrolling */
   overflow: hidden;
   background: radial-gradient(circle at top right, hsl(220 30% 12%), var(--color-bg-base));
   position: relative;
@@ -107,8 +108,9 @@
   display: flex;
   gap: 2px;
   background: hsl(var(--h-bg) var(--s-bg) 6%);
-  padding: 2px;
+  padding: 4px;
   border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
 }
 
 .modeBtn {

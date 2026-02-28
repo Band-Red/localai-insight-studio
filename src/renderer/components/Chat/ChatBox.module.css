@@ -2,8 +2,11 @@
   display: flex;
   flex-direction: column;
   block-size: 100%;
+  inline-size: 100%;
   background-color: var(--color-bg-base);
   direction: rtl;
+  overflow: hidden;
+  position: relative;
 }
 
 .chatHeader {
@@ -71,11 +74,14 @@
 
 .messagesList {
   flex: 1;
+  inline-size: 100%;
   overflow-y: auto;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  min-block-size: 0; /* Essential for flex shrinking */
+  scroll-behavior: smooth;
 }
 
 .welcomeArea {
@@ -282,9 +288,13 @@
 }
 
 .inputContainer {
-  padding: var(--space-md);
+  padding-inline: var(--space-md);
+  padding-block: var(--space-sm) var(--space-md);
   background: var(--color-bg-base);
   border-block-start: 1px solid var(--color-border);
+  position: relative;
+  z-index: 50; /* Above message list overlap */
+  pointer-events: auto;
 }
 
 .inputWrapper {
@@ -295,6 +305,16 @@
   align-items: flex-end;
   padding: 6px;
   gap: 6px;
+  box-shadow: 0 10px 30px hsl(0 0% 0% / 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px hsl(0 0% 0% / 0.3);
+  position: relative;
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 15px var(--color-accent-glow);
+  background: hsl(var(--h-bg) var(--s-bg) 10%);
 }
 
 .chatInput {

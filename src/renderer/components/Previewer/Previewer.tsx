@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileCode, Copy, Share2, Maximize2 } from 'lucide-react';
+import { FileCode, Copy, Share2, Maximize2, X } from 'lucide-react';
 import styles from './Previewer.module.css';
 
 interface PreviewerProps {
@@ -14,15 +14,36 @@ const Previewer: React.FC<PreviewerProps> = ({
   const displayCode = content && content.trim() ? content : "// لا يوجد كود متاح حالياً للعرض";
 
 
+  const [isFullScreen, setIsFullScreen] = React.useState(false);
+
   const handleCopy = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(displayCode);
-      alert('تم نسخ الكود بنجاح');
+      window.dispatchEvent(new CustomEvent('app:toast', { 
+        detail: { msg: '✅ تم نسخ الكود المصدري بنجاح', type: 'success' } 
+      }));
     }
   };
 
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
+    window.dispatchEvent(new CustomEvent('app:toast', { 
+      detail: { msg: isFullScreen ? 'ℹ️ تم تصغير نافذة الكود' : '🔍 تم توسيع نافذة الكود', type: 'success' } 
+    }));
+  };
+
+  const handleShare = () => {
+    handleCopy();
+  };
+
   return (
-    <div className={styles.previewContainer}>
+    <div className={`${styles.previewContainer} ${isFullScreen ? styles.fullScreen : ''}`}>
+      {/* Explicit close button for fullScreen mode */}
+      <button className={styles.fullScreenCloseBtn} onClick={toggleFullScreen}>
+        <X size={16} />
+        <span>إغلاق التوسيع</span>
+      </button>
+
       {/* رأس المستعرض */}
       <header className={styles.header}>
         <div className={styles.titleArea}>
@@ -31,15 +52,15 @@ const Previewer: React.FC<PreviewerProps> = ({
         </div>
 
         <div className={styles.controls}>
-          <button className={styles.actionButton} onClick={handleCopy}>
+          <button className={styles.actionButton} onClick={handleCopy} title="نسخ الكود">
             <Copy size={14} />
             <span>نسخ</span>
           </button>
-          <button className={styles.actionButton}>
+          <button className={styles.actionButton} onClick={toggleFullScreen} title={isFullScreen ? "تصغير" : "عرض ملء الشاشة"}>
             <Maximize2 size={14} />
-            <span>تكبير</span>
+            <span>{isFullScreen ? 'تصغير' : 'توسيع'}</span>
           </button>
-          <button className={styles.actionButton}>
+          <button className={styles.actionButton} onClick={handleShare} title="مشاركة">
             <Share2 size={14} />
           </button>
         </div>

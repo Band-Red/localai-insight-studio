@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Smartphone, Monitor, Tablet, ExternalLink, RefreshCw, Layers } from 'lucide-react';
 import styles from './Emulator.module.css';
 import mockupStyles from './EmulatorMockup.module.css';
 
 // تعريف قياسات الأجهزة المدعومة
 const DEVICES = {
-  iphone: { width: '375px', height: '812px', label: 'iPhone 13 Pro' },
-  samsung: { width: '360px', height: '780px', label: 'Galaxy S22' },
-  tablet: { width: '768px', height: '1024px', label: 'iPad Air' },
+  iphone: { width: 375, height: 812, label: 'iPhone 13 Pro' },
+  samsung: { width: 360, height: 780, label: 'Galaxy S22' },
+  tablet: { width: 768, height: 1024, label: 'iPad Air' },
   desktop: { width: '100%', height: '100%', label: 'Desktop View' }
 };
 
@@ -18,6 +18,36 @@ interface EmulatorProps {
 const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
   const [deviceKey, setDeviceKey] = useState<'iphone' | 'samsung' | 'tablet' | 'desktop'>('desktop');
   const [refreshKey, setRefreshKey] = useState(0);
+  const viewportRef = useRef<HTMLElement>(null);
+  const [scale, setScale] = useState(1);
+
+  // حساب الحجم المناسب (Scaling) لتطبيق المعاينة
+  const updateScale = useMemo(() => () => {
+    if (deviceKey === 'desktop' || !viewportRef.current) {
+      setScale(1);
+      return;
+    }
+
+    const viewport = viewportRef.current;
+    const device = DEVICES[deviceKey];
+    
+    // هيدر وتولبار و padding (تقريبًا 120px)
+    const availableWidth = viewport.clientWidth - 80;
+    const availableHeight = viewport.clientHeight - 80;
+
+    const scaleX = availableWidth / (device.width as number);
+    const scaleY = availableHeight / (device.height as number);
+    
+    // استخدام أقل مقياس لضمان احتواء الجهاز بالكامل
+    const newScale = Math.min(scaleX, scaleY, 1);
+    setScale(newScale);
+  }, [deviceKey]);
+
+  useEffect(() => {
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, [updateScale]);
 
   // كشف تلقائي لنوع الكود
   useEffect(() => {
@@ -34,15 +64,13 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
   const handleOpenExternal = () => {
     const electron = (window as any).electronAPI;
     if (electron?.openExternal && code) {
+      const isHtml = code.trim().toLowerCase().startsWith('<html') || code.includes('<!DOCTYPE') || code.includes('<html>');
       if (isHtml) {
-        // Enforce full HTML structure for cleaner browser preview
         const fullHtml = code.includes('<html>') ? code : `<html><body style="background:#050507;color:#fff;padding:20px;">${code}</body></html>`;
         const blob = new Blob([fullHtml], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         electron.openExternal(url);
       } else {
-        // For non-HTML code, we could either copy to clipboard or open a search/view
-        // For now, let's toast or alert, or just open a blank page with pre tags
         const previewCode = `<html><body style="background:#050507;color:#00ffcc;font-family:monospace;padding:20px;"><pre>${code.replace(/</g, '&lt;')}</pre></body></html>`;
         const blob = new Blob([previewCode], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
@@ -53,19 +81,20 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
 
   const isHtml = code.trim().toLowerCase().startsWith('<html') || code.includes('<!DOCTYPE') || code.includes('<html>');
 
-  const getSizeClass = (key: string) => {
-    switch (key) {
-      case 'iphone': return styles.iphoneSize;
-      case 'samsung': return styles.samsungSize;
-      case 'tablet': return styles.tabletSize;
-      case 'desktop': return styles.desktopSize;
-      default: return styles.iphoneSize;
-    }
+  const getDeviceStyle = () => {
+    if (deviceKey === 'desktop') return {};
+    const d = DEVICES[deviceKey];
+    return {
+      width: `${d.width}px`,
+      height: `${d.height}px`,
+      transform: `scale(${scale})`,
+      transformOrigin: 'center center',
+      flexShrink: 0
+    };
   };
 
   return (
     <div className={styles.emulatorContainer}>
-      {/* شريط التحكم العلوي */}
       <div className={styles.toolbar}>
         <div className={styles.deviceSelectors}>
           <button
@@ -74,21 +103,18 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
           >
             <Smartphone size={16} /> iPhone
           </button>
-
           <button
             onClick={() => setDeviceKey('samsung')}
             className={`${styles.deviceButton} ${deviceKey === 'samsung' ? styles.activeButton : ''}`}
           >
             <Smartphone size={16} /> Samsung
           </button>
-
           <button
             onClick={() => setDeviceKey('tablet')}
             className={`${styles.deviceButton} ${deviceKey === 'tablet' ? styles.activeButton : ''}`}
           >
             <Tablet size={16} /> Tablet
           </button>
-
           <button
             onClick={() => setDeviceKey('desktop')}
             className={`${styles.deviceButton} ${deviceKey === 'desktop' ? styles.activeButton : ''}`}
@@ -115,9 +141,11 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
         </div>
       </div>
 
-      {/* منطقة العرض والمعاينة */}
-      <main className={styles.viewportArea}>
-        <div className={`${styles.deviceFrame} ${getSizeClass(deviceKey)}`}>
+      <main className={styles.viewportArea} ref={viewportRef}>
+        <div 
+          className={`${styles.deviceFrame} ${deviceKey === 'desktop' ? styles.desktopSize : ''}`}
+          style={getDeviceStyle()}
+        >
           {isHtml ? (
             <iframe
               key={refreshKey}
