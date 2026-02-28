@@ -244,7 +244,8 @@ export class ModelManager {
                     const out = data.toString();
                     if (!started) {
                         lastErrorLog = out; // Keep last output for error reporting
-                        if (out.toLowerCase().includes('http server listening') || out.toLowerCase().includes('llama server listening')) {
+                        const lowerOut = out.toLowerCase();
+                        if (lowerOut.includes('http server listening') || lowerOut.includes('llama server listening') || lowerOut.includes('server is listening')) {
                             started = true;
                             clearTimeout(timeout);
                             model.status = 'ready';
@@ -252,7 +253,7 @@ export class ModelManager {
                             this.activeServerId = model.id;
                             this.models.set(model.id, model);
                             resolve({ success: true });
-                        } else if (out.toLowerCase().includes('failed to') || out.toLowerCase().includes('error:')) {
+                        } else if (lowerOut.includes('failed to') || lowerOut.includes('error:')) {
                             // If it explicitly failed early
                             started = true; // prevent timeout
                             clearTimeout(timeout);

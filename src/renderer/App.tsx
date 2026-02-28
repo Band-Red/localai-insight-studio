@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Zap, MessageSquare, LayoutDashboard, Eye,
   Settings as SettingsIcon, ExternalLink,
-  Smartphone, Tablet, Monitor, X, Brain
+  Smartphone, Tablet, Monitor, X, Brain, 
+  Minus, Square, Copy, CheckCircle, AlertTriangle, InfoIcon, Maximize2
 } from 'lucide-react';
 import ChatBox from './components/Chat/ChatBox';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -35,7 +36,18 @@ const App: React.FC = () => {
   const [isChatPreviewOpen, setIsChatPreviewOpen] = useState(false);
   const [chatPreviewCode, setChatPreviewCode] = useState('');
   const [isUpdatingCode, setIsUpdatingCode] = useState(false);
-  const [engineStatus, setEngineStatus] = useState<string | null>(null);
+  
+  // Toast System
+  const [toasts, setToasts] = useState<Array<{ id: number; msg: string; type: 'success' | 'error' | 'warning' }>>([]);
+
+  const addToast = useCallback((msg: string, type: 'success' | 'error' | 'warning' = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, msg, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 8000); // 8 seconds as requested
+  }, []);
+
 
   const handleSplashFinish = useCallback(() => {
     setShowSplash(false);
@@ -52,12 +64,16 @@ const App: React.FC = () => {
     const electron = (window as any).electronAPI;
     if (electron?.onEngineSetupStatus) {
       electron.onEngineSetupStatus((msg: string) => {
-        setEngineStatus(msg);
-        if (msg.includes('بنجاح') || msg.includes('موجود وجاهز')) {
-          setTimeout(() => setEngineStatus(null), 4000);
-        }
+        addToast(msg, msg.includes('فشل') ? 'error' : 'success');
       });
     }
+
+    // Handle global toast requests from children if needed (via window event)
+    const handleGlobalToast = (e: any) => {
+      if (e.detail) addToast(e.detail.msg, e.detail.type);
+    };
+    window.addEventListener('app:toast' as any, handleGlobalToast);
+
 
     setCurrentCode(`
   <html>
@@ -201,8 +217,41 @@ const App: React.FC = () => {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
+  const electron = (window as any).electronAPI;
+
   return (
     <div className={styles.appContainer}>
+      {/* Title Bar - Drag Region & Window Controls */}
+      <div className={styles.titleBar}>
+        <div className={styles.titleText}>
+          <Zap size={14} color="#00ffcc" />
+          <span>LocalAI Insight Studio</span>
+        </div>
+        <div className={styles.windowControls}>
+          <button className={styles.controlBtn} onClick={() => electron?.minimizeWindow()}>
+            <Minus size={14} />
+          </button>
+          <button className={styles.controlBtn} onClick={() => electron?.toggleMaximize()}>
+            <Square size={12} />
+          </button>
+          <button className={`${styles.controlBtn} ${styles.closeBtnControl}`} onClick={() => electron?.closeWindow()}>
+            <X size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* Global Toast Notifications */}
+      <div className={styles.toastList}>
+        {toasts.map(toast => (
+          <div key={toast.id} className={`${styles.toastItem} ${styles[toast.type]}`}>
+            {toast.type === 'success' && <CheckCircle size={18} color="#10b981" />}
+            {toast.type === 'error' && <AlertTriangle size={18} color="#ef4444" />}
+            {toast.type === 'warning' && <InfoIcon size={18} color="#f59e0b" />}
+            <span>{toast.msg}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Sidebar - Side Navigation Panel */}
       <aside className={styles.sidebar}>
         <div className={styles.logoSection}><Zap color="#00ffcc" size={28} /></div>
@@ -235,11 +284,7 @@ const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main className={styles.mainViewport}>
-        {engineStatus && (
-          <div className={styles.engineToast}>
-            <Brain size={16} /> <span>{engineStatus}</span>
-          </div>
-        )}
+
         {activeTab === 'sandbox' ? (
           <div className={styles.sandboxContainer}>
             {/* Sandbox Controls & Actions */}
