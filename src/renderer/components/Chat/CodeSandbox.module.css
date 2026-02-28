@@ -1,10 +1,10 @@
 .codeSandboxContainer {
-    margin: 15px 0;
-    border-radius: 12px;
-    background: #0c0c12;
-    border: 1px solid #1f1f23;
+    margin-block: var(--space-md);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-sidebar);
+    border: 1px solid var(--color-border);
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px hsl(0 0% 0% / 0.3);
     position: relative;
     z-index: 10;
     pointer-events: auto;
@@ -14,9 +14,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 16px;
-    background: #121217;
-    border-bottom: 1px solid #1f1f23;
+    padding: 8px var(--space-sm);
+    background: hsl(var(--h-bg) var(--s-bg) 4%);
+    border-block-end: 1px solid var(--color-border);
     pointer-events: auto;
 }
 
@@ -25,57 +25,57 @@
 }
 
 .codeTitle {
-    font-size: 12px;
-    color: #71717a;
+    font-size: 0.75rem;
+    color: var(--color-text-dim);
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-xs);
 }
 
 .codeActions {
     display: flex;
-    gap: 8px;
+    gap: var(--space-xs);
 }
 
 .actionBtn {
     background: transparent;
     border: none;
-    color: #71717a;
-    cursor: pointer !important;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 11px;
+    color: var(--color-text-dim);
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     transition: all 0.2s;
     pointer-events: auto !important;
 }
 
 .actionBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: hsl(0 0% 100% / 0.05);
     color: #fff;
 }
 
 .runBtn {
-    color: #00ffcc;
-    font-weight: bold;
+    color: var(--color-accent);
+    font-weight: 700;
 }
 
 .runBtn:hover {
-    background: rgba(0, 255, 204, 0.1);
-    color: #00ffcc;
+    background: var(--color-accent-glow);
+    color: var(--color-accent);
 }
 
 .codeContent {
-    padding: 16px;
-    max-height: 300px;
+    padding: var(--space-md);
+    max-block-size: clamp(200px, 30vh, 400px);
     overflow-y: auto;
-    font-family: 'Fira Code', 'Consolas', monospace;
-    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
     line-height: 1.5;
-    background: #050507;
+    background: hsl(var(--h-bg) var(--s-bg) 1%);
     scrollbar-width: none;
     -ms-overflow-style: none;
 }

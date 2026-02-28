@@ -2,7 +2,7 @@
 .sidebar {
   inline-size: var(--sidebar-width);
   background-color: var(--color-bg-sidebar);
-  border-inline-start: 1px solid var(--color-border);
+  border-inline-end: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -46,6 +46,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .navItem:hover,
@@ -54,23 +55,11 @@
   color: var(--color-accent);
 }
 
-.offlineToggle {
-  inline-size: 40px;
-  block-size: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--color-border);
-  background: hsl(240 6% 10%);
-  color: var(--color-accent);
+.sidebarBottom {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.3s;
-}
-
-.offlineToggle.isOffline {
-  color: var(--color-danger);
-  border-color: hsl(0 75% 15%);
-  background: hsl(0 75% 5%);
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-block-start: auto;
 }
 
 /* ── Main content Area ───────────────────────────────────────── */
@@ -95,119 +84,142 @@
   flex-direction: column;
 }
 
-.dashboardScroll {
+/* ── Sandbox & Workspace Layouts ────────────────────────────── */
+.sandboxContainer {
+  display: flex;
+  flex-direction: column;
   block-size: 100%;
-  overflow-y: auto;
-  padding: var(--space-md);
-}
-
-/* ── Dashboard Header ───────────────────────────────────────── */
-.dashHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-block-end: var(--space-md);
-}
-
-.headerTitles h1 {
-  font-size: var(--font-size-lg);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.headerTitles p {
-  color: var(--color-text-dim);
-  margin-block-start: var(--space-xs);
-  font-size: 0.9em;
-}
-
-.autoDocBtn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  background: var(--color-accent);
-  color: var(--color-bg-base);
-  border: none;
-  padding: 0.75em 1.5em;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.autoDocBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px var(--color-accent-glow);
-}
-
-/* ── Stats Grid ─────────────────────────────────────────────── */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(clamp(200px, 15vw, 250px), 1fr));
-  gap: var(--space-md);
-  margin-block-end: var(--space-md);
-}
-
-.statCard {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  padding: var(--space-md);
-  border-radius: var(--radius-lg);
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.statCard:hover {
-  border-color: var(--color-accent);
-  transform: translateY(-2px);
-}
-
-.statHeader {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  color: var(--color-text-dim);
-  font-size: 0.85em;
-  margin-block-end: var(--space-sm);
-}
-
-.statValue {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: #fff;
-  margin-block-end: var(--space-sm);
-}
-
-.miniChart {
-  block-size: 4px;
-  background: var(--color-border);
-  border-radius: 2px;
+  inline-size: 100%;
   overflow: hidden;
 }
 
-.chartFill {
-  block-size: 100%;
-  background: var(--color-accent);
-  transition: inline-size 1s ease-in-out;
-}
-
-/* ── Details Panel ─────────────────────────────────────────── */
-.detailsRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
-  gap: var(--space-md);
-  margin-block-end: var(--space-md);
-}
-
-.detailsPanel {
+.deviceToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
   background: var(--color-bg-sidebar);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
+  border-block-end: 1px solid var(--color-border);
+  z-index: 10;
 }
 
-.detailsPanel h3 {
-  margin-block-end: var(--space-md);
-  font-size: 1rem;
+.sandboxModeSwitcher {
+  display: flex;
+  gap: 2px;
+  background: hsl(var(--h-bg) var(--s-bg) 6%);
+  padding: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.modeBtn {
+  background: transparent;
+  border: none;
   color: var(--color-text-dim);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modeBtn.active {
+  background: var(--color-border);
+  color: var(--color-accent);
+  box-shadow: 0 2px 10px hsl(0 0% 0% / 0.2);
+}
+
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  position: relative;
+}
+
+.inspectLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+}
+
+.inspectToggle {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.inspectToggle.active {
+  background: var(--color-accent-glow);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.externalBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.externalBtn:hover {
+  color: var(--color-accent);
+  background: hsl(0 0% 100% / 0.05);
+}
+
+.browserSelectPopover {
+  position: absolute;
+  inset-block-start: calc(100% + 10px);
+  inset-inline-end: 0;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs);
+  box-shadow: 0 10px 30px hsl(0 0% 0% / 0.5);
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 180px;
+  z-index: 100;
+}
+
+.browserBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-dim);
+  padding: 10px 14px;
+  text-align: right;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.browserBtn:hover {
+  background: hsl(0 0% 100% / 0.05);
+  color: var(--color-text-main);
+}
+
+.viewportContent {
+  flex: 1;
+  inline-size: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.previewContainer {
+  inline-size: 100%;
+  block-size: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Toast Notifications ────────────────────────────────────── */
@@ -258,6 +270,7 @@
   padding: 4px;
   border-radius: 4px;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .toastClose:hover {
@@ -295,6 +308,13 @@
   gap: var(--space-xs);
 }
 
+.appLogoMini {
+  inline-size: 18px;
+  block-size: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px var(--color-accent-glow));
+}
+
 .windowControls {
   display: flex;
   gap: 4px;
@@ -312,6 +332,7 @@
   color: var(--color-text-dim);
   border-radius: 6px;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .controlBtn:hover {

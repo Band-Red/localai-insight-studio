@@ -1,30 +1,31 @@
 .chatSplitContainer {
     display: flex;
-    height: 100%;
-    width: 100%;
+    block-size: 100%;
+    inline-size: 100%;
+    overflow: hidden;
 }
 
 .chatSide {
     flex: 1;
-    min-width: 400px;
-    max-width: 100%;
+    min-inline-size: 400px;
     display: flex;
     flex-direction: column;
-    transition: flex 0.3s ease;
+    transition: flex 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--color-bg-base);
 }
 
 .chatSide.withPreview {
     flex: 0.55;
-    border-left: 1px solid #1f1f23;
+    border-inline-end: 1px solid var(--color-border);
 }
 
 .previewSide {
     flex: 0.45;
-    background: #050507;
+    background: var(--color-bg-base);
     display: flex;
     flex-direction: column;
     position: relative;
-    animation: slideLeft 0.3s ease-out;
+    animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: auto;
 }
 
@@ -32,34 +33,38 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background: #0c0c12;
-    border-bottom: 1px solid #1f1f23;
-    font-size: 13px;
-    color: #71717a;
+    padding-inline: var(--space-md);
+    padding-block: 10px;
+    background: var(--color-bg-sidebar);
+    border-block-end: 1px solid var(--color-border);
+    font-size: 0.8rem;
+    color: var(--color-text-dim);
+    font-weight: 600;
 }
 
 .closePreviewBtn {
     background: transparent;
     border: none;
-    color: #71717a;
+    color: var(--color-text-dim);
     cursor: pointer !important;
-    padding: 4px;
-    border-radius: 4px;
-    pointer-events: auto !important;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
 .closePreviewBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #ef4444;
+    background: hsl(0 75% 50% / 0.1);
+    color: var(--color-danger);
 }
 
-@keyframes slideLeft {
+@keyframes slideIn {
     from {
-        transform: translateX(50px);
+        transform: translateX(30px);
         opacity: 0;
     }
-
     to {
         transform: translateX(0);
         opacity: 1;
@@ -67,33 +72,32 @@
 }
 
 /* ── Responsive Optimization ─────────────────────────────────── */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
     .chatSplitContainer {
         flex-direction: column;
     }
 
     .chatSide {
-        min-width: 100%;
+        min-inline-size: 100%;
     }
 
     .chatSide.withPreview {
         flex: 1;
-        border-left: none;
-        border-bottom: 1px solid #1f1f23;
+        border-inline-end: none;
+        border-block-end: 1px solid var(--color-border);
     }
 
     .previewSide {
         flex: 1;
-        animation: slideUp 0.3s ease-out;
+        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 }
 
 @keyframes slideUp {
     from {
-        transform: translateY(50px);
+        transform: translateY(30px);
         opacity: 0;
     }
-
     to {
         transform: translateY(0);
         opacity: 1;
@@ -101,18 +105,10 @@
 }
 
 /* ── Large Screen Optimization ─────────────────────────────────── */
-@media (min-width: 1440px) {
-    .chatSide {
-        max-width: 100%;
-        margin: 0;
-    }
-
+@media (min-width: 1600px) {
     .chatSide.withPreview {
-        max-width: 100%;
-        margin: 0;
         flex: 0.5;
     }
-
     .previewSide {
         flex: 0.5;
     }
