@@ -1,0 +1,23 @@
+# Verification and Audit Task List
+
+- [x] UI Component Audit
+    - [x] [ModelManager](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/renderer/components/Models/ModelManager.tsx#38-298): Check model drag-drop, selects, and buttons
+    - [x] [ChatBox](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/renderer/components/Chat/ChatBox.tsx#20-250): Verify message sending, attachments, and export
+        - [x] Fix: [handleAttach](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/renderer/components/Chat/ChatBox.tsx#125-143) should use [selectFolder](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/main/preload.ts#31-33) for RAG indexing
+    - [x] [Settings](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/renderer/components/Settings/Settings.tsx#13-167): Test all inputs, selects, and folder browse buttons
+    - [x] [Dashboard](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/renderer/components/Dashboard/Dashboard.tsx#22-186): Check stats correctness and refresh
+    - [x] `Previewer/Emulator`: Verify code preview, source view, and visual inspector
+- [x] Backend Integration Verification
+    - [x] Check all IPC Handlers in [main.ts](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/main/main.ts) and [preload.ts](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/main/preload.ts)
+    - [x] Verify error handling for failed IPC calls
+- [x] Architectural & Security Compliance
+    - [x] Confirm "Offline-First" behavior (no unauthorized external calls)
+    - [x] Verify folder permissions and `bin` folder integrity (Fixed earlier)
+    - [x] Check that no sensitive data is leaked or sent externally
+- [x] Final Fixes and Polishing
+    - [x] Apply fixes:
+        - [x] [ChatBox](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/renderer/components/Chat/ChatBox.tsx#20-250): Fix attachment indexing logic
+        - [x] [ModelParameters](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/renderer/components/Models/ModelParameters.tsx#75-225): Populate draft model list
+        - [x] [main.ts](file:///c:/Users/FAHAD/Desktop/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%D8%B9%20AI/localai-insight-studio/src/main/main.ts): Ensure `python` command fallback for metrics if `python3` is standard
+        - [x] [ChatBox](file:///c:/Users/FAHAD/Desktop/مشاريع AI/localai-insight-studio/src/renderer/components/Chat/ChatBox.tsx): Fix response formatting using `react-markdown` and `remark-gfm`
+    - [x] Update documentation and walkthrough

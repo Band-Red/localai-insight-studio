@@ -1,8 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History, Plus, Edit2, Check, X } from 'lucide-react';
+import MarkdownIt from 'markdown-it';
 import CodeSandbox from './CodeSandbox';
 import ConfirmModal from '../UI/ConfirmModal';
 import styles from './ChatBox.module.css';
+
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true
+});
+
+// Adding custom rule for lists to match project direction if needed, 
+// but default markdown-it handles * and - well.
 
 interface Message {
   id: string;
@@ -165,7 +175,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   };
 
   const renderMessageText = (text: string) => {
-    // تقطيع النص للبحث عن كود ماركداون
+    // Split by markdown code blocks to handle CodeSandbox separately
     const parts = text.split(/(```[\s\S]*?```)/g);
     return parts.map((part, index) => {
       if (part.startsWith('```') && part.endsWith('```')) {
@@ -181,10 +191,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           />
         );
       }
+      
+      // Render general markdown for text parts (lists, bold, etc.)
+      const html = md.render(part);
       return (
-        <div key={index} className={styles.messageText}>
-          {part}
-        </div>
+        <div 
+          key={index} 
+          className={styles.markdownContent}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       );
     });
   };

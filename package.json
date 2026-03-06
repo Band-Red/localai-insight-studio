@@ -42,6 +42,10 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "src/main/python_engine.py",
+        "to": "python_engine.py"
       }
     ]
   },
@@ -60,17 +64,19 @@
     "chokidar": "^3.5.3",
     "dotenv": "^17.3.1",
     "lucide-react": "^0.284.0",
+    "markdown-it": "^14.1.1",
     "pdf-parse": "^1.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "recharts": "^3.7.0"
   },
   "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "concurrently": "^8.2.1",
     "css-loader": "^6.8.1",
-    "electron": "^26.2.1",
+    "electron": "^40.8.0",
     "electron-builder": "^26.8.1",
     "html-webpack-plugin": "^5.6.6",
     "style-loader": "^3.3.3",
