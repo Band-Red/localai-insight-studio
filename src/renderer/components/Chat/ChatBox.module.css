@@ -185,14 +185,14 @@
 .markdownContent {
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  line-height: 1.6;
-  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  word-break: break-word;
 }
 
 .user .markdownContent {
   background: hsl(var(--h-bg) var(--s-bg) 8%);
-  color: #fff;
+  color: #fafafa;
   border-start-end-radius: 2px;
   border: 1px solid var(--color-border);
 }
@@ -200,46 +200,43 @@
 .ai .markdownContent {
   background: hsl(var(--h-bg) var(--s-bg) 4%);
   border: 1px solid var(--color-border);
-  color: hsl(240 5% 90%);
+  color: #e4e4e7;
   border-start-start-radius: 2px;
 }
 
+/* Markdown Specific Styles */
 .markdownContent p {
-  margin-bottom: 1rem;
+  margin-block-end: 1rem;
 }
 
 .markdownContent p:last-child {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .markdownContent ul, .markdownContent ol {
-  margin-bottom: 1rem;
-  padding-right: 1.5rem;
+  margin-block-end: 1rem;
+  padding-inline-start: 1.5rem;
 }
 
 .markdownContent li {
-  margin-bottom: 0.25rem;
+  margin-block-end: 0.5rem;
 }
 
-.markdownContent h1,
-.markdownContent h2,
-.markdownContent h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
+.markdownContent h1, .markdownContent h2, .markdownContent h3 {
   color: var(--color-accent);
+  margin-block: 1.2rem 0.8rem;
+  font-weight: 700;
 }
-
-.markdownContent h1 { font-size: 1.3rem; }
-.markdownContent h2 { font-size: 1.15rem; }
-.markdownContent h3 { font-size: 1rem; }
 
 .markdownContent code:not(pre code) {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-accent-glow);
+  color: var(--color-accent);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
-  font-family: monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85em;
 }
+
 
 .messageTime {
   display: flex;

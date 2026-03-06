@@ -42,10 +42,6 @@
         "filter": [
           "**/*"
         ]
-      },
-      {
-        "from": "src/main/python_engine.py",
-        "to": "python_engine.py"
       }
     ]
   },
@@ -76,7 +72,7 @@
     "@types/react-dom": "^19.2.3",
     "concurrently": "^8.2.1",
     "css-loader": "^6.8.1",
-    "electron": "^40.8.0",
+    "electron": "^26.2.1",
     "electron-builder": "^26.8.1",
     "html-webpack-plugin": "^5.6.6",
     "style-loader": "^3.3.3",
