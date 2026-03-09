@@ -136,6 +136,7 @@ class MainApp {
         ipcMain.handle('gguf:list', () => this.modelManager.listModels());
 
         ipcMain.handle('gguf:remove', (_e, id: string) => this.modelManager.removeModel(id));
+        ipcMain.handle('gguf:permanently-delete', (_e, id: string) => this.modelManager.permanentlyDeleteModel(id));
         ipcMain.handle('gguf:update-model', (_e, id: string, updates: any) => this.modelManager.updateModel(id, updates));
 
         ipcMain.handle('gguf:start-server', async (_e, config) =>

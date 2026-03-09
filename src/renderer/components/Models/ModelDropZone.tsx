@@ -25,7 +25,13 @@ const ModelDropZone: React.FC<ModelDropZoneProps> = ({ onModelAdded, disabled = 
             const result = await electron.registerGgufPath(filePath);
             if (!result.success) {
                 setError(result.error || 'فشل في إضافة النموذج');
+                window.dispatchEvent(new CustomEvent('app:toast', { 
+                    detail: { msg: `❌ فشل إضافة النموذج: ${result.error || 'خطأ غير معروف'}`, type: 'error' } 
+                }));
             } else {
+                window.dispatchEvent(new CustomEvent('app:toast', { 
+                    detail: { msg: '✅ تم إضافة النموذج ونسخه إلى مجلد التخزين بنجاح', type: 'success' } 
+                }));
                 onModelAdded();
             }
         }
@@ -48,7 +54,6 @@ const ModelDropZone: React.FC<ModelDropZoneProps> = ({ onModelAdded, disabled = 
     };
 
     const handleClickZone = async () => {
-        console.log('ModelDropZone clicked');
         if (disabled || isLoading) return;
 
         setError(null);
@@ -57,9 +62,15 @@ const ModelDropZone: React.FC<ModelDropZoneProps> = ({ onModelAdded, disabled = 
             setIsLoading(true);
             const result = await electron.selectGgufFile();
             if (result.success) {
+                window.dispatchEvent(new CustomEvent('app:toast', { 
+                    detail: { msg: '✅ تم إضافة النموذج ونسخه إلى مجلد التخزين بنجاح', type: 'success' } 
+                }));
                 onModelAdded();
             } else if (result.error && result.error !== 'Cancelled') {
                 setError(result.error);
+                window.dispatchEvent(new CustomEvent('app:toast', { 
+                    detail: { msg: `❌ فشل إضافة النموذج: ${result.error}`, type: 'error' } 
+                }));
             }
             setIsLoading(false);
         }

@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     registerGgufPath: (filePath: string) => ipcRenderer.invoke('gguf:register-path', filePath),
     listModels: () => ipcRenderer.invoke('gguf:list'),
     removeModel: (id: string) => ipcRenderer.invoke('gguf:remove', id),
+    permanentlyDeleteModel: (id: string) => ipcRenderer.invoke('gguf:permanently-delete', id),
     updateGgufModel: (id: string, updates: any) => ipcRenderer.invoke('gguf:update-model', id, updates),
     onServerStopped: (callback: (modelId: string) => void) => {
         ipcRenderer.removeAllListeners('gguf:server-stopped');

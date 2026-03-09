@@ -12,6 +12,7 @@ import ServerConfig, { ServerConfigValues, defaultServerConfig } from './ServerC
 import ModelParameters, { ModelParamValues, defaultModelParams } from './ModelParameters';
 import QuantizationSelector from './QuantizationSelector';
 import McpConfig from './McpConfig';
+import ConfirmModal from '../UI/ConfirmModal';
 
 type Tab = 'library' | 'server' | 'params' | 'mcp';
 
@@ -65,6 +66,8 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
     const [restartNeeded, setRestartNeeded] = useState(false);
     // حالة جديدة لتتبع النموذج المختار حالياً لضبط الكميّة قبل التشغيل
     const [selectedModelForSetup, setSelectedModelForSetup] = useState<string | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [modelToDelete, setModelToDelete] = useState<string | null>(null);
 
     /**
      * تحديث قائمة النماذج المتاحة من المجلد المحلي عبر Electron
@@ -177,14 +180,49 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
         await refreshModels();
     };
 
-    const handleDelete = async (id: string) => {
+    /**
+     * إظهار نافذة تأكيد الحذف
+     */
+    const handleDelete = (id: string) => {
+        setModelToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    /**
+     * تنفيذ الحذف النهائي للملف والسجل
+     */
+    const handleConfirmDelete = async () => {
+        if (!modelToDelete) return;
+        
+        setIsDeleteModalOpen(false);
         const electron = (window as any).electronAPI;
-        if (electron?.removeModel) await electron.removeModel(id);
-        if (id === activeModelId) {
-            setActiveModelId(null);
-            onActiveModelChange?.(null);
+        
+        try {
+            const result = await electron?.permanentlyDeleteModel(modelToDelete);
+            
+            if (result?.success) {
+                window.dispatchEvent(new CustomEvent('app:toast', { 
+                    detail: { msg: '✅ تم حذف ملف النموذج نهائياً من الجهاز بنجاح', type: 'success' } 
+                }));
+                
+                if (modelToDelete === activeModelId) {
+                    setActiveModelId(null);
+                    onActiveModelChange?.(null);
+                }
+                
+                await refreshModels();
+            } else {
+                window.dispatchEvent(new CustomEvent('app:toast', { 
+                    detail: { msg: `❌ فشل حذف الملف: ${result?.error || 'حدث خطأ غير معروف'}`, type: 'error' } 
+                }));
+            }
+        } catch (err: any) {
+            window.dispatchEvent(new CustomEvent('app:toast', { 
+                detail: { msg: `❌ خطأ في النظام: ${err.message}`, type: 'error' } 
+            }));
+        } finally {
+            setModelToDelete(null);
         }
-        await refreshModels();
     };
 
     const handleSaveAll = async () => {
@@ -368,6 +406,18 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                 </div>
             )}
 
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                title="تأكيد الحذف النهائي"
+                message="هل أنت متأكد من حذف ملف النموذج نهائياً من جهازك؟ لا يمكن التراجع عن هذه العملية."
+                confirmText="حذف نهائي"
+                cancelText="إلغاء"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => {
+                    setIsDeleteModalOpen(false);
+                    setModelToDelete(null);
+                }}
+            />
         </div>
     );
 };
