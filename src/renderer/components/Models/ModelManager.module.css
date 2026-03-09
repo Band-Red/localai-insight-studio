@@ -93,9 +93,17 @@
 /* ── Generic Card ────────────────────────────────────────────── */
 .card {
     background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
+    border: none;
+    outline: none;
     border-radius: var(--radius-lg);
     padding: var(--space-md);
+}
+
+.card:focus,
+.card:focus-within,
+.card:focus-visible {
+    outline: none;
+    border: none;
 }
 
 .cardWithMargin {
@@ -154,8 +162,16 @@
 }
 
 .highlightCard {
-  border: 1px solid #00C4A7;
+  border: none;
+  outline: none;
   animation: pulse-glow 2s infinite ease-in-out;
+}
+
+.highlightCard:focus,
+.highlightCard:focus-within,
+.highlightCard:focus-visible {
+  outline: none;
+  border: none;
 }
 
 @keyframes pulse-glow {
