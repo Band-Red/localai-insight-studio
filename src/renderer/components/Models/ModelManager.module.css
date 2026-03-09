@@ -487,6 +487,11 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 12vw, 150px), 1fr));
     gap: var(--space-xs);
+    outline: none;
+}
+
+.quantGrid:focus, .quantGrid:focus-within, .quantGrid:focus-visible {
+    outline: none;
 }
 
 .quantOption {
@@ -495,14 +500,37 @@
     border-radius: var(--radius-md);
     padding: var(--space-sm);
     text-align: center;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     cursor: pointer;
+    outline: none;
 }
 
-.quantOption:hover { border-color: hsl(240 5% 30%); }
-.quantOptionSelected { border-color: var(--color-accent); background: var(--color-accent-glow); }
-.quantName { font-size: 0.8rem; font-weight: 700; }
-.quantMeta { font-size: 0.7rem; color: var(--color-text-dim); margin-block-start: 4px; }
+.quantOption:focus, .quantOption:focus-within, .quantOption:focus-visible {
+    outline: none;
+}
+
+.quantOption:hover { 
+    border-color: #00C4A7; 
+    box-shadow: 0 0 10px rgba(0, 196, 167, 0.1);
+}
+
+.quantOptionSelected { 
+    border-color: #00C4A7; 
+    background: rgba(0, 196, 167, 0.15); 
+    box-shadow: 0 0 15px rgba(0, 196, 167, 0.2);
+}
+
+.quantName { 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    color: #FFFFFF; /* نص العناوين - تباين عالٍ للقراءة السريعة */
+}
+
+.quantMeta { 
+    font-size: 0.7rem; 
+    color: #9CA3AF; /* نص التفاصيل - لتقليل الضجيج البصري */
+    margin-block-start: 4px; 
+}
 
 /* ── Sliders ─────────────────────────────────────────────────── */
 .sliderRow { display: flex; align-items: center; gap: var(--space-sm); }
