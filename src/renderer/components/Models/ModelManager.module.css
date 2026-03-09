@@ -141,8 +141,97 @@
 }
 
 .dropTitle {
-    font-size: 0.9rem;
-    font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+/* ── Mandatory Quantization Selection Flow ────────────────── */
+.modelItemSelected {
+  border-color: var(--color-accent);
+  background: hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.05);
+  box-shadow: 0 0 15px var(--color-accent-glow);
+}
+
+.highlightCard {
+  border: 1px solid var(--color-accent);
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 5px var(--color-accent-glow); }
+  50% { box-shadow: 0 0 20px var(--color-accent-glow); }
+  100% { box-shadow: 0 0 5px var(--color-accent-glow); }
+}
+
+.mandatoryBadge {
+  font-size: 0.7rem;
+  background: var(--color-accent);
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-inline-start: 10px;
+  font-weight: bold;
+}
+
+.startActionContainer {
+  margin-block-start: var(--space-md);
+  padding-block-start: var(--space-md);
+  border-block-start: 1px solid var(--color-border);
+  display: flex;
+  justify-content: center;
+}
+
+.btnPrimaryFull {
+  inline-size: 100%;
+  background: linear-gradient(135deg, var(--color-accent) 0%, hsl(var(--h-cyan) var(--s-cyan) 60%) 100%);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.btnPrimaryFull:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px var(--color-accent-glow);
+  filter: brightness(1.1);
+}
+
+.btnConfig {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btnConfig:hover, .btnConfigActive {
+  background: var(--color-border);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.badgeDanger {
+  background: hsl(0 75% 15% / 0.5);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
 }
 
 .dropSubtitle {
@@ -193,7 +282,7 @@
 }
 
 .modelItemActive {
-    border-color: var(--color-accent) !important;
+    border-color: var(--color-accent);
     background: hsl(var(--h-bg) var(--s-bg) 6%);
 }
 

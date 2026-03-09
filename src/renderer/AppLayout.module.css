@@ -15,12 +15,53 @@
 }
 
 .chatSide.withPreview {
-    flex: 0.55;
+    /* Set min/max directly by panel props, but let's remove strict flex values to let resizable handle it */
     border-inline-end: 1px solid var(--color-border);
 }
 
+.resizeHandle {
+    flex: 0 0 8px;
+    position: relative;
+    outline: none;
+    background-color: var(--color-bg-base);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+[data-panel-group-direction="vertical"] > * > .resizeHandle,
+[data-panel-group-direction="vertical"] .resizeHandle {
+    cursor: row-resize;
+}
+
+[data-panel-group-direction="horizontal"] > * > .resizeHandle,
+[data-panel-group-direction="horizontal"] .resizeHandle {
+    cursor: col-resize;
+}
+
+.resizeHandleInner {
+    background-color: var(--color-border);
+    border-radius: 4px;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-panel-group-direction="horizontal"] .resizeHandleInner {
+    height: 30px;
+    width: 2px;
+}
+
+[data-panel-group-direction="vertical"] .resizeHandleInner {
+    width: 30px;
+    height: 2px;
+}
+
+.resizeHandle:hover .resizeHandleInner,
+.resizeHandle[data-resize-handle-active] .resizeHandleInner {
+    background-color: var(--color-accent);
+}
+
 .previewSide {
-    flex: 0.45;
     background: var(--color-bg-base);
     display: flex;
     flex-direction: column;

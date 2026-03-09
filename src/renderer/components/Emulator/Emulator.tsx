@@ -100,26 +100,30 @@ const Emulator: React.FC<EmulatorProps> = ({ code = "" }) => {
           <button
             onClick={() => setDeviceKey('iphone')}
             className={`${styles.deviceButton} ${deviceKey === 'iphone' ? styles.activeButton : ''}`}
+            title="iPhone"
           >
-            <Smartphone size={16} /> iPhone
+            <Smartphone size={16} /> <span className={styles.btnText}>iPhone</span>
           </button>
           <button
             onClick={() => setDeviceKey('samsung')}
             className={`${styles.deviceButton} ${deviceKey === 'samsung' ? styles.activeButton : ''}`}
+            title="Samsung"
           >
-            <Smartphone size={16} /> Samsung
+            <Smartphone size={16} /> <span className={styles.btnText}>Samsung</span>
           </button>
           <button
             onClick={() => setDeviceKey('tablet')}
             className={`${styles.deviceButton} ${deviceKey === 'tablet' ? styles.activeButton : ''}`}
+            title="Tablet"
           >
-            <Tablet size={16} /> Tablet
+            <Tablet size={16} /> <span className={styles.btnText}>Tablet</span>
           </button>
           <button
             onClick={() => setDeviceKey('desktop')}
             className={`${styles.deviceButton} ${deviceKey === 'desktop' ? styles.activeButton : ''}`}
+            title="Desktop"
           >
-            <Monitor size={16} /> Desktop
+            <Monitor size={16} /> <span className={styles.btnText}>Desktop</span>
           </button>
         </div>
 

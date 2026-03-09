@@ -2,8 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { app } from 'electron';
 
-const LOGS_DIR = path.join(app.getPath('userData'), 'logs');
-
 export interface LogEntry {
     timestamp: string;
     event: string;
@@ -17,6 +15,7 @@ export class LoggerManager {
     private logFilePath: string;
 
     constructor() {
+        const LOGS_DIR = path.join(app.getPath('userData'), 'logs');
         if (!fs.existsSync(LOGS_DIR)) {
             fs.mkdirSync(LOGS_DIR, { recursive: true });
         }

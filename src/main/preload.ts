@@ -1,10 +1,15 @@
+/**
+ * ملف ما قبل التحميل (Preload Script)
+ * الوظيفة: يعمل كجسر آمن (Bridge) بين عمليات المتصفح (Renderer) وعمليات النظام (Main).
+ * يستخدم contextBridge لتعريض دوال محدودة وآمنة لواجهة المستخدم.
+ */
 import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    // وظائف المراقبة
+    // وظائف المراقبة وجلب إحصائيات النظام
     getSystemStats: () => ipcRenderer.invoke('system:stats'),
 
-    // وظائف النماذج القديمة (Ollama)
+    // وظائف التعامل مع نماذج Ollama والدردشة
     checkModelStatus: () => ipcRenderer.invoke('model:status'),
     sendMessage: (message: string, model?: string) => ipcRenderer.invoke('chat:send', message, model),
     loadChatHistory: () => ipcRenderer.invoke('chat:load-history'),
@@ -27,6 +32,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     // إعدادات المحرك
     onEngineSetupStatus: (callback: (msg: string) => void) => {
+        ipcRenderer.removeAllListeners('engine:setup-status');
         ipcRenderer.on('engine:setup-status', (_e, msg) => callback(msg));
     },
 
@@ -47,6 +53,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     removeModel: (id: string) => ipcRenderer.invoke('gguf:remove', id),
     updateGgufModel: (id: string, updates: any) => ipcRenderer.invoke('gguf:update-model', id, updates),
     onServerStopped: (callback: (modelId: string) => void) => {
+        ipcRenderer.removeAllListeners('gguf:server-stopped');
         ipcRenderer.on('gguf:server-stopped', (_e, modelId) => callback(modelId));
     },
     startServer: (config: any) => ipcRenderer.invoke('gguf:start-server', config),
@@ -56,6 +63,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     generateApiKey: () => ipcRenderer.invoke('gguf:generate-api-key'),
     loadMcpConfig: () => ipcRenderer.invoke('gguf:load-mcp'),
     saveMcpConfig: (content: string) => ipcRenderer.invoke('gguf:save-mcp', content),
+    getActiveModel: () => ipcRenderer.invoke('gguf:get-active'),
 
     // Window Controls
     minimizeWindow: () => ipcRenderer.invoke('window:minimize'),

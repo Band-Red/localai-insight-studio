@@ -60,12 +60,14 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  transition: transform 0.2s, border-color 0.2s;
+  transition: transform 0.2s;
 }
 
 .statCard:hover {
   transform: translateY(-4px);
-  border-color: var(--color-accent);
+  border-color: var(--color-border) !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .statIcon {
@@ -117,6 +119,12 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-md);
+  transition: transform 0.2s;
+}
+
+.chartBox:hover {
+  border-color: var(--color-border) !important;
+  outline: none !important;
 }
 
 .chartBox h4 {
@@ -217,32 +225,4 @@
   font-weight: bold;
 }
 
-.healthBar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-block-end: var(--space-md);
-  padding: 10px;
-  background: hsl(0 0% 100% / 0.02);
-  border-radius: var(--radius-sm);
-}
 
-.healthDot {
-  inline-size: 12px;
-  block-size: 12px;
-  border-radius: 50%;
-  transition: all 0.3s;
-}
-
-.healthDot.healthy { background-color: var(--color-success); box-shadow: 0 0 10px var(--color-success); }
-.healthDot.warning { background-color: var(--color-warning); box-shadow: 0 0 10px var(--color-warning); }
-.healthDot.critical { background-color: var(--color-danger); box-shadow: 0 0 10px var(--color-danger); }
-
-.healthLabel {
-  font-size: 0.9rem;
-  font-weight: bold;
-}
-
-.alertItem.healthy, .alertItem.success { border-color: hsl(150 70% 20%); background: hsl(150 70% 5% / 0.5); }
-.alertItem.warning { border-color: hsl(40 70% 20%); background: hsl(40 70% 5% / 0.5); }
-.alertItem.critical, .alertItem.error { border-color: hsl(0 75% 15%); background: hsl(0 75% 5% / 0.5); }

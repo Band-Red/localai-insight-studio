@@ -227,29 +227,39 @@
 /* ── Toast Notifications ────────────────────────────────────── */
 .toastList {
   position: fixed;
-  inset-block-start: 60px;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+  bottom: clamp(1rem, 2vh, 2rem);
+  left: clamp(1rem, 2vw, 2rem);
   display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  flex-direction: column-reverse; /* تظهر التنبيهات الجديدة فوق القديمة عند البدء من الأسفل */
+  gap: var(--space-xs);
   z-index: 11000;
+  pointer-events: none; /* للسماح بالنقر خلف الحاوية إذا كانت فارغة */
 }
 
 .toastItem {
-  background: hsl(var(--h-bg) var(--s-bg) 6% / 0.95);
+  pointer-events: auto;
+  background: hsl(var(--h-bg) var(--s-bg) 6% / 0.9);
   backdrop-filter: blur(20px);
   border: 1px solid var(--color-border);
-  padding-inline: var(--space-md);
-  padding-block: 0.75rem;
+  padding: 12px 16px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  box-shadow: 0 20px 50px hsl(0 0% 0% / 0.6);
-  animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  min-inline-size: min(90vw, 350px);
+  box-shadow: 0 10px 30px hsl(0 0% 0% / 0.5);
+  animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-inline-size: 320px;
+  max-inline-size: 450px;
   direction: rtl;
+  overflow: hidden;
+  position: relative;
+}
+
+.toastContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
 }
 
 .toastItem.error { border-inline-start: 4px solid var(--color-danger); }
@@ -281,8 +291,28 @@
 }
 
 @keyframes toastIn {
-  from { transform: translate(-50%, -30px); opacity: 0; scale: 0.95; }
-  to { transform: translate(-50%, 0); opacity: 1; scale: 1; }
+  from { transform: translateY(-30px); opacity: 0; scale: 0.95; }
+  to { transform: translateY(0); opacity: 1; scale: 1; }
+}
+
+.toastProgress {
+  position: absolute;
+  block-size: 3px;
+  inline-size: 100%;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  background: var(--color-accent);
+  transform-origin: right;
+  animation: toastProgressAnim 5s linear forwards;
+}
+
+.progress_success { background: var(--color-success); }
+.progress_error { background: var(--color-danger); }
+.progress_warning { background: var(--color-warning); }
+
+@keyframes toastProgressAnim {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
 
 /* ── Window Controls ────────────────────────────────────────── */
