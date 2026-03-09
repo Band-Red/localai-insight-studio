@@ -8,6 +8,8 @@
     color: var(--color-text-main);
     overflow: hidden;
     direction: rtl;
+    container-type: inline-size;
+    container-name: emulator;
 }
 
 .toolbar {
@@ -18,11 +20,19 @@
     background-color: var(--color-bg-sidebar);
     border-block-end: 1px solid var(--color-border);
     z-index: 10;
+    flex-wrap: nowrap;
+    gap: var(--space-sm);
 }
 
 .deviceSelectors {
     display: flex;
     gap: var(--space-xs);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+}
+.deviceSelectors::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
 }
 
 .deviceButton {
@@ -50,9 +60,14 @@
     box-shadow: 0 0 15px var(--color-accent-glow);
 }
 
+.btnText {
+    display: inline;
+}
+
 .actionButtons {
     display: flex;
     gap: var(--space-sm);
+    flex-shrink: 0;
 }
 
 .iconButton {
@@ -127,4 +142,20 @@
 
 .desktopSize::before {
     display: none;
+}
+
+/* ── Container Queries: Responsive within Emulator Splitter ── */
+@container emulator (max-width: 550px) {
+    .btnText {
+        display: none; /* إخفاء النص عند صغر المساحة */
+    }
+    
+    .deviceButton {
+        padding: 8px; /* تقليص الحشوة لتكون الأزرار مربعة */
+        justify-content: center;
+    }
+    
+    .toolbar {
+        padding: var(--space-sm);
+    }
 }

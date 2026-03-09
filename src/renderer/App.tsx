@@ -1,3 +1,8 @@
+/**
+ * المكون الرئيسي: App
+ * الوظيفة: يمثل الحاوية الأساسية للتطبيق، يدير التنقل (Tabs)، الإشعارات العالمية، وحالة النظام بشكل عام.
+ * الهيكل: يتكون من شريط جانبي (Sidebar)، شريط علوي (TitleBar)، ومنطقة محتوى متغيرة.
+ */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Zap, MessageSquare, LayoutDashboard, Eye,
@@ -13,6 +18,7 @@ import Previewer from './components/Previewer/Previewer';
 import Settings from './components/Settings/Settings';
 import VisualEditorOverlay from './components/Emulator/VisualEditorOverlay';
 import ModelManager from './components/Models/ModelManager';
+import { Panel, Group, Separator } from 'react-resizable-panels';
 
 import appLogo from '@/assets/logo.png';
 import styles from './App.module.css';
@@ -37,6 +43,7 @@ const App: React.FC = () => {
   const [isChatPreviewOpen, setIsChatPreviewOpen] = useState(false);
   const [chatPreviewCode, setChatPreviewCode] = useState('');
   const [isUpdatingCode, setIsUpdatingCode] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   
   // Toast System
   const [toasts, setToasts] = useState<Array<{ id: number; msg: string; type: 'success' | 'error' | 'warning' }>>([]);
@@ -45,12 +52,25 @@ const App: React.FC = () => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
+  /**
+   * إضافة تنبيه (Toast) جديد مع نظام حماية من التكرار وطابور ذكي
+   */
   const addToast = useCallback((msg: string, type: 'success' | 'error' | 'warning' = 'success') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, msg, type }]);
-    setTimeout(() => {
-      removeToast(id);
-    }, 8000); 
+    setToasts(prev => {
+      // منع تكرار نفس الرسالة والنوع إذا كانت موجودة بالفعل (Anti-Duplication)
+      const isDuplicate = prev.some(t => t.msg === msg && t.type === type);
+      if (isDuplicate) return prev;
+
+      const id = Date.now();
+      // تحديث مصفوفة التنبيهات وإضافة مؤقت الحذف التلقائي بعد 5 ثوانٍ
+      const newToasts = [...prev, { id, msg, type }];
+      
+      setTimeout(() => {
+        removeToast(id);
+      }, 5000); // تقليص المدة لـ 5 ثوانٍ لتحسين تجربة المستخدم
+
+      return newToasts;
+    });
   }, [removeToast]);
 
 
@@ -58,6 +78,9 @@ const App: React.FC = () => {
     setShowSplash(false);
   }, []);
 
+  /**
+   * إعدادات المستمعين للأحداث (Event Listeners) العالمية عند تشغيل التطبيق
+   */
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'ELEMENT_INSPECTED') {
@@ -68,13 +91,28 @@ const App: React.FC = () => {
 
     const electron = (window as any).electronAPI;
     if (electron?.onEngineSetupStatus) {
+        // الاستماع لحالة إعداد المحرك (Ollama/Python)
       electron.onEngineSetupStatus((msg: string) => {
         addToast(msg, msg.includes('فشل') ? 'error' : 'success');
       });
+      // التعامل مع توقف الخادم المفاجئ
       electron.onServerStopped(() => {
         setActiveModelName(null);
         addToast('⚠️ توقف خادم النموذج المحلي بشكل مفاجئ. قد يكون بسبب نقص في موارد النظام (RAM/VRAM).', 'warning');
       });
+      
+      // مزامنة النموذج النشط حالياً من العمليات الخلفية لضمان ثبات الحالة
+      const syncActiveModel = async () => {
+        if (electron.getActiveModel) {
+          const active = await electron.getActiveModel();
+          if (active && active.id && electron.listModels) {
+            const list = await electron.listModels();
+            const m = (list || []).find((model: any) => model.id === active.id);
+            if (m) setActiveModelName(m.name);
+          }
+        }
+      };
+      syncActiveModel();
     }
 
     // Handle global toast requests from children if needed (via window event)
@@ -99,7 +137,14 @@ const App: React.FC = () => {
   </html>
   `);
 
-    return () => window.removeEventListener('message', handleMessage);
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('app:toast' as any, handleGlobalToast);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const [showBrowserOptions, setShowBrowserOptions] = useState(false);
@@ -249,17 +294,21 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Global Toast Notifications */}
+      {/* نظام التنبيهات العالمي مع شريط التقدم والحد الأقصى (3 تنبيهات) */}
       <div className={styles.toastList}>
-        {toasts.map(toast => (
+        {toasts.slice(0, 3).map(toast => (
           <div key={toast.id} className={`${styles.toastItem} ${styles[toast.type]}`}>
-            {toast.type === 'success' && <CheckCircle size={18} color="#10b981" />}
-            {toast.type === 'error' && <AlertTriangle size={18} color="#ef4444" />}
-            {toast.type === 'warning' && <InfoIcon size={18} color="#f59e0b" />}
-            <span>{toast.msg}</span>
+            <div className={styles.toastContent}>
+              {toast.type === 'success' && <CheckCircle size={18} color="#10b981" />}
+              {toast.type === 'error' && <AlertTriangle size={18} color="#ef4444" />}
+              {toast.type === 'warning' && <InfoIcon size={18} color="#f59e0b" />}
+              <span>{toast.msg}</span>
+            </div>
             <button className={styles.toastClose} onClick={() => removeToast(toast.id)}>
               <X size={14} />
             </button>
+            {/* شريط تقدم يتناقص بصرياً ليشير لوقت الاختفاء */}
+            <div className={`${styles.toastProgress} ${styles[`progress_${toast.type}`]}`} />
           </div>
         ))}
       </div>
@@ -368,35 +417,50 @@ const App: React.FC = () => {
         ) : activeTab === 'models' ? (
           <ModelManager onActiveModelChange={setActiveModelName} />
         ) : activeTab === 'chat' ? (
-          <div className={layoutStyles.chatSplitContainer}>
-            <div className={`${layoutStyles.chatSide} ${isChatPreviewOpen ? layoutStyles.withPreview : ''}`}>
+          <Group orientation={windowWidth <= 1024 ? "vertical" : "horizontal"} className={layoutStyles.chatSplitContainer}>
+            <Panel 
+              defaultSize={60} 
+              minSize={windowWidth < 500 ? "30%" : "450px"} 
+              collapsible={false}
+              className={`${layoutStyles.chatSide} ${isChatPreviewOpen ? layoutStyles.withPreview : ''}`}
+            >
               <ChatBox
                 onCodeGenerated={(code) => { setCurrentCode(extractCode(code)); }}
                 onRunCode={handleRunInChat}
                 activeModel={activeModelName}
               />
 
-            </div>
+            </Panel>
             {isChatPreviewOpen && (
-              <div className={layoutStyles.previewSide}>
-                <div className={layoutStyles.previewHeader}>
-                  <span>معاينة حية للنظام المولد</span>
-                  <button className={layoutStyles.closePreviewBtn} onClick={() => setIsChatPreviewOpen(false)}>
-                    <X size={16} />
-                  </button>
-                </div>
-                <Emulator code={injectInspector(chatPreviewCode)} />
+              <>
+                <Separator className={layoutStyles.resizeHandle}>
+                  <div className={layoutStyles.resizeHandleInner} />
+                </Separator>
+                <Panel 
+                  defaultSize={40} 
+                  minSize={windowWidth < 600 ? "30%" : "400px"} 
+                  collapsible={false}
+                  className={layoutStyles.previewSide}
+                >
+                  <div className={layoutStyles.previewHeader}>
+                    <span>معاينة حية للنظام المولد</span>
+                    <button className={layoutStyles.closePreviewBtn} onClick={() => setIsChatPreviewOpen(false)}>
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <Emulator code={injectInspector(chatPreviewCode)} />
 
-                {/* Visual Editor Overlay for Chat splitting view */}
-                <VisualEditorOverlay
-                  element={inspectedElement}
-                  onCancel={() => setInspectedElement(null)}
-                  onSubmit={handleVisualEditSubmit}
-                  loading={isUpdatingCode}
-                />
-              </div>
+                  {/* Visual Editor Overlay for Chat splitting view */}
+                  <VisualEditorOverlay
+                    element={inspectedElement}
+                    onCancel={() => setInspectedElement(null)}
+                    onSubmit={handleVisualEditSubmit}
+                    loading={isUpdatingCode}
+                  />
+                </Panel>
+              </>
             )}
-          </div>
+          </Group>
         ) : activeTab === 'dashboard' ? (
           <Dashboard />
         ) : (

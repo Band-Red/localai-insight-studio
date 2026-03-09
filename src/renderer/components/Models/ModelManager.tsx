@@ -1,3 +1,8 @@
+/**
+ * المكون: ModelManager
+ * الوظيفة: الإدارة المركزية لنماذج GGUF، تشمل رفع النماذج، إعداد الخادم، ضبط المعاملات، ومراقبة حالة التشغيل.
+ * المكان: واجهة إدارة النماذج (Model Library).
+ */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Brain, Server, SlidersHorizontal, Code2, Save, RefreshCw } from 'lucide-react';
 import styles from './ModelManager.module.css';
@@ -58,7 +63,12 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'success' | 'error' | null>(null);
     const [restartNeeded, setRestartNeeded] = useState(false);
+    // حالة جديدة لتتبع النموذج المختار حالياً لضبط الكميّة قبل التشغيل
+    const [selectedModelForSetup, setSelectedModelForSetup] = useState<string | null>(null);
 
+    /**
+     * تحديث قائمة النماذج المتاحة من المجلد المحلي عبر Electron
+     */
     const refreshModels = useCallback(async () => {
         const electron = (window as any).electronAPI;
         if (electron?.listModels) {
@@ -78,39 +88,57 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
         }
     }, [setResources, setServerConfig]);
 
-    // Load models and system resources on mount
+    /**
+     * تهيئة المكون: جلب الموارد، النماذج، ومزامنة حالة الخادم النشط
+     */
     useEffect(() => {
-        refreshModels();
-        loadSystemResources();
-    }, [refreshModels, loadSystemResources]);
+        const init = async () => {
+            await refreshModels();
+            await loadSystemResources();
+            
+            // استعادة حالة النموذج النشط من عملية Electron الرئيسية (Main Process)
+            const electron = (window as any).electronAPI;
+            if (electron?.getActiveModel) {
+                const active = await electron.getActiveModel();
+                if (active && active.id) {
+                    setActiveModelId(active.id);
+                    // إبلاغ المكون الأب باسم النموذج النشط للمزامنة العامة
+                    const list = await electron.listModels();
+                    const m = (list || []).find((model: any) => model.id === active.id);
+                    if (m) onActiveModelChange?.(m.name);
+                }
+            }
+        };
+        init();
+    }, [refreshModels, loadSystemResources, onActiveModelChange]);
 
-    // Persist settings on change
+    // مزامنة الإعدادات مع التخزين المحلي عند التغيير (Auto-save) لتجربة أسلس
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY_SERVER, JSON.stringify(serverConfig));
-    }, [serverConfig]);
-
-    useEffect(() => {
         localStorage.setItem(STORAGE_KEY_PARAMS, JSON.stringify(modelParams));
-    }, [modelParams]);
-
-    useEffect(() => {
         localStorage.setItem(STORAGE_KEY_QUANT, selectedQuant);
+        
+        // إذا كان هناك نموذج نشط، نحدث الإعدادات في الخلفية بدون إعادة تحميل كاملة
         if (activeModelId) {
             const electron = (window as any).electronAPI;
             if (electron?.updateGgufModel) {
-                electron.updateGgufModel(activeModelId, { quantization: selectedQuant })
-                    .then(() => refreshModels());
+                electron.updateGgufModel(activeModelId, { quantization: selectedQuant });
             }
         }
-    }, [selectedQuant, activeModelId]);
+    }, [serverConfig, modelParams, selectedQuant, activeModelId]);
 
+    // مزامنة نوع الكميّة المختار مع النموذج عند التغيير
     useEffect(() => {
-        if (activeModelId) {
-            const m = models.find(i => i.id === activeModelId);
+        if (selectedModelForSetup || activeModelId) {
+            const targetId = selectedModelForSetup || activeModelId;
+            const m = models.find(i => i.id === targetId);
             if (m) setSelectedQuant(m.quantization);
         }
-    }, [activeModelId, models]);
+    }, [activeModelId, selectedModelForSetup, models]);
 
+    /**
+     * بدء تشغيل خادم النموذج (Llama Server) مع الإعدادات المختارة
+     */
     const handleLoad = async (id: string) => {
         const electron = (window as any).electronAPI;
         if (!electron?.startServer) return;
@@ -160,7 +188,7 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
     };
 
     const handleSaveAll = async () => {
-        console.log('handleSaveAll called');
+        // تم إزالة console.log لتقليل الضوضاء في وحدة التحكم
         setIsSaving(true);
         setSaveStatus(null);
         try {
@@ -222,21 +250,36 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                                 <ModelList
                                     models={models}
                                     activeModelId={activeModelId}
+                                    selectedId={selectedModelForSetup}
+                                    onSelect={(id) => setSelectedModelForSetup(id === selectedModelForSetup ? null : id)}
                                     onLoad={handleLoad}
                                     onStop={() => handleStop()}
                                     onDelete={handleDelete}
                                 />
                             </div>
-
-                            {/* Quantization Section */}
-                            {activeModel && (
-                                <div className={`${styles.card} ${styles.cardWithMargin}`}>
-                                    <div className={styles.sectionTitle}><span>نوع الكميّة (Quantization)</span></div>
+ 
+                            {/* شاشة إجبارية لاختيار الكميّة قبل التشغيل */}
+                            {(selectedModelForSetup || activeModel) && (
+                                <div className={`${styles.card} ${styles.cardWithMargin} ${!activeModelId && selectedModelForSetup ? styles.highlightCard : ''}`}>
+                                    <div className={styles.sectionTitle}>
+                                        <span>خطوة 1: تحديد نوع الكميّة (Quantization)</span>
+                                        {!activeModelId && <span className={styles.mandatoryBadge}>إجراء مطلوب</span>}
+                                    </div>
                                     <QuantizationSelector
                                         selected={selectedQuant}
-                                        modelSizeMB={activeModel.fileSizeMB}
+                                        modelSizeMB={(models.find(m => m.id === (selectedModelForSetup || activeModelId))?.fileSizeMB || 0)}
                                         onChange={setSelectedQuant}
                                     />
+                                    {!activeModelId && selectedModelForSetup && (
+                                        <div className={styles.startActionContainer}>
+                                            <button 
+                                                className={styles.btnPrimaryFull}
+                                                onClick={() => handleLoad(selectedModelForSetup)}
+                                            >
+                                                خطوة 2: تشغيل النموذج الآن ⚡
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

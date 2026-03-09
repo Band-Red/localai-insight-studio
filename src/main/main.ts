@@ -1,11 +1,15 @@
-import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron';
+/**
+ * ملف المدخل الرئيسي (Main Process)
+ * المسؤول عن: إنشاء نوافذ التطبيق، إدارة دورة حياة Electron، وربط قنوات الاتصال (IPC) بين الواجهة والنظام.
+ */
+import { app, ipcMain, shell, dialog, BrowserWindow } from 'electron';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import * as dotenv from 'dotenv';
 
-// Load .env file
+// تحميل متغيرات البيئة من ملف .env
 dotenv.config();
 
 import { ModelManager } from './model_manager';
@@ -75,7 +79,13 @@ class MainApp {
             }
         });
 
-        // تحقق من المحرك وتثبيته في الخلفية عند الإقلاع
+        this.mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+            console.log(`[Renderer Console] [${level}] ${message} (${sourceId}:${line})`);
+        });
+
+        /**
+         * التحقق من توفر محرك الذكاء الاصطناعي (Ollama/Python) وإعداده
+         */
         this.engineSetup.ensureEngineAvailable((msg: string) => {
             console.log(`[Engine Setup]: ${msg}`);
             if (this.mainWindow && !this.mainWindow.isDestroyed()) {
@@ -85,6 +95,9 @@ class MainApp {
     }
 
 
+    /**
+     * إعداد كافة قنوات التواصل (IPC) بين Renderer و Main
+     */
     private setupIpc() {
         // ── Legacy Ollama (backward compat) ─────────────────────────────
         ipcMain.handle('model:status', () => this.modelManager.getStatus());
@@ -133,6 +146,7 @@ class MainApp {
             }));
 
         ipcMain.handle('gguf:stop-server', () => this.modelManager.stopServer());
+        ipcMain.handle('gguf:get-active', () => this.modelManager.getActiveServer());
 
         ipcMain.handle('gguf:smart-suggest', async (_e, modelId: string) =>
             await this.modelManager.getSmartSuggestions(modelId));

@@ -60,6 +60,13 @@ html, body {
   font-size: var(--font-size-base);
 }
 
+.bg-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 #root {
   inline-size: 100%;
   block-size: 100%;
@@ -84,14 +91,25 @@ html, body {
 
 /* ── Global Interactivity ────────────────────────────────────── */
 button, select, input, textarea, [role="button"] {
-  cursor: pointer !important;
-  pointer-events: auto !important;
+  cursor: pointer;
+  pointer-events: auto;
   font-family: inherit;
   font-size: inherit;
+  outline: none;
+  border: none;
 }
 
 input:not([type="button"]):not([type="submit"]), textarea {
-  cursor: text !important;
+  cursor: text;
+  resize: none;
+}
+
+/* Centralized Reset for Focus States */
+*:focus, 
+*:focus-visible, 
+*:focus-within {
+  outline: none;
+  box-shadow: none;
 }
 
 /* ── Shared Cyberpunk Utilities ─────────────────────────────── */

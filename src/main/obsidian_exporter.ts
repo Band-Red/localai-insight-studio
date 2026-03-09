@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { app } from 'electron';
+const { app } = require('electron');
 
 export class ObsidianExporter {
     public async exportChat(session: { title: string, messages: any[] }, vaultPath?: string) {

@@ -190,7 +190,15 @@ export class ModelManager {
         if (!model) return { success: false, error: 'Model not found' };
 
         // Stop any running server first
-        if (this.serverProcess) this.stopServer();
+        if (this.serverProcess) await this.stopServer();
+
+        // التحقق من وجود ملف النموذج على القرص قبل البدء
+        if (!fs.existsSync(model.filePath)) {
+            model.status = 'error';
+            model.errorMsg = `ملف النموذج غير موجود في المسار: ${model.filePath}. ربما تم نقله أو حذفه.`;
+            this.models.set(model.id, model);
+            return { success: false, error: model.errorMsg };
+        }
 
         // Mark as loading
         model.status = 'loading';
@@ -221,15 +229,20 @@ export class ModelManager {
             if (config.serveOnLan) args.push('--host', '0.0.0.0');
 
             try {
-                // Determine the correct path to llama-server
+                // تحديد المسار الصحيح للملف التنفيذي llama-server
                 const isPackaged = __dirname.includes('app.asar');
-                // dist/main.js -> dist -> root
-                const rootDir = isPackaged ? process.resourcesPath : path.join(__dirname, '..');
+                // في وضع التطوير (npm start)، غالباً ما نكون في src/main أو dist
+                const rootDir = isPackaged 
+                    ? process.resourcesPath 
+                    : fs.existsSync(path.join(__dirname, '..', 'bin')) 
+                        ? path.join(__dirname, '..') // src/bin
+                        : path.join(__dirname, '..', '..'); // root/bin
 
                 const binFolder = path.join(rootDir, 'bin');
                 const exePath = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
                 const localServerPath = path.join(binFolder, exePath);
 
+                console.log(`[Model Manager] Searching for binary at: ${localServerPath}`);
                 const serverCmd = fs.existsSync(localServerPath) ? localServerPath : exePath;
 
                 this.serverProcess = spawn(serverCmd, args, {
@@ -290,7 +303,13 @@ export class ModelManager {
                 });
 
                 this.serverProcess.on('close', (code) => {
-                    console.log(`[Model Server] Process closed with code: ${code}`);
+                    if (code !== 0 && code !== null) {
+                        console.error(`[Model Server] Process closed with error code: ${code}`);
+                        if (lastErrorLog) console.error(`[Model Server] Last Stderr: ${lastErrorLog}`);
+                    } else {
+                        console.log(`[Model Server] Process closed gracefully (code: ${code})`);
+                    }
+
                     if (this.activeServerId === model.id) {
                         model.status = 'idle';
                         onStop?.(model.id);
@@ -308,18 +327,43 @@ export class ModelManager {
         });
     }
 
-    public stopServer(): { success: boolean } {
+    public async stopServer(): Promise<{ success: boolean }> {
         if (this.serverProcess) {
-            this.serverProcess.kill('SIGTERM');
+            const proc = this.serverProcess;
             this.serverProcess = null;
-        }
-        if (this.activeServerId) {
-            const model = this.models.get(this.activeServerId);
-            if (model) {
-                model.status = 'idle';
-                this.models.set(this.activeServerId, model);
+
+            if (this.activeServerId) {
+                const model = this.models.get(this.activeServerId);
+                if (model) {
+                    model.status = 'idle';
+                    this.models.set(this.activeServerId, model);
+                }
+                this.activeServerId = null;
+                this.saveToDisk();
             }
-            this.activeServerId = null;
+
+            return new Promise((resolve) => {
+                let resolved = false;
+                const finish = () => {
+                    if (resolved) return;
+                    resolved = true;
+                    resolve({ success: true });
+                };
+
+                proc.once('exit', finish);
+                proc.once('close', finish);
+                
+                try {
+                    proc.kill('SIGINT');
+                } catch (err) {}
+
+                setTimeout(() => {
+                    if (!resolved) {
+                        try { proc.kill('SIGKILL'); } catch (err) {}
+                        finish();
+                    }
+                }, 4000); // give it 4 seconds to gracefully release RAM
+            });
         }
         return { success: true };
     }
