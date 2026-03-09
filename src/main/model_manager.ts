@@ -84,10 +84,15 @@ export class ModelManager {
     private activePort: number = 8080;
     private readonly maxModels = 5;
     private readonly storageFile: string;
+    private readonly modelsDir: string;
 
     constructor() {
         const dataDir = path.join(os.homedir(), '.localai-insight-studio');
         if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        
+        this.modelsDir = path.join(dataDir, 'InsightStudio_Models');
+        if (!fs.existsSync(this.modelsDir)) fs.mkdirSync(this.modelsDir, { recursive: true });
+
         this.storageFile = path.join(dataDir, 'models.json');
         this.loadFromDisk();
     }
@@ -132,27 +137,53 @@ export class ModelManager {
                 return { success: false, error: `الحد الأقصى هو ${this.maxModels} نماذج` };
             }
 
-            const stat = fs.statSync(filePath);
-            const id = crypto.randomUUID();
             const filename = path.basename(filePath);
-            const model: GgufModel = {
-                id,
-                name: filename.replace(/\.gguf$/i, ''),
-                filePath,
-                fileSizeBytes: stat.size,
-                fileSizeMB: Math.round(stat.size / (1024 * 1024)),
-                quantization: detectQuantization(filename),
-                status: 'idle',
-                addedAt: new Date().toISOString()
-            };
+            const destPath = path.join(this.modelsDir, filename);
 
-            this.models.set(id, model);
-            this.saveToDisk();
-            return { success: true, model };
+            // التحقق من وجود ملف بنفس الاسم في المجلد المخصص
+            if (fs.existsSync(destPath) && destPath !== filePath) {
+                // ملاحظة: هنا يمكننا مستقبلاً سؤال المستخدم، حالياً سنقوم بتوليد اسم فريد أو إرجاع خطأ
+                // سأقوم بإضافة توقيت لاسم الملف ليكون فريداً بدلاً من الرفض
+                const nameParts = path.parse(filename);
+                const uniqueFilename = `${nameParts.name}_${Date.now()}${nameParts.ext}`;
+                const uniqueDestPath = path.join(this.modelsDir, uniqueFilename);
+                
+                // نسخ الملف للمسار الجديد الفريد
+                fs.copyFileSync(filePath, uniqueDestPath);
+                return this.finalizeRegistration(uniqueDestPath);
+            }
+
+            // إذا لم يكن الملف موجوداً في المجلد المخصص، نقوم بنسخه
+            if (destPath !== filePath) {
+                console.log(`[Model Manager] Migrating model to: ${destPath}`);
+                fs.copyFileSync(filePath, destPath);
+            }
+
+            return this.finalizeRegistration(destPath);
         } catch (err: any) {
             console.error('[Register Model Error]:', err);
             return { success: false, error: err.message || 'فشل غير متوقع في إضافة النموذج' };
         }
+    }
+
+    private finalizeRegistration(finalPath: string): { success: boolean; model?: GgufModel; error?: string } {
+        const stat = fs.statSync(finalPath);
+        const id = crypto.randomUUID();
+        const filename = path.basename(finalPath);
+        const model: GgufModel = {
+            id,
+            name: filename.replace(/\.gguf$/i, ''),
+            filePath: finalPath,
+            fileSizeBytes: stat.size,
+            fileSizeMB: Math.round(stat.size / (1024 * 1024)),
+            quantization: detectQuantization(filename),
+            status: 'idle',
+            addedAt: new Date().toISOString()
+        };
+
+        this.models.set(id, model);
+        this.saveToDisk();
+        return { success: true, model };
     }
 
 
@@ -163,6 +194,31 @@ export class ModelManager {
         this.models.delete(id);
         this.saveToDisk();
         return { success: true };
+    }
+
+    /**
+     * الحذف النهائي للملف من القرص الصلب والسجل
+     */
+    public permanentlyDeleteModel(id: string): { success: boolean; error?: string } {
+        const model = this.models.get(id);
+        if (!model) return { success: false, error: 'النموذج غير موجود في السجل' };
+
+        if (id === this.activeServerId) {
+            return { success: false, error: 'لا يمكن حذف نموذج قيد التشغيل حالياً' };
+        }
+
+        try {
+            if (fs.existsSync(model.filePath)) {
+                fs.unlinkSync(model.filePath);
+                console.log(`[Model Manager] Physically deleted file: ${model.filePath}`);
+            }
+            this.models.delete(id);
+            this.saveToDisk();
+            return { success: true };
+        } catch (err: any) {
+            console.error('[Delete Model Error]:', err);
+            return { success: false, error: `فشل حذف الملف: ${err.message}` };
+        }
     }
 
     public listModels(): GgufModel[] {
