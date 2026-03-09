@@ -112,7 +112,7 @@
 }
 
 .sectionTitle span {
-    color: var(--color-accent);
+    color: #00C4A7;
 }
 
 /* ── Drop Zone ───────────────────────────────────────────────── */
@@ -154,19 +154,19 @@
 }
 
 .highlightCard {
-  border: 1px solid var(--color-accent);
+  border: 1px solid #00C4A7;
   animation: pulse-glow 2s infinite ease-in-out;
 }
 
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 5px var(--color-accent-glow); }
-  50% { box-shadow: 0 0 20px var(--color-accent-glow); }
-  100% { box-shadow: 0 0 5px var(--color-accent-glow); }
+  0% { box-shadow: 0 0 5px rgba(0, 196, 167, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(0, 196, 167, 0.4); }
+  100% { box-shadow: 0 0 5px rgba(0, 196, 167, 0.2); }
 }
 
 .mandatoryBadge {
   font-size: 0.7rem;
-  background: var(--color-accent);
+  background: #00C4A7;
   color: #000;
   padding: 2px 8px;
   border-radius: 4px;
@@ -184,7 +184,7 @@
 
 .btnPrimaryFull {
   inline-size: 100%;
-  background: linear-gradient(135deg, var(--color-accent) 0%, hsl(var(--h-cyan) var(--s-cyan) 60%) 100%);
+  background: linear-gradient(135deg, #00C4A7 0%, #52D1DC 100%);
   color: #000;
   border: none;
   border-radius: var(--radius-md);
@@ -491,7 +491,7 @@
 }
 
 .quantGrid:focus, .quantGrid:focus-within, .quantGrid:focus-visible {
-    outline: none;
+    outline: none !important;
 }
 
 .quantOption {
@@ -506,29 +506,29 @@
 }
 
 .quantOption:focus, .quantOption:focus-within, .quantOption:focus-visible {
-    outline: none;
+    outline: none !important;
 }
 
 .quantOption:hover { 
     border-color: #00C4A7; 
-    box-shadow: 0 0 10px rgba(0, 196, 167, 0.1);
+    background: rgba(0, 196, 167, 0.05);
 }
 
 .quantOptionSelected { 
     border-color: #00C4A7; 
-    background: rgba(0, 196, 167, 0.15); 
-    box-shadow: 0 0 15px rgba(0, 196, 167, 0.2);
+    background: rgba(0, 196, 167, 0.1); 
+    box-shadow: 0 0 20px rgba(0, 196, 167, 0.15);
 }
 
 .quantName { 
     font-size: 0.8rem; 
     font-weight: 700; 
-    color: #FFFFFF; /* نص العناوين - تباين عالٍ للقراءة السريعة */
+    color: #FFFFFF; /* High contrast white */
 }
 
 .quantMeta { 
     font-size: 0.7rem; 
-    color: #9CA3AF; /* نص التفاصيل - لتقليل الضجيج البصري */
+    color: #9CA3AF; /* Muted gray for secondary info */
     margin-block-start: 4px; 
 }
 
