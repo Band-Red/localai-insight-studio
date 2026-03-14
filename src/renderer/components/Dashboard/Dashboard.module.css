@@ -225,4 +225,76 @@
   font-weight: bold;
 }
 
+/* ── Custom Dark Tooltip ────────────────────────────────────── */
+.customTooltip {
+  background: hsl(240 18% 8%);
+  border: 1px solid rgba(0, 196, 167, 0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
 
+.tooltipLabel {
+  color: #9CA3AF;
+  margin-block-end: 4px;
+  font-weight: 600;
+}
+
+.tooltipValue {
+  margin: 2px 0;
+  font-size: 0.78rem;
+}
+
+.tooltipValue strong {
+  color: #FFFFFF;
+}
+
+/* ── Metrics Grid ────────────────────────────────────────────── */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 16vw, 200px), 1fr));
+  gap: var(--space-sm);
+  margin-block-start: var(--space-md);
+}
+
+.metricCard {
+  background: hsl(240 18% 8%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.3s ease;
+}
+
+.metricCard:hover {
+  border-color: rgba(0, 196, 167, 0.3);
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metricLabel {
+  font-size: 0.72rem;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.metricValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: 'Fira Code', monospace;
+}
+
+.metricModel {
+  font-size: 0.65rem;
+  color: #9CA3AF;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

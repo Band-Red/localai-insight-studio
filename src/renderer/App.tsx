@@ -462,7 +462,7 @@ const App: React.FC = () => {
             )}
           </Group>
         ) : activeTab === 'dashboard' ? (
-          <Dashboard />
+          <Dashboard activeModel={activeModelName} />
         ) : (
           <Settings />
         )

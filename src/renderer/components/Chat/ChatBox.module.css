@@ -413,3 +413,122 @@
   font-size: 0.75rem;
   font-weight: 600;
 }
+
+/* ── Pulsing Model Indicator ─────────────────────────────────── */
+.modelPulseBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px var(--space-md);
+  background: rgba(0, 196, 167, 0.06);
+  border-block-end: 1px solid rgba(0, 196, 167, 0.15);
+  font-size: 0.75rem;
+  color: #9CA3AF;
+}
+
+.modelPulseDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00C4A7;
+  box-shadow: 0 0 6px rgba(0, 196, 167, 0.8);
+  animation: pulseBlink 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.modelPulseText strong {
+  color: #00C4A7;
+}
+
+@keyframes pulseBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* ── New Chat Modal (Save / Discard) ─────────────────────────── */
+.newChatOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30000;
+  animation: fadeIn 0.2s ease;
+}
+
+.newChatModal {
+  background: hsl(240 18% 8%);
+  border: 1px solid rgba(0, 196, 167, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  width: min(90%, 400px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0,196,167,0.1);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+}
+
+.newChatTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-block-end: var(--space-sm);
+  color: #FFFFFF;
+}
+
+.newChatMsg {
+  font-size: 0.9rem;
+  color: #9CA3AF;
+  margin-block-end: var(--space-md);
+  line-height: 1.6;
+}
+
+.newChatActions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  flex-direction: column;
+}
+
+.btnSaveNew {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #00C4A7, #52D1DC);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSaveNew:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.btnDiscardNew {
+  padding: 10px 24px;
+  background: transparent;
+  color: #9CA3AF;
+  border: 1px solid hsl(240 6% 20%);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnDiscardNew:hover {
+  background: hsl(0 75% 50% / 0.1);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
