@@ -48,6 +48,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     onConfirm: () => { },
   });
 
+  // حالة Modal المحادثة الجديدة (حفظ / بدون حفظ)
+  const [newChatModalOpen, setNewChatModalOpen] = useState(false);
+
   const showConfirm = (title: string, message: string, onConfirm: () => void) => {
     setConfirmModal({
       isOpen: true,
@@ -207,6 +210,38 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     });
   };
 
+  /**
+   * معالجة بدء محادثة جديدة — يعرض Modal للسؤال عن الحفظ
+   */
+  const handleNewChat = () => {
+    if (messages.length === 0) { setMessages([]); return; }
+    setNewChatModalOpen(true);
+  };
+
+  /**
+   * حفظ المحادثة الحالية ثم بدء جديدة
+   */
+  const handleSaveAndNew = async () => {
+    const electron = (window as any).electronAPI;
+    if (electron?.saveChatHistory) {
+      await electron.saveChatHistory(messages);
+      window.dispatchEvent(new CustomEvent('app:toast', {
+        detail: { msg: '✅ تم حفظ المحادثة في السجل', type: 'success' }
+      }));
+    }
+    setMessages([]);
+    setNewChatModalOpen(false);
+  };
+
+  /**
+   * بدء محادثة جديدة بدون حفظ
+   */
+  const handleDiscardAndNew = () => {
+    setMessages([]);
+    setNewChatModalOpen(false);
+  };
+
+
   const handleExportIndividual = async (msgText: string) => {
     const electron = (window as any).electronAPI;
     if (electron && electron.exportChat) {
@@ -284,9 +319,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         </div>
         <div className={styles.headerActions}>
           <button 
-            onClick={() => { 
-              showConfirm('محادثة جديدة', 'بدء محادثة جديدة؟', () => setMessages([]));
-            }} 
+            onClick={handleNewChat} 
             className={styles.headerAction} 
             title="محادثة جديدة"
           >
@@ -310,6 +343,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
       </div>
 
+      {/* ── مؤشر حالة النموذج النشط (Pulsing Indicator) ───────── */}
+      {activeModel && (
+        <div className={styles.modelPulseBar}>
+          <span className={styles.modelPulseDot} />
+          <span className={styles.modelPulseText}>النموذج النشط: <strong>{activeModel}</strong></span>
+        </div>
+      )}
 
       <div className={styles.messagesList} ref={scrollRef}>
         {messages.length === 0 && (
@@ -435,6 +475,20 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
       />
+
+      {/* ── Modal المحادثة الجديدة: حفظ أم تجاهل؟ ──────── */}
+      {newChatModalOpen && (
+        <div className={styles.newChatOverlay} onClick={handleDiscardAndNew}>
+          <div className={styles.newChatModal} onClick={e => e.stopPropagation()} dir="rtl">
+            <h3 className={styles.newChatTitle}>💬 محادثة جديدة</h3>
+            <p className={styles.newChatMsg}>هل تريد حفظ هذه المحادثة في السجل قبل البدء؟</p>
+            <div className={styles.newChatActions}>
+              <button className={styles.btnSaveNew} onClick={handleSaveAndNew}>✅ حفظ وبدء جديد</button>
+              <button className={styles.btnDiscardNew} onClick={handleDiscardAndNew}>🗑 بدء بدون حفظ</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

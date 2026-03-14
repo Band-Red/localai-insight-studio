@@ -4,7 +4,7 @@
  * المكان: واجهة إدارة النماذج (Model Library).
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Brain, Server, SlidersHorizontal, Code2, Save, RefreshCw } from 'lucide-react';
+import { Brain, Server, SlidersHorizontal, Code2, Save, RefreshCw, Zap } from 'lucide-react';
 import styles from './ModelManager.module.css';
 import ModelDropZone from './ModelDropZone';
 import ModelList from './ModelList';
@@ -68,6 +68,9 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
     const [selectedModelForSetup, setSelectedModelForSetup] = useState<string | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [modelToDelete, setModelToDelete] = useState<string | null>(null);
+    /** معاينة الاقتراحات الذكية قبل التطبيق */
+    const [pendingSuggestions, setPendingSuggestions] = useState<any | null>(null);
+    const [isSuggesting, setIsSuggesting] = useState(false);
 
     /**
      * تحديث قائمة النماذج المتاحة من المجلد المحلي عبر Electron
@@ -226,7 +229,6 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
     };
 
     const handleSaveAll = async () => {
-        // تم إزالة console.log لتقليل الضوضاء في وحدة التحكم
         setIsSaving(true);
         setSaveStatus(null);
         try {
@@ -240,6 +242,48 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
         }
         setIsSaving(false);
         setTimeout(() => setSaveStatus(null), 3000);
+    };
+
+    /**
+     * جلب الاقتراحات الذكية وتخزينها في المعاينة فقط (لا تطبيق فوري)
+     */
+    const handleSmartSuggest = async () => {
+        const targetId = activeModelId || (models[0]?.id || null);
+        if (!targetId) return;
+        setIsSuggesting(true);
+        const electron = (window as any).electronAPI;
+        if (electron?.getSmartSuggestions) {
+            const s = await electron.getSmartSuggestions(targetId);
+            if (s) setPendingSuggestions(s);
+        }
+        setIsSuggesting(false);
+    };
+
+    /**
+     * تطبيق الاقتراحات المعلقة على حالة النموذج
+     */
+    const handleApplySuggestions = () => {
+        if (!pendingSuggestions) return;
+        setServerConfig(prev => ({
+            ...prev,
+            contextLength: pendingSuggestions.contextLength ?? prev.contextLength,
+            nGpuLayers:   pendingSuggestions.nGpuLayers   ?? prev.nGpuLayers,
+            ramGb:        pendingSuggestions.ramGb        ?? prev.ramGb,
+            vramGb:       pendingSuggestions.vramGb       ?? prev.vramGb,
+            evalBatch:    pendingSuggestions.evalBatch    ?? prev.evalBatch,
+        }));
+        setModelParams(prev => ({
+            ...prev,
+            temperature:   pendingSuggestions.temperature   ?? prev.temperature,
+            topK:          pendingSuggestions.topK          ?? prev.topK,
+            topP:          pendingSuggestions.topP          ?? prev.topP,
+            repeatPenalty: pendingSuggestions.repeatPenalty ?? prev.repeatPenalty,
+            cpuThreads:    pendingSuggestions.cpuThreads    ?? prev.cpuThreads,
+        }));
+        setPendingSuggestions(null);
+        window.dispatchEvent(new CustomEvent('app:toast', {
+            detail: { msg: '✅ تم تطبيق الاقتراحات الذكية بنجاح', type: 'success' }
+        }));
     };
 
     const activeModel = models.find(m => m.id === activeModelId) || null;
@@ -361,6 +405,46 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                             gpus={resources?.gpus || []}
                             onChange={setServerConfig}
                         />
+                        {/* ── Smart Suggest Bar ── */}
+                        <div className={styles.suggestionBar}>
+                            <button
+                                type="button"
+                                className={styles.smartBtn}
+                                onClick={handleSmartSuggest}
+                                disabled={isSuggesting}
+                            >
+                                {isSuggesting
+                                    ? <RefreshCw size={14} className={styles.spin} />
+                                    : <Zap size={14} />}
+                                ⚡ اقتراحات ذكية
+                            </button>
+                            {pendingSuggestions && (
+                                <div className={styles.suggestionPanel}>
+                                    <div className={styles.suggestionHeader}>✨ اقتراحات مبنية على موارد جهازك</div>
+                                    <div className={styles.suggestionGrid}>
+                                        {Object.entries({
+                                            'طول السياق': `${pendingSuggestions.contextLength ?? '—'} tokens`,
+                                            'طبقات GPU':    `${pendingSuggestions.nGpuLayers ?? '—'}`,
+                                            'RAM':            `${pendingSuggestions.ramGb ?? '—'} GB`,
+                                            'VRAM':           `${pendingSuggestions.vramGb ?? '—'} GB`,
+                                            'حزم التقييم':  `${pendingSuggestions.evalBatch ?? '—'}`,
+                                        }).map(([k, v]) => (
+                                            <div key={k} className={styles.suggestionRow}>
+                                                <span className={styles.suggestionKey}>{k}</span>
+                                                <span className={styles.suggestionVal}>{v}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {pendingSuggestions.reasoning && (
+                                        <div className={styles.suggestionNote}>{pendingSuggestions.reasoning}</div>
+                                    )}
+                                    <div className={styles.suggestionActions}>
+                                        <button className={styles.btnApply} onClick={handleApplySuggestions}>✓ تطبيق</button>
+                                        <button className={styles.btnDismiss} onClick={() => setPendingSuggestions(null)}>× تجاهل</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -373,7 +457,46 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                             models={models}
                             onChange={setModelParams}
                         />
-
+                        {/* ── Smart Suggest Bar ── */}
+                        <div className={styles.suggestionBar}>
+                            <button
+                                type="button"
+                                className={styles.smartBtn}
+                                onClick={handleSmartSuggest}
+                                disabled={isSuggesting}
+                            >
+                                {isSuggesting
+                                    ? <RefreshCw size={14} className={styles.spin} />
+                                    : <Zap size={14} />}
+                                ⚡ اقتراحات ذكية
+                            </button>
+                            {pendingSuggestions && (
+                                <div className={styles.suggestionPanel}>
+                                    <div className={styles.suggestionHeader}>✨ اقتراحات معامل النمذجة</div>
+                                    <div className={styles.suggestionGrid}>
+                                        {Object.entries({
+                                            'درجة الحرارة': `${pendingSuggestions.temperature ?? '—'}`,
+                                            'Top-K':          `${pendingSuggestions.topK ?? '—'}`,
+                                            'Top-P':          `${pendingSuggestions.topP ?? '—'}`,
+                                            'عقوبة التكرار': `${pendingSuggestions.repeatPenalty ?? '—'}`,
+                                            'أنوية CPU':     `${pendingSuggestions.cpuThreads ?? '—'}`,
+                                        }).map(([k, v]) => (
+                                            <div key={k} className={styles.suggestionRow}>
+                                                <span className={styles.suggestionKey}>{k}</span>
+                                                <span className={styles.suggestionVal}>{v}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {pendingSuggestions.reasoning && (
+                                        <div className={styles.suggestionNote}>{pendingSuggestions.reasoning}</div>
+                                    )}
+                                    <div className={styles.suggestionActions}>
+                                        <button className={styles.btnApply} onClick={handleApplySuggestions}>✓ تطبيق</button>
+                                        <button className={styles.btnDismiss} onClick={() => setPendingSuggestions(null)}>× تجاهل</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 

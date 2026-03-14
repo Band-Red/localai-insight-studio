@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Save, RefreshCw, FileJson } from 'lucide-react';
+import { Save, RefreshCw, FileJson, Sparkles } from 'lucide-react';
 import styles from './ModelManager.module.css';
 
 const McpConfig: React.FC = () => {
     const [content, setContent] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isImproving, setIsImproving] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'warn'; msg: string } | null>(null);
 
     useEffect(() => {
@@ -46,6 +47,57 @@ const McpConfig: React.FC = () => {
         setIsSaving(false);
     };
 
+    /**
+     * تحسين JSON: تنسيق، ترتيب المفاتيح أبجدياً، إزالة التكرار، إضافة طابع زمني
+     */
+    const handleImprove = () => {
+        if (!content.trim()) {
+            setStatus({ type: 'error', msg: 'المحتوى فارغ — أضف JSON أولاً' });
+            return;
+        }
+        setIsImproving(true);
+        try {
+            const parsed = JSON.parse(content);
+
+            // ترتيب المفاتيح بشكل أبجدي بشكل تكراري
+            const sortKeys = (obj: any): any => {
+                if (Array.isArray(obj)) return obj.map(sortKeys);
+                if (obj && typeof obj === 'object') {
+                    return Object.keys(obj).sort().reduce((acc: any, k) => {
+                        acc[k] = sortKeys(obj[k]);
+                        return acc;
+                    }, {});
+                }
+                return obj;
+            };
+
+            // إزالة خوادم MCP مكررة (بنفس الـ command)
+            if (parsed.mcpServers && typeof parsed.mcpServers === 'object') {
+                const seen = new Set<string>();
+                const cleaned: any = {};
+                for (const [key, val] of Object.entries(parsed.mcpServers as Record<string, any>)) {
+                    const sig = JSON.stringify(val?.command);
+                    if (!seen.has(sig)) {
+                        seen.add(sig);
+                        cleaned[key] = val;
+                    }
+                }
+                parsed.mcpServers = cleaned;
+            }
+
+            // إضافة طابع زمني للتحسين
+            parsed._lastImproved = new Date().toISOString();
+
+            const improved = JSON.stringify(sortKeys(parsed), null, 2);
+            setContent(improved);
+            setStatus({ type: 'success', msg: '✅ تم تحسين الـ JSON وترتيب مفاتيحه' });
+            setTimeout(() => setStatus(null), 3000);
+        } catch (e: any) {
+            setStatus({ type: 'error', msg: `JSON غير صالح: ${e.message}` });
+        }
+        setIsImproving(false);
+    };
+
     return (
         <div>
             <div className={styles.sectionTitle}>
@@ -58,18 +110,14 @@ const McpConfig: React.FC = () => {
                 onChange={(e) => setContent(e.target.value)}
                 onPaste={(e) => {
                     e.preventDefault();
-                    // Get pasted text
                     const paste = (e.clipboardData || (window as any).clipboardData).getData('text');
                     try {
-                        // Parse and re-stringify with formatting
                         const obj = JSON.parse(paste);
                         const formatted = JSON.stringify(obj, null, 2);
-                        // If parsing works, replace the current selection or content
                         setContent(formatted);
                         setStatus({ type: 'success', msg: '✅ تم تنسيق JSON بنجاح' });
                         setTimeout(() => setStatus(null), 3000);
                     } catch (err) {
-                        // If it's not valid JSON, just paste as is
                         setContent(paste);
                     }
                 }}
@@ -87,6 +135,11 @@ const McpConfig: React.FC = () => {
                 <button type="button" className={styles.btnSave} onClick={handleSave} disabled={isSaving}>
                     {isSaving ? <RefreshCw size={16} className={styles.spin} /> : <Save size={16} />}
                     حفظ mcp.json
+                </button>
+
+                <button type="button" className={styles.btnImprove} onClick={handleImprove} disabled={isImproving}>
+                    {isImproving ? <RefreshCw size={14} className={styles.spin} /> : <Sparkles size={14} />}
+                    تحسين ✨
                 </button>
 
                 {status && (

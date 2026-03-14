@@ -746,3 +746,134 @@
     background: var(--color-accent-glow);
     border-color: var(--color-accent);
 }
+
+/* ── Suggestion Bar (wraps button + panel) ───────────────────── */
+.suggestionBar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-block-start: var(--space-md);
+    padding-block-start: var(--space-md);
+    border-block-start: 1px solid var(--color-border);
+}
+
+/* ── Suggestion Preview Panel ────────────────────────────────── */
+.suggestionPanel {
+    background: rgba(0, 196, 167, 0.05);
+    border: 1px solid rgba(0, 196, 167, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.suggestionHeader {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #00C4A7;
+    margin-block-end: var(--space-sm);
+}
+
+.suggestionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
+    margin-block-end: var(--space-sm);
+}
+
+.suggestionRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: hsl(240 20% 4%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    font-size: 0.78rem;
+}
+
+.suggestionKey {
+    color: #9CA3AF;
+}
+
+.suggestionVal {
+    color: #00C4A7;
+    font-weight: 700;
+    font-family: 'Fira Code', monospace;
+}
+
+.suggestionNote {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    padding: 6px 8px;
+    background: hsl(240 20% 4%);
+    border-radius: var(--radius-sm);
+    border-inline-start: 2px solid rgba(0, 196, 167, 0.4);
+    margin-block-end: var(--space-sm);
+    line-height: 1.5;
+}
+
+.suggestionActions {
+    display: flex;
+    gap: var(--space-xs);
+    justify-content: flex-end;
+}
+
+.btnApply {
+    padding: 7px 18px;
+    background: linear-gradient(135deg, #00C4A7, #52D1DC);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnApply:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.btnDismiss {
+    padding: 7px 14px;
+    background: transparent;
+    color: #9CA3AF;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnDismiss:hover {
+    background: hsl(0 75% 50% / 0.1);
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+}
+
+/* ── MCP Improve Button ──────────────────────────────────────── */
+.btnImprove {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnImprove:hover:not(:disabled) {
+    background: #8b5cf6;
+    color: #fff;
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.4);
+}
+
+.btnImprove:disabled { opacity: 0.5; cursor: not-allowed; }
