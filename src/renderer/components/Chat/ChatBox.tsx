@@ -519,6 +519,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
       {newChatModalOpen && (
         <div className={styles.newChatOverlay} onClick={handleDiscardAndNew}>
           <div className={styles.newChatModal} onClick={e => e.stopPropagation()} dir="rtl">
+            <button className={styles.newChatClose} onClick={handleDiscardAndNew} title="إغلاق">×</button>
             <h3 className={styles.newChatTitle}>💬 محادثة جديدة</h3>
             <p className={styles.newChatMsg}>هل تريد حفظ هذه المحادثة في السجل قبل البدء؟</p>
             <div className={styles.newChatActions}>
