@@ -160,19 +160,58 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     setEditingText('');
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingText.trim() || !editingMessageId) return;
 
-    setMessages(prev => prev.map(m => 
-      m.id === editingMessageId ? { ...m, text: editingText, timestamp: new Date() } : m
-    ));
-    
+    const newText = editingText.trim();
+    const editId  = editingMessageId;
+
+    // 1. تحديث نص الرسالة المعدّلة وحذف كل الرسائل التي تليها (الردود القديمة)
+    setMessages(prev => {
+      const idx = prev.findIndex(m => m.id === editId);
+      if (idx === -1) return prev;
+      const updated = prev.slice(0, idx + 1).map(m =>
+        m.id === editId ? { ...m, text: newText, timestamp: new Date() } : m
+      );
+      return updated;
+    });
+
     setEditingMessageId(null);
     setEditingText('');
-    
-    // Suggestion: Re-send if user wants? For now just local update.
-    // Usually editing a message in LLM chat might trigger a re-generation.
-    // But user just asked for "ability to edit".
+
+    // 2. إعادة توليد رد الذكاء الاصطناعي بناءً على النص المعدَّل
+    setIsLoading(true);
+    try {
+      const electron = (window as any).electronAPI;
+      if (electron?.sendMessage) {
+        const result = await electron.sendMessage(newText, activeModel);
+        const aiMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          text: result.success ? result.response : `خطأ: ${result.error}`,
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMsg]);
+        if (result.success && result.response.includes('<html>')) {
+          if (onCodeGenerated) onCodeGenerated(result.response);
+        }
+      } else {
+        // fallback إذا لم يكن API متاحاً
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            text: 'عذراً، محرك الذكاء الاصطناعي المحلي غير متصل حالياً.',
+            sender: 'ai',
+            timestamp: new Date()
+          }]);
+          setIsLoading(false);
+        }, 800);
+        return;
+      }
+    } catch (err) {
+      console.error('Re-generate error:', err);
+    }
+    setIsLoading(false);
   };
 
   const renderMessageText = (text: string) => {
