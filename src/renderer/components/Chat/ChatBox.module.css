@@ -347,9 +347,8 @@
 }
 
 .inputWrapper:focus-within {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 15px var(--color-accent-glow);
-  background: hsl(var(--h-bg) var(--s-bg) 10%);
+  border-color: var(--color-border);
+  box-shadow: none;
 }
 
 .chatInput {
