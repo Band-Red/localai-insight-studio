@@ -14,6 +14,7 @@ dotenv.config();
 
 import { ModelManager } from './model_manager';
 import { SessionManager } from './session_manager';
+import { SessionMemoryDB } from './session_db';
 import { ObsidianExporter } from './obsidian_exporter';
 import { saveSettings, loadSettings } from './settings_manager';
 import { LoggerManager } from './logger_manager';
@@ -27,6 +28,7 @@ class MainApp {
     private exporter = new ObsidianExporter();
     private logger = new LoggerManager();
     private ragManager = new RagManager();
+    private sessionDb = new SessionMemoryDB();
     private engineSetup = new EngineSetupManager();
     private readonly mcpConfigPath = path.join(os.homedir(), '.localai-insight-studio', 'mcp.json');
     private lastCpuInfo: { idle: number, total: number } | null = null;
@@ -99,15 +101,34 @@ class MainApp {
      * إعداد كافة قنوات التواصل (IPC) بين Renderer و Main
      */
     private setupIpc() {
-        // ── Legacy Ollama (backward compat) ─────────────────────────────
+        // ── Legacy Ollama & Context Engine ─────────────────────────────
         ipcMain.handle('model:status', () => this.modelManager.getStatus());
 
-        ipcMain.handle('chat:send', async (_e, message, model) => {
+        // chat:send can accept either a 'message' string OR an array of messages for context memory
+        ipcMain.handle('chat:send', async (_e, input, model) => {
             const startTime = Date.now();
             try {
-                const context = this.ragManager.getContextString();
-                const fullPrompt = context ? `${context}\nالمستخدم يقول: ${message}` : message;
-                const response = await this.modelManager.chat(fullPrompt, model);
+                let contextStr = this.ragManager.getContextString();
+                
+                let promptPayload;
+                // If input is an array, it's our new context-aware history
+                if (Array.isArray(input)) {
+                    // Prepend RAG context to the first message if context exists
+                    if (contextStr && input.length > 0) {
+                        const firstMsg = input[0];
+                        // If we already prepended it, don't do it again
+                        if (!firstMsg.content.includes(contextStr)) {
+                           input[0] = { ...firstMsg, content: `${contextStr}\n${firstMsg.content}` };
+                        }
+                    }
+                    promptPayload = input;
+                } else {
+                    // Backward compatibility - if it's just a string, simulate it as user message
+                    const msgString = String(input);
+                    promptPayload = contextStr ? `${contextStr}\nالمستخدم يقول: ${msgString}` : msgString;
+                }
+
+                const response = await this.modelManager.chat(promptPayload, model);
                 const latency = Date.now() - startTime;
                 this.logger.addLog({ event: 'AI_Chat_Success', cpuUsage: 15, ramUsage: 45, latency, status: 'success' });
                 return { success: true, response };
@@ -117,6 +138,21 @@ class MainApp {
                 return { success: false, error: err.message || 'Failed to communicate with local AI engine' };
             }
         });
+
+        // ── NoSQL Session Database ───────────────────────────────────────
+        ipcMain.handle('db:save-chat', async (_e, messages: any[]) => {
+            return await this.sessionDb.saveConversation(messages);
+        });
+
+        ipcMain.handle('db:get-chat', async () => {
+            const messages = await this.sessionDb.getConversation();
+            return { success: true, data: messages };
+        });
+
+        ipcMain.handle('db:clear-chat', async () => {
+            return await this.sessionDb.clearConversation();
+        });
+
 
 
         // ── GGUF Model Management ────────────────────────────────────────
@@ -278,10 +314,11 @@ class MainApp {
         // ── RAG ─────────────────────────────────────────────────────────
         ipcMain.handle('rag:select-folder', async () => {
             try {
-                const result = await dialog.showOpenDialog(this.mainWindow!, { properties: ['openDirectory'] });
+                const result = await dialog.showOpenDialog(this.mainWindow!, { properties: ['openDirectory', 'multiSelections'] });
                 if (!result.canceled && result.filePaths.length > 0) {
-                    const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
-                    return { ...indexResult, path: result.filePaths[0] };
+                    const indexResult = await this.ragManager.indexMultiplePaths(result.filePaths);
+                    const pathLabel = result.filePaths.length > 1 ? `(${result.filePaths.length}) مجلدات` : result.filePaths[0];
+                    return { ...indexResult, path: pathLabel };
                 }
                 return { success: false, error: 'Cancelled' };
             } catch (err: any) {
@@ -294,12 +331,13 @@ class MainApp {
         ipcMain.handle('rag:select-file', async () => {
             try {
                 const result = await dialog.showOpenDialog(this.mainWindow!, {
-                    properties: ['openFile'],
-                    filters: [{ name: 'Project Files', extensions: ['txt', 'md', 'pdf', 'js', 'ts', 'html', 'py', 'png', 'jpg', 'jpeg', 'ppt', 'pptx'] }]
+                    properties: ['openFile', 'multiSelections'],
+                    filters: [{ name: 'Project Files', extensions: ['txt', 'md', 'pdf', 'js', 'ts', 'html', 'py', 'png', 'jpg', 'jpeg', 'ppt', 'pptx', 'css', 'json'] }]
                 });
                 if (!result.canceled && result.filePaths.length > 0) {
-                    const indexResult = await this.ragManager.indexFileOrFolder(result.filePaths[0]);
-                    return { ...indexResult, path: result.filePaths[0] };
+                    const indexResult = await this.ragManager.indexMultiplePaths(result.filePaths);
+                    const pathLabel = result.filePaths.length > 1 ? `(${result.filePaths.length}) ملفات` : result.filePaths[0];
+                    return { ...indexResult, path: pathLabel };
                 }
                 return { success: false, error: 'Cancelled' };
             } catch (err: any) {

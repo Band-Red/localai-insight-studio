@@ -154,8 +154,8 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
         const modelName = models.find(m => m.id === id)?.name || null;
         const result = await electron.startServer({
             ...serverConfig,
-            modelId: id,
-            draftModel: modelParams.draftModel
+            ...modelParams,
+            modelId: id
         });
 
         // Always refresh from source of truth first
