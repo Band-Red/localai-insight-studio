@@ -35,9 +35,14 @@ export interface ServerConfig {
     apiKeys: string[];
     maxIdleTtl: number;
     serveOnLan: boolean;
-    enableCors: boolean;
     jitLoading: boolean;
     draftModel?: string;
+    temperature?: number;
+    topK?: number;
+    topP?: number;
+    minP?: number;
+    repeatPenalty?: number;
+    cpuThreads?: number;
 }
 
 
@@ -81,6 +86,7 @@ export class ModelManager {
     private models: Map<string, GgufModel> = new Map();
     private serverProcess: ChildProcess | null = null;
     private activeServerId: string | null = null;
+    private activeServerConfig: ServerConfig | null = null;
     private activePort: number = 8080;
     private readonly maxModels = 5;
     private readonly storageFile: string;
@@ -259,6 +265,7 @@ export class ModelManager {
         // Mark as loading
         model.status = 'loading';
         this.activePort = config.port || 8080;
+        this.activeServerConfig = config;
         this.models.set(model.id, model);
 
         return new Promise((resolve) => {
@@ -395,6 +402,7 @@ export class ModelManager {
                     this.models.set(this.activeServerId, model);
                 }
                 this.activeServerId = null;
+                this.activeServerConfig = null;
                 this.saveToDisk();
             }
 
@@ -439,16 +447,20 @@ export class ModelManager {
         });
     }
 
-    public async chat(message: string, model: string = 'llama3') {
+    public async chat(messagePayload: string | any[], model: string = 'llama3') {
         // If GGUF server is running, use it via API
         if (this.activeServerId) {
-            return this.chatGguf(message);
+            return this.chatGguf(messagePayload);
         }
 
         // Fallback to Ollama
         return new Promise((resolve, reject) => {
+            const rawMessage = Array.isArray(messagePayload) 
+                ? messagePayload[messagePayload.length - 1].content 
+                : messagePayload;
+            
             const safeModel = model && model !== 'null' ? model : 'llama3';
-            exec(`ollama run ${safeModel} "${message.replace(/"/g, '\\"')}"`, { encoding: 'utf8' }, (error, stdout, stderr) => {
+            exec(`ollama run ${safeModel} "${rawMessage.replace(/"/g, '\\"')}"`, { encoding: 'utf8' }, (error, stdout, stderr) => {
                 if (error) {
                     console.error('Ollama Error:', stderr || error.message);
                     if (error.message.includes('not recognized') || error.code === 1) {
@@ -463,15 +475,51 @@ export class ModelManager {
         });
     }
 
-    private async chatGguf(message: string): Promise<string> {
+    private async chatGguf(messagePayload: string | any[]): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
+                let messages = [];
+                if (Array.isArray(messagePayload)) {
+                    // It's already the full history from NoSQL frontend
+                    messages = messagePayload.map(m => ({
+                        role: m.sender === 'user' ? 'user' : 'assistant',
+                        content: m.text || m.content
+                    }));
+                } else {
+                    // Backward compatibility single user message
+                    messages = [{ role: 'user', content: messagePayload }];
+                }
+                const penalty = this.activeServerConfig?.repeatPenalty || 1.1;
+                // Typically frequency/presence penalty are expected to be between 0.0 and 2.0 in compatible APIs
+                const compatiblePenalty = penalty >= 1.0 ? Math.min(penalty - 1.0, 2.0) : 0.0;
+
+                // ── Sliding Window Strategy ──────────────────────────
+                // If the context is very long, we trimming older messages 
+                // but keep the most recent ones.
+                const MAX_MESSAGES = 12; // Safety limit for multi-turn chat
+                let finalMessages = messages;
+                if (messages.length > MAX_MESSAGES) {
+                    console.log(`[Model Manager] Trimming context: ${messages.length} messages -> ${MAX_MESSAGES}`);
+                    // Keep the first message if it's a 'system' or 'user' with heavy RAG context, 
+                    // and the last N messages for immediate flow.
+                    const systemMsg = messages.find(m => m.role === 'system');
+                    const recentMsgs = messages.slice(-MAX_MESSAGES);
+                    finalMessages = systemMsg ? [systemMsg, ...recentMsgs] : recentMsgs;
+                }
+
                 const response = await fetch(`http://127.0.0.1:${this.activePort}/v1/chat/completions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        messages: [{ role: 'user', content: message }],
-                        stream: false
+                        messages: finalMessages,
+                        stream: false,
+                        temperature: this.activeServerConfig?.temperature ?? 0.7,
+                        top_k: this.activeServerConfig?.topK ?? 40,
+                        top_p: this.activeServerConfig?.topP ?? 0.9,
+                        min_p: this.activeServerConfig?.minP ?? 0.05,
+                        repeat_penalty: penalty,
+                        presence_penalty: compatiblePenalty,
+                        frequency_penalty: compatiblePenalty
                     })
                 });
 

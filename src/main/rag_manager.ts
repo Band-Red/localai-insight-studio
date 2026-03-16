@@ -26,6 +26,20 @@ export class RagManager {
         return { success: true, fileCount: this.context.length };
     }
 
+    public async indexMultiplePaths(targetPaths: string[]) {
+        this.context = []; // Clear previous context
+        for (const p of targetPaths) {
+            if (!fs.existsSync(p)) continue;
+            const stats = fs.statSync(p);
+            if (stats.isDirectory()) {
+                await this.indexDirectory(p);
+            } else {
+                await this.indexSingleFile(p);
+            }
+        }
+        return { success: true, fileCount: this.context.length };
+    }
+
     private async indexDirectory(dirPath: string) {
         const files = fs.readdirSync(dirPath);
         for (const file of files) {

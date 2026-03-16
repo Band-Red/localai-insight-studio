@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History, Plus, Edit2, Check, X } from 'lucide-react';
+import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History, Plus, Edit2, Check, X, Folder, FileText } from 'lucide-react';
 import CodeSandbox from './CodeSandbox';
 import ConfirmModal from '../UI/ConfirmModal';
 import styles from './ChatBox.module.css';
@@ -34,6 +34,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
+  const [showMentionMenu, setShowMentionMenu] = useState(false);
 
   // Custom Confirm Modal State
   const [confirmModal, setConfirmModal] = useState<{
@@ -87,6 +88,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
       const electron = (window as any).electronAPI;
       if (electron && electron.saveChatHistory) {
         electron.saveChatHistory(messages);
+        // Also sync local NoSQL DB only if it has length
+        if (electron.dbSaveChat && messages.length > 0) {
+          electron.dbSaveChat(messages);
+        } else if (electron.dbClearChat && messages.length === 0) {
+          electron.dbClearChat();
+        }
       }
     }
   }, [messages, isHistoryLoaded]);
@@ -111,15 +118,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     setInputValue('');
     setIsLoading(true);
 
-    // Communication with local AI engine (Task 2.1)
+    // Communication with local AI engine
     try {
       const electron = (window as any).electronAPI;
       if (electron && electron.sendMessage) {
-        const result = await electron.sendMessage(inputValue, activeModel);
+        const historyPayload = [...messages, userMsg];
+        const result = await electron.sendMessage(historyPayload, activeModel);
 
         const aiMsg: Message = {
           id: (Date.now() + 1).toString(),
-          text: result.success ? result.response : `خطأ: ${result.error}`,
+          text: result.success ? result.response : `خطأ في التواصل مع المحرك المحرك: ${result.error || 'فشل جلب البيانات (Fetch Failed)'}`,
           sender: 'ai',
           timestamp: new Date()
         };
@@ -184,14 +192,30 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     try {
       const electron = (window as any).electronAPI;
       if (electron?.sendMessage) {
-        const result = await electron.sendMessage(newText, activeModel);
+        // Calculate the history from the CURRENT state slice to avoid duplication bugs
+        const msgIndex = messages.findIndex(m => m.id === editId);
+        if (msgIndex === -1) return;
+
+        const historyUpToEdited = messages.slice(0, msgIndex + 1).map(m => 
+            m.id === editId ? { ...m, text: newText, timestamp: new Date() } : m
+        );
+
+        const result = await electron.sendMessage(historyUpToEdited, activeModel);
         const aiMsg: Message = {
           id: (Date.now() + 1).toString(),
-          text: result.success ? result.response : `خطأ: ${result.error}`,
+          text: result.success ? result.response : `خطأ: ${result.error || 'فشل جلب البيانات (Fetch Failed)'}`,
           sender: 'ai',
           timestamp: new Date()
         };
-        setMessages(prev => [...prev, aiMsg]);
+
+        // Important: Use functional update to ensure we don't duplicate based on stale state
+        setMessages(prev => {
+            // Find the index again in the latest state to be safe
+            const currentIdx = prev.findIndex(m => m.id === editId);
+            if (currentIdx === -1) return prev;
+            return [...prev.slice(0, currentIdx + 1), aiMsg];
+        });
+
         if (result.success && result.response.includes('<html>')) {
           if (onCodeGenerated) onCodeGenerated(result.response);
         }
@@ -244,8 +268,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
 
   const clearChat = () => {
-    showConfirm('مسح المحادثة', 'هل أنت متأكد من مسح جميع المحادثات وتفريغ السجل؟', () => {
+    showConfirm('مسح المحادثة', 'هل أنت متأكد من مسح جميع المحادثات وتفريغ السجل؟', async () => {
       setMessages([]);
+      const electron = (window as any).electronAPI;
+      if (electron?.dbClearChat) await electron.dbClearChat();
     });
   };
 
@@ -275,8 +301,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   /**
    * بدء محادثة جديدة بدون حفظ
    */
-  const handleDiscardAndNew = () => {
+  const handleDiscardAndNew = async () => {
     setMessages([]);
+    setNewChatModalOpen(false);
+    const electron = (window as any).electronAPI;
+    if (electron?.dbClearChat) await electron.dbClearChat();
+  };
+
+  /**
+   * إغلاق النافذة بدون مسح المحادثة
+   */
+  const handleCloseModal = () => {
     setNewChatModalOpen(false);
   };
 
@@ -315,19 +350,26 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
       }
   };
 
-  const handleAttach = async () => {
+  const handleAttachFiles = async () => {
     try {
       const electron = (window as any).electronAPI;
       if (!electron) return;
+      const fileResult = await electron.selectFile();
+      if (fileResult.success) {
+        setAttachedInfo({ count: fileResult.fileCount || 1 });
+      }
+    } catch (err) {
+      console.error('Attach Error:', err);
+    }
+  };
 
+  const handleAttachFolder = async () => {
+    try {
+      const electron = (window as any).electronAPI;
+      if (!electron) return;
       const result = await electron.selectFolder();
       if (result.success) {
         setAttachedInfo({ count: result.fileCount || 1 });
-      } else if (result.error !== 'Cancelled') {
-        const fileResult = await electron.selectFile();
-        if (fileResult.success) {
-          setAttachedInfo({ count: fileResult.fileCount || 1 });
-        }
       }
     } catch (err) {
       console.error('Attach Error:', err);
@@ -350,11 +392,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         <div className={styles.headerInfo}>
           <Bot size={18} className={styles.aiIcon} />
           <span>المساعد المحلي (GGUF Engine)</span>
-          {activeModel && (
-            <span className={styles.statusBadge} title="النموذج النشط حالياً">
-              🟢 {activeModel}
-            </span>
-          )}
         </div>
         <div className={styles.headerActions}>
           <button 
@@ -474,16 +511,50 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           <button
             className={`${styles.attachBtn} ${attachedInfo ? styles.active : ''}`}
             title="إرفاق مجلد أو ملف للمشروع"
-            onClick={handleAttach}
+            onClick={() => setShowMentionMenu(!showMentionMenu)}
           >
             <Paperclip size={18} />
           </button>
+
+          {showMentionMenu && (
+            <div className={styles.mentionMenu}>
+              <button 
+                className={styles.mentionMenuItem}
+                onClick={() => {
+                  setShowMentionMenu(false);
+                  handleAttachFiles();
+                }}
+              >
+                <FileText size={16} />
+                <span>إرفاق ملفات (Files)</span>
+              </button>
+              <button 
+                className={styles.mentionMenuItem}
+                onClick={() => {
+                  setShowMentionMenu(false);
+                  handleAttachFolder();
+                }}
+              >
+                <Folder size={16} />
+                <span>إرفاق مجلد (Folder)</span>
+              </button>
+            </div>
+          )}
+
           <textarea
             className={styles.chatInput}
             placeholder="اسأل الذكاء الاصطناعي عن كود أو أداء النظام..."
             value={inputValue}
             rows={1}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setInputValue(val);
+              if (val.endsWith('@')) {
+                setShowMentionMenu(true);
+              } else if (showMentionMenu && val.trim() === '') {
+                setShowMentionMenu(false);
+              }
+            }}
             onInput={(e: any) => {
               e.target.style.height = 'auto';
               e.target.style.height = (e.target.scrollHeight) + 'px';
@@ -517,9 +588,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
       {/* ── Modal المحادثة الجديدة: حفظ أم تجاهل؟ ──────── */}
       {newChatModalOpen && (
-        <div className={styles.newChatOverlay} onClick={handleDiscardAndNew}>
+        <div className={styles.newChatOverlay} onClick={handleCloseModal}>
           <div className={styles.newChatModal} onClick={e => e.stopPropagation()} dir="rtl">
-            <button className={styles.newChatClose} onClick={handleDiscardAndNew} title="إغلاق">×</button>
+            <button className={styles.newChatClose} onClick={handleCloseModal} title="إغلاق">×</button>
             <h3 className={styles.newChatTitle}>💬 محادثة جديدة</h3>
             <p className={styles.newChatMsg}>هل تريد حفظ هذه المحادثة في السجل قبل البدء؟</p>
             <div className={styles.newChatActions}>

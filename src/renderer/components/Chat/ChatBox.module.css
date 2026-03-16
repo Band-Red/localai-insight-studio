@@ -413,6 +413,44 @@
   font-weight: 600;
 }
 
+/* ── Context Picker Menu (@) ─────────────────────────────────── */
+.mentionMenu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 10px; /* Aligned near the attach button */
+  background: var(--color-bg-sidebar);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 6px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(0,196,167,0.1);
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  z-index: 200;
+  animation: slideUp 0.15s ease-out;
+}
+
+.mentionMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: var(--color-text-main);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  text-align: right;
+  width: 100%;
+}
+
+.mentionMenuItem:hover {
+  background: rgba(0, 196, 167, 0.1);
+  color: var(--color-accent);
+}
+
 /* ── Pulsing Model Indicator ─────────────────────────────────── */
 .modelPulseBar {
   display: flex;
