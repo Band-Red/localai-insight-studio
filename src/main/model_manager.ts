@@ -697,10 +697,26 @@ Task: Suggest optimal settings for this model on this PC. Return ONLY JSON in th
             const data = await response.json();
             const aiContent = data.choices[0].message.content;
             const cleanJson = aiContent.substring(aiContent.indexOf('{'), aiContent.lastIndexOf('}') + 1);
+            
+            // Stop the suggestion model to free up resources
+            await this.stopSuggestionModel();
+            
             return JSON.parse(cleanJson);
         } catch (err) {
             console.error('[Suggestion Engine] API Error:', err);
+            await this.stopSuggestionModel();
             return this.getFallbackSuggestions(model, resources);
+        }
+    }
+
+    private async stopSuggestionModel(): Promise<void> {
+        if (this.suggestionProcess) {
+            const proc = this.suggestionProcess;
+            this.suggestionProcess = null;
+            try {
+                proc.kill('SIGINT');
+                setTimeout(() => { if (proc) proc.kill('SIGKILL'); }, 2000);
+            } catch (err) {}
         }
     }
 
