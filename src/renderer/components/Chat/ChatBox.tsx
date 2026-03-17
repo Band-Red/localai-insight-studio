@@ -52,6 +52,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   // حالة Modal المحادثة الجديدة (حفظ / بدون حفظ)
   const [newChatModalOpen, setNewChatModalOpen] = useState(false);
 
+  const [showHistoryList, setShowHistoryList] = useState(false);
+  const [historySessions, setHistorySessions] = useState<any[]>([]);
+
   const showConfirm = (title: string, message: string, onConfirm: () => void) => {
     setConfirmModal({
       isOpen: true,
@@ -241,8 +244,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   };
 
   const renderMessageText = (text: string) => {
+    if (!text) return null;
+
     // تقطيع النص للبحث عن كود ماركداون
     const parts = text.split(/(```[\s\S]*?```)/g);
+    
     return parts.map((part, index) => {
       if (part.startsWith('```') && part.endsWith('```')) {
         const match = part.match(/```(\w+)?\n?([\s\S]*?)```/);
@@ -250,19 +256,23 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         const code = match?.[2] || '';
         return (
           <CodeSandbox
-            key={index}
+            key={`code-${index}`}
             code={code}
             language={language}
             onRun={onRunCode}
           />
         );
       }
-      // استخدام markdown-it للنصوص العادية التي قد تحتوي على تنسيقات أخرى
+      
+      // إذا كان النص فارغاً أو مجرد مسافات لا نضيفه كـ div مستقل
+      const renderedHtml = md.render(part).trim();
+      if (!renderedHtml) return null;
+
       return (
         <div 
-          key={index} 
+          key={`md-${index}`} 
           className={styles.markdownContent}
-          dangerouslySetInnerHTML={{ __html: md.render(part) }}
+          dangerouslySetInnerHTML={{ __html: renderedHtml }}
         />
       );
     });
@@ -286,21 +296,37 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   };
 
   /**
-   * حفظ المحادثة الحالية ثم بدء جديدة
+   * حفظ المحادثة الحالية كجلسة تاريخية ثم بدء جديدة
    */
   const handleSaveAndNew = async () => {
+    if (messages.length === 0) {
+      setNewChatModalOpen(false);
+      return;
+    }
+
     const electron = (window as any).electronAPI;
-    if (electron?.saveChatHistory) {
-      // 1. Save to JSON History
-      await electron.saveChatHistory(messages);
-      
-      // 2. Save explicitly to NoSQL Session DB (Manual Save Logic)
-      if (electron.dbSaveChat) {
-          await electron.dbSaveChat(messages);
+    if (electron) {
+      // 1. Generate a title from the first user message
+      const firstUserMsg = messages.find(m => m.sender === 'user');
+      let title = 'محادثة بلا عنوان';
+      if (firstUserMsg) {
+        title = firstUserMsg.text.length > 30 
+          ? firstUserMsg.text.substring(0, 30) + '...' 
+          : firstUserMsg.text;
+      }
+
+      // 2. Save explicitly to NoSQL Session DB (Historical Session)
+      if (electron.dbSaveNewSession) {
+          await electron.dbSaveNewSession(title, messages);
+      }
+
+      // 3. Save to the general JSON history too for redundancy
+      if (electron.saveChatHistory) {
+          await electron.saveChatHistory(messages);
       }
 
       window.dispatchEvent(new CustomEvent('app:toast', {
-        detail: { msg: '✅ تم حفظ المحادثة في السجل وقاعدة البيانات', type: 'success' }
+        detail: { msg: `✅ تم حفظ المحادثة بعنوان: "${title}"`, type: 'success' }
       }));
     }
     setMessages([]);
@@ -343,20 +369,31 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
   const handleManualHistoryLoad = async () => {
       const electron = (window as any).electronAPI;
-      if (electron && electron.loadChatHistory) {
-        const result = await electron.loadChatHistory();
-        if (result.success && result.data && result.data.length > 0) {
-          const loadedMsg = result.data.map((m: any) => ({
-            ...m,
-            timestamp: new Date(m.timestamp)
-          }));
-          setMessages(loadedMsg);
-        } else {
-          window.dispatchEvent(new CustomEvent('app:toast', { 
-            detail: { msg: 'ℹ️ لا توجد محادثات سابقة محفوظة.', type: 'warning' } 
-          }));
+      if (electron?.dbListSessions) {
+        const res = await electron.dbListSessions();
+        if (res.success) {
+          setHistorySessions(res.data);
+          setShowHistoryList(true);
         }
       }
+  };
+
+  const loadSession = async (id: string) => {
+    const electron = (window as any).electronAPI;
+    if (electron?.dbGetSessionById) {
+      const res = await electron.dbGetSessionById(id);
+      if (res.success && res.data) {
+        const loadedMsg = res.data.messages.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }));
+        setMessages(loadedMsg);
+        setShowHistoryList(false);
+        window.dispatchEvent(new CustomEvent('app:toast', { 
+          detail: { msg: `📂 تم تحميل المحادثة: ${res.data.title}`, type: 'success' } 
+        }));
+      }
+    }
   };
 
   const handleAttachFiles = async () => {
@@ -413,7 +450,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           <button 
             onClick={handleManualHistoryLoad} 
             className={styles.headerAction} 
-            title="تحميل وعرض المحادثات السابقة المكتوبة مسبقاً"
+            title="المحادثات السابقة"
           >
             <History size={16} />
           </button>
@@ -595,7 +632,29 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
       />
 
-      {/* ── Modal المحادثة الجديدة: حفظ أم تجاهل؟ ──────── */}
+      {/* ── Modal قائمة المحادثات السابقة ──────── */}
+      {showHistoryList && (
+        <div className={styles.newChatOverlay} onClick={() => setShowHistoryList(false)}>
+          <div className={styles.newChatModal} onClick={e => e.stopPropagation()} dir="rtl">
+            <button className={styles.newChatClose} onClick={() => setShowHistoryList(false)}>×</button>
+            <h3 className={styles.newChatTitle}>📜 المحادثات السابقة</h3>
+            <div className={styles.historyListScroll}>
+              {historySessions.length === 0 ? (
+                <p className={styles.newChatMsg}>لا توجد محادثات محفوظة بعد.</p>
+              ) : (
+                historySessions.map(s => (
+                  <div key={s.id} className={styles.historyItem} onClick={() => loadSession(s.id)}>
+                    <div className={styles.historyTitle}>{s.title}</div>
+                    <div className={styles.historyMeta}>
+                      {new Date(s.createdAt).toLocaleDateString('ar-SA')} • {s.messageCount} رسائل
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {newChatModalOpen && (
         <div className={styles.newChatOverlay} onClick={handleCloseModal}>
           <div className={styles.newChatModal} onClick={e => e.stopPropagation()} dir="rtl">

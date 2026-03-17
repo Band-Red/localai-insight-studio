@@ -156,6 +156,20 @@ class MainApp {
             return await this.sessionDb.clearConversation();
         });
 
+        ipcMain.handle('db:save-new-session', async (_e, title: string, messages: any[]) => {
+            return await this.sessionDb.saveNewSession(title, messages);
+        });
+
+        ipcMain.handle('db:list-sessions', async () => {
+            const sessions = await this.sessionDb.listSessions();
+            return { success: true, data: sessions };
+        });
+
+        ipcMain.handle('db:get-session-by-id', async (_e, id: string) => {
+            const session = await this.sessionDb.getSessionById(id);
+            return { success: true, data: session };
+        });
+
 
 
         // ── GGUF Model Management ────────────────────────────────────────
