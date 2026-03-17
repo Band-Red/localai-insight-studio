@@ -22,28 +22,74 @@ export class SessionMemoryDB {
     }
 
     /**
-     * Saves the entire conversation array.
-     * We clear any existing memory in the session first to avoid duplicates.
+     * Saves the entire conversation array for the active session.
      */
     public async saveConversation(messages: any[]) {
         try {
-            // Overwrite memory completely with the latest saved array
-            await this.db.remove({}, { multi: true });
-            
-            // Re-insert array of messages 
-            // We store them as a single document under a "conversation" type, 
-            // or we could insert them individually. A single container object is simpler.
-            await this.db.insert({ _id: 'current_session', type: 'conversation', messages });
-            
+            await this.db.update(
+                { _id: 'current_session' },
+                { _id: 'current_session', type: 'active_session', messages, updatedAt: new Date() },
+                { upsert: true }
+            );
             return { success: true };
         } catch (error: any) {
-            console.error('[SessionDB] Error saving conversation:', error);
+            console.error('[SessionDB] Error saving active conversation:', error);
             return { success: false, error: error.message };
         }
     }
 
     /**
-     * Retrieves the stored conversation messages to be passed as context to the AI.
+     * Saves a completed conversation as a historical session with a title.
+     */
+    public async saveNewSession(title: string, messages: any[]) {
+        try {
+            const sessionId = `session_${Date.now()}`;
+            await this.db.insert({
+                _id: sessionId,
+                type: 'history_session',
+                title,
+                messages,
+                createdAt: new Date()
+            });
+            return { success: true, sessionId };
+        } catch (error: any) {
+            console.error('[SessionDB] Error saving new history session:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Lists all historical sessions (titles and IDs).
+     */
+    public async listSessions() {
+        try {
+            const sessions = await this.db.find({ type: 'history_session' }).sort({ createdAt: -1 });
+            return sessions.map((s: any) => ({
+                id: s._id,
+                title: s.title,
+                createdAt: s.createdAt,
+                messageCount: s.messages.length
+            }));
+        } catch (error) {
+            console.error('[SessionDB] Error listing sessions:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Retrieves a specific historical session by ID.
+     */
+    public async getSessionById(id: string) {
+        try {
+            return await this.db.findOne({ _id: id });
+        } catch (error) {
+            console.error('[SessionDB] Error getting session by ID:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves the active session messages.
      */
     public async getConversation(): Promise<any[]> {
         try {
@@ -59,11 +105,11 @@ export class SessionMemoryDB {
     }
 
     /**
-     * Clears the current session memory (used when user clears chat or discards it).
+     * Clears the current session memory.
      */
     public async clearConversation() {
         try {
-            await this.db.remove({}, { multi: true });
+            await this.db.remove({ _id: 'current_session' });
             return { success: true };
         } catch (error: any) {
             console.error('[SessionDB] Error clearing conversation:', error);
