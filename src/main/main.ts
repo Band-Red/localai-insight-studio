@@ -113,12 +113,15 @@ class MainApp {
                 let promptPayload;
                 // If input is an array, it's our new context-aware history
                 if (Array.isArray(input)) {
-                    // Prepend RAG context to the first message if context exists
-                    if (contextStr && input.length > 0) {
-                        const firstMsg = input[0];
-                        // If we already prepended it, don't do it again
-                        if (!firstMsg.content.includes(contextStr)) {
-                           input[0] = { ...firstMsg, content: `${contextStr}\n${firstMsg.content}` };
+                    // Inject RAG context as a system message at the beginning if not already present
+                    if (contextStr) {
+                        const hasContext = input.some(m => m.role === 'system' && m.content.includes(contextStr));
+                        if (!hasContext) {
+                            // Put it at the very top
+                            input.unshift({ 
+                                role: 'system', 
+                                content: `سياق إضافي من الملفات المرفقة:\n${contextStr}\nاستخدم هذه المعلومات للإجابة بدقة.` 
+                            });
                         }
                     }
                     promptPayload = input;

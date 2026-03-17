@@ -495,16 +495,21 @@ export class ModelManager {
 
                 // ── Sliding Window Strategy ──────────────────────────
                 // If the context is very long, we trimming older messages 
-                // but keep the most recent ones.
-                const MAX_MESSAGES = 12; // Safety limit for multi-turn chat
+                // but keep the most recent ones and all system prompts.
+                const MAX_MODERN_FLOW = 20; // Increased window for better communication
                 let finalMessages = messages;
-                if (messages.length > MAX_MESSAGES) {
-                    console.log(`[Model Manager] Trimming context: ${messages.length} messages -> ${MAX_MESSAGES}`);
-                    // Keep the first message if it's a 'system' or 'user' with heavy RAG context, 
-                    // and the last N messages for immediate flow.
-                    const systemMsg = messages.find(m => m.role === 'system');
-                    const recentMsgs = messages.slice(-MAX_MESSAGES);
-                    finalMessages = systemMsg ? [systemMsg, ...recentMsgs] : recentMsgs;
+                
+                if (messages.length > MAX_MODERN_FLOW) {
+                    console.log(`[Model Manager] Trimming context: ${messages.length} messages -> roughly ${MAX_MODERN_FLOW}`);
+                    
+                    // Always preserve system messages (which now include RAG context from main.ts)
+                    const systemMsgs = messages.filter(m => m.role === 'system');
+                    const nonSystemMsgs = messages.filter(m => m.role !== 'system');
+                    
+                    // Take the last N from the non-system messages
+                    const recentMsgs = nonSystemMsgs.slice(-MAX_MODERN_FLOW);
+                    
+                    finalMessages = [...systemMsgs, ...recentMsgs];
                 }
 
                 const response = await fetch(`http://127.0.0.1:${this.activePort}/v1/chat/completions`, {

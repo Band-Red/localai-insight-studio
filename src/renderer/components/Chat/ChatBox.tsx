@@ -88,12 +88,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
       const electron = (window as any).electronAPI;
       if (electron && electron.saveChatHistory) {
         electron.saveChatHistory(messages);
-        // Also sync local NoSQL DB only if it has length
-        if (electron.dbSaveChat && messages.length > 0) {
-          electron.dbSaveChat(messages);
-        } else if (electron.dbClearChat && messages.length === 0) {
-          electron.dbClearChat();
-        }
+        // Automatic NoSQL sync removed per refined plan - Manual Save only
       }
     }
   }, [messages, isHistoryLoaded]);
@@ -127,10 +122,17 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
         const aiMsg: Message = {
           id: (Date.now() + 1).toString(),
-          text: result.success ? result.response : `خطأ في التواصل مع المحرك المحرك: ${result.error || 'فشل جلب البيانات (Fetch Failed)'}`,
+          text: result.success ? result.response : `خطأ في التواصل مع المحرك: ${result.error || 'فشل جلب البيانات (Fetch Failed)'}`,
           sender: 'ai',
           timestamp: new Date()
         };
+
+        // If context overflow was detected by backend (optional enhancement)
+        if (!result.success && result.error?.includes('context')) {
+             window.dispatchEvent(new CustomEvent('app:toast', {
+                detail: { msg: '⚠️ تم الوصول للحد الأقصى للذاكرة، جاري تكييف المحادثة...', type: 'warning' }
+             }));
+        }
 
         setMessages(prev => [...prev, aiMsg]);
         setIsLoading(false);
@@ -289,9 +291,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
   const handleSaveAndNew = async () => {
     const electron = (window as any).electronAPI;
     if (electron?.saveChatHistory) {
+      // 1. Save to JSON History
       await electron.saveChatHistory(messages);
+      
+      // 2. Save explicitly to NoSQL Session DB (Manual Save Logic)
+      if (electron.dbSaveChat) {
+          await electron.dbSaveChat(messages);
+      }
+
       window.dispatchEvent(new CustomEvent('app:toast', {
-        detail: { msg: '✅ تم حفظ المحادثة في السجل', type: 'success' }
+        detail: { msg: '✅ تم حفظ المحادثة في السجل وقاعدة البيانات', type: 'success' }
       }));
     }
     setMessages([]);
