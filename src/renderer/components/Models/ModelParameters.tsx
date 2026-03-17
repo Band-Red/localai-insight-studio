@@ -76,45 +76,13 @@ const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void }> = (
 
 const ModelParameters: React.FC<ModelParametersProps> = ({ params, modelId, models, onChange }) => {
 
-    const [isSuggesting, setIsSuggesting] = useState(false);
-    const [suggestion, setSuggestion] = useState<string | null>(null);
-
     const set = (partial: Partial<ModelParamValues>) => onChange({ ...params, ...partial });
-
-    const handleSmartSuggest = async () => {
-        if (!modelId) return;
-        setIsSuggesting(true);
-        const electron = (window as any).electronAPI;
-        if (electron?.getSmartSuggestions) {
-            const result = await electron.getSmartSuggestions(modelId);
-            if (result) {
-                set({
-                    temperature: result.temperature,
-                    topK: result.topK,
-                    topP: result.topP,
-                    repeatPenalty: result.repeatPenalty,
-                    cpuThreads: result.cpuThreads,
-                });
-                setSuggestion(result.reasoning);
-            }
-        }
-        setIsSuggesting(false);
-    };
 
     return (
         <div>
-            {suggestion && (
-                <div className={styles.suggestionAlert}>
-                    <strong>✦ اقتراح ذكي:</strong> {suggestion}
-                </div>
-            )}
-
             {/* Header */}
-            <div className={styles.sectionHeaderRow}>
-                <div className={styles.sectionTitle}>
-                    <SlidersHorizontal size={18} /><span>معلمات النموذج</span>
-                </div>
-                <SmartSuggestBtn onSuggest={handleSmartSuggest} loading={isSuggesting} />
+            <div className={styles.sectionTitle}>
+                <SlidersHorizontal size={18} /><span>معاملات النموذج (Parameters)</span>
             </div>
 
             {/* System Prompt */}

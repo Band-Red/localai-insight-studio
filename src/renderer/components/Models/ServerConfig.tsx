@@ -74,30 +74,7 @@ const calcLayersFromVram = (vramMb: number): number => {
 };
 
 const ServerConfig: React.FC<ServerConfigProps> = ({ config, modelId, gpus, onChange }) => {
-    const [isSuggesting, setIsSuggesting] = useState(false);
-    const [suggestion, setSuggestion] = useState<string | null>(null);
-
     const set = (partial: Partial<ServerConfigValues>) => onChange({ ...config, ...partial });
-
-    const handleSmartSuggest = async () => {
-        if (!modelId) return;
-        setIsSuggesting(true);
-        const electron = (window as any).electronAPI;
-        if (electron?.getSmartSuggestions) {
-            const result = await electron.getSmartSuggestions(modelId);
-            if (result) {
-                set({
-                    contextLength: result.contextLength,
-                    nGpuLayers: result.nGpuLayers,
-                    ramGb: result.ramGb,
-                    vramGb: result.vramGb,
-                    evalBatch: result.evalBatch,
-                });
-                setSuggestion(result.reasoning);
-            }
-        }
-        setIsSuggesting(false);
-    };
 
     const generateApiKey = async () => {
         const electron = (window as any).electronAPI;
@@ -111,19 +88,11 @@ const ServerConfig: React.FC<ServerConfigProps> = ({ config, modelId, gpus, onCh
 
     return (
         <div>
-            {/* Smart Suggestion Alert */}
-            {suggestion && (
-                <div className={styles.suggestionAlert}>
-                    <strong>✦ اقتراح ذكي:</strong> {suggestion}
-                </div>
-            )}
-
-            {/* Section Header with Smart Suggest */}
+            {/* Section Header */}
             <div className={styles.sectionHeaderRow}>
                 <div className={styles.sectionTitle}>
                     <Server size={18} /><span>إعدادات الخادم الأساسية</span>
                 </div>
-                <SmartSuggestBtn onSuggest={handleSmartSuggest} loading={isSuggesting} />
             </div>
 
             {/* Basic Settings */}

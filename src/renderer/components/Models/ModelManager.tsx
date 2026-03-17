@@ -144,7 +144,7 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
 
     /**
      * بدء تشغيل خادم النموذج (Llama Server) مع الإعدادات المختارة
-     */
+     */ 
     const handleLoad = async (id: string) => {
         const electron = (window as any).electronAPI;
         if (!electron?.startServer) return;
@@ -472,52 +472,7 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                             gpus={resources?.gpus || []}
                             onChange={(cfg) => { setServerConfig(cfg); if (activeModelId) setRestartNeeded(true); }}
                         />
-                        {/* ── Single Smart Suggest Bar ── */}
-                        <div className={styles.suggestionBar}>
-                            <button type="button" className={styles.smartBtn}
-                                onClick={handleSmartSuggest} disabled={isSuggesting}>
-                                {isSuggesting ? <RefreshCw size={14} className={styles.spin} /> : <Zap size={14} />}
-                                ⚡ اقتراحات ذكية
-                            </button>
-                            {pendingSuggestions && (
-                                <div className={styles.suggestionPanel}>
-                                    <div className={styles.suggestionHeader}>✨ اقتراحات مبنية على موارد جهازك</div>
-                                    <div className={styles.suggestionGrid}>
-                                        {([
-                                            ['المنفذ (Port)',      `${pendingSuggestions.port ?? '—'}`],
-                                            ['RAM (GB)',           `${pendingSuggestions.ramGb ?? '—'} GB`],
-                                            ['VRAM (GB)',          `${pendingSuggestions.vramGb ?? '—'} GB`],
-                                            ['طبقات GPU',          `${pendingSuggestions.nGpuLayers ?? '—'}`],
-                                            ['Context Length',     `${pendingSuggestions.contextLength ?? '—'} tokens`],
-                                            ['Eval Batch',         `${pendingSuggestions.evalBatch ?? '—'}`],
-                                            ['ROPE Freq Base',     `${pendingSuggestions.ropeFreqBase ?? '—'}`],
-                                            ['ROPE Freq Scale',    `${pendingSuggestions.ropeFreqScale ?? '—'}`],
-                                            ['mlock',              `${pendingSuggestions.keepInMemory ? 'تفعيل' : 'تعطيل'}`],
-                                            ['mmap',               `${pendingSuggestions.useMmap ? 'تفعيل' : 'تعطيل'}`],
-                                            ['Max Idle TTL',       `${pendingSuggestions.maxIdleTtl ?? '—'} دقيقة`],
-                                            ['Require Auth',       `${pendingSuggestions.requireAuth ? 'تفعيل' : 'تعطيل'}`],
-                                            ['Serve on LAN',       `${pendingSuggestions.serveOnLan ? 'تفعيل' : 'تعطيل'}`],
-                                            ['CORS',               `${pendingSuggestions.enableCors ? 'تفعيل' : 'تعطيل'}`],
-                                            ['Per-req MCPs',       `${pendingSuggestions.allowPerRequestMcp ? 'تفعيل' : 'تعطيل'}`],
-                                            ['MCP JSON',           `${pendingSuggestions.allowMcpJson ? 'تفعيل' : 'تعطيل'}`],
-                                            ['JIT Loading',        `${pendingSuggestions.jitLoading ? 'تفعيل' : 'تعطيل'}`],
-                                            ['Auto Unload JIT',    `${pendingSuggestions.autoUnloadJit ? 'تفعيل' : 'تعطيل'}`],
-                                            ['Only Last JIT',      `${pendingSuggestions.onlyLastJit ? 'تفعيل' : 'تعطيل'}`],
-                                        ] as [string, string][]).map(([k, v]) => (
-                                            <div key={k} className={styles.suggestionRow}>
-                                                <span className={styles.suggestionKey}>{k}</span>
-                                                <span className={styles.suggestionVal}>{v}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {pendingSuggestions.reasoning && <div className={styles.suggestionNote}>{pendingSuggestions.reasoning}</div>}
-                                    <div className={styles.suggestionActions}>
-                                        <button className={styles.btnApply} onClick={handleApplySuggestions}>✓ تطبيق كل الاقتراحات</button>
-                                        <button className={styles.btnDismiss} onClick={() => setPendingSuggestions(null)}>× تجاهل</button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        {/* Suggestion Bar moved to bottom of body */}
                     </div>
                 )}
 
@@ -530,46 +485,7 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                             models={models}
                             onChange={(p) => { setModelParams(p); if (activeModelId) setRestartNeeded(true); }}
                         />
-                        {/* ── Single Smart Suggest Bar ── */}
-                        <div className={styles.suggestionBar}>
-                            <button type="button" className={styles.smartBtn}
-                                onClick={handleSmartSuggest} disabled={isSuggesting}>
-                                {isSuggesting ? <RefreshCw size={14} className={styles.spin} /> : <Zap size={14} />}
-                                ⚡ اقتراحات ذكية
-                            </button>
-                            {pendingSuggestions && (
-                                <div className={styles.suggestionPanel}>
-                                    <div className={styles.suggestionHeader}>✨ اقتراحات معامل النمذجة</div>
-                                    <div className={styles.suggestionGrid}>
-                                        {([
-                                            ['Temperature',         `${pendingSuggestions.temperature ?? '—'}`],
-                                            ['Top K',               `${pendingSuggestions.topK ?? '—'}`],
-                                            ['Top P',               `${pendingSuggestions.topP ?? '—'}`],
-                                            ['Min P',               `${pendingSuggestions.minP ?? '—'}`],
-                                            ['Repeat Penalty',      `${pendingSuggestions.repeatPenalty ?? '—'}`],
-                                            ['CPU Threads',         `${pendingSuggestions.cpuThreads ?? '—'}`],
-                                            ['Context Overflow',    `${pendingSuggestions.contextOverflow ?? '—'}`],
-                                            ['Stop Strings',        `${pendingSuggestions.stopStrings ?? '—'}`],
-                                            ['Structured Output',   `${pendingSuggestions.structuredOutput ? 'تفعيل' : 'تعطيل'}`],
-                                            ['Drafting Cutoff',     `${pendingSuggestions.draftingCutoff ?? '—'}`],
-                                            ['Min Draft Size',      `${pendingSuggestions.minDraftSize ?? '—'}`],
-                                            ['Max Draft Size',      `${pendingSuggestions.maxDraftSize ?? '—'}`],
-                                            ['Visualize Drafts',    `${pendingSuggestions.visualizeDraftTokens ? 'تفعيل' : 'تعطيل'}`],
-                                        ] as [string, string][]).map(([k, v]) => (
-                                            <div key={k} className={styles.suggestionRow}>
-                                                <span className={styles.suggestionKey}>{k}</span>
-                                                <span className={styles.suggestionVal}>{v}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {pendingSuggestions.reasoning && <div className={styles.suggestionNote}>{pendingSuggestions.reasoning}</div>}
-                                    <div className={styles.suggestionActions}>
-                                        <button className={styles.btnApply} onClick={handleApplySuggestions}>✓ تطبيق كل الاقتراحات</button>
-                                        <button className={styles.btnDismiss} onClick={() => setPendingSuggestions(null)}>× تجاهل</button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        {/* Suggestion Bar moved to bottom of body */}
                     </div>
                 )}
 
@@ -577,6 +493,51 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
                 {activeTab === 'mcp' && (
                     <div className={styles.card}>
                         <McpConfig />
+                    </div>
+                )}
+                {/* ── Consolidated Intelligent Suggestion Bar (Pinned to Body Bottom) ────────────────── */}
+                {(activeTab === 'server' || activeTab === 'params') && (
+                    <div className={styles.consolidatedSuggestionContainer}>
+                        <div className={styles.suggestionBarFullWidth}>
+                            <button type="button" className={styles.smartBtnIntelligent}
+                                onClick={handleSmartSuggest} disabled={isSuggesting}>
+                                {isSuggesting ? <RefreshCw size={14} className={styles.spin} /> : <Zap size={14} />}
+                                ⚡ اقتراحات ذكية (Intelligent Resource Analyzer)
+                            </button>
+                        </div>
+                        
+                        {pendingSuggestions && (
+                            <div className={styles.intelligentPanel}>
+                                <div className={styles.suggestionHeader}>✨ اقتراحات محسنة بناءً على موارد جهازك وأداء المحرك</div>
+                                <div className={styles.suggestionGrid}>
+                                    {[
+                                        ['RAM', `${pendingSuggestions.ramGb} GB`, 'nGpuLayers', pendingSuggestions.nGpuLayers],
+                                        ['VRAM', `${pendingSuggestions.vramGb} GB`, 'evalBatch', pendingSuggestions.evalBatch],
+                                        ['Context', `${pendingSuggestions.contextLength}`, 'cpuThreads', pendingSuggestions.cpuThreads],
+                                        ['Temp', pendingSuggestions.temperature, 'topK', pendingSuggestions.topK],
+                                        ['Min P', pendingSuggestions.minP, 'repeatPenalty', pendingSuggestions.repeatPenalty]
+                                    ].map(([k1, v1, k2, v2]) => (
+                                        <React.Fragment key={k1 as string}>
+                                            <div className={styles.suggestionItem}>
+                                                <span className={styles.suggestionKey}>{k1}:</span>
+                                                <span className={styles.suggestionVal}>{v1}</span>
+                                            </div>
+                                            <div className={styles.suggestionItem}>
+                                                <span className={styles.suggestionKey}>{k2}:</span>
+                                                <span className={styles.suggestionVal}>{v2}</span>
+                                            </div>
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                                {pendingSuggestions.reasoning && (
+                                    <div className={styles.suggestionNoteIntelligent}>💡 {pendingSuggestions.reasoning}</div>
+                                )}
+                                <div className={styles.suggestionActions}>
+                                    <button className={styles.btnDismiss} onClick={() => setPendingSuggestions(null)}>× تجاهل</button>
+                                    <button className={styles.btnApplyIntelligent} onClick={handleApplySuggestions}>✓ تطبيق كل الاقتراحات</button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
