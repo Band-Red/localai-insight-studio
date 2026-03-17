@@ -85,12 +85,16 @@ function detectQuantization(filename: string): string {
 export class ModelManager {
     private models: Map<string, GgufModel> = new Map();
     private serverProcess: ChildProcess | null = null;
+    private suggestionProcess: ChildProcess | null = null;
     private activeServerId: string | null = null;
     private activeServerConfig: ServerConfig | null = null;
     private activePort: number = 8080;
+    private suggestionPort: number = 8089;
     private readonly maxModels = 5;
     private readonly storageFile: string;
     private readonly modelsDir: string;
+    private serverLogs: string[] = []; // Rolling buffer for intelligent analysis 
+
 
     constructor() {
         const dataDir = path.join(os.homedir(), '.localai-insight-studio');
@@ -327,6 +331,16 @@ export class ModelManager {
 
                 const checkOutput = (data: Buffer) => {
                     const out = data.toString();
+                    
+                    // تحصيل اللوقات للتحليل الذكي (Rolling Buffer)
+                    const lines = out.split('\n');
+                    lines.forEach(l => {
+                        if (l.trim()) {
+                            this.serverLogs.push(l.trim());
+                            if (this.serverLogs.length > 100) this.serverLogs.shift();
+                        }
+                    });
+
                     if (!started) {
                         lastErrorLog = out; // Keep last output for error reporting
                         const lowerOut = out.toLowerCase();
@@ -591,62 +605,120 @@ export class ModelManager {
     // ----------------------------------------------------------------
     // Smart Suggestions
     // ----------------------------------------------------------------
+    // ----------------------------------------------------------------
+    // Intelligent Smart Suggestions (Dedicated Model)
+    // ----------------------------------------------------------------
+    
+    /**
+     * تشغيل نموذج الاقتراحات في الخلفية لفترة وجيزة لتحليل المشاكل
+     */
+    private async startSuggestionModel(): Promise<string | null> {
+        // إذا كان يعمل بالفعل، لا حاجة لبدء جديد
+        if (this.suggestionProcess) return `http://127.0.0.1:${this.suggestionPort}`;
+
+        const suggestionModelPath = path.join(__dirname, '..', 'renderer', 'components', 'Models', 'Suggestion_model.Q8_0.gguf');
+        // في حال عدم وجوده في المسار المتوقع (مثلاً بعد الحزم)
+        const finalPath = fs.existsSync(suggestionModelPath) 
+            ? suggestionModelPath 
+            : path.join(this.modelsDir, 'Suggestion_model.Q8_0.gguf');
+
+        if (!fs.existsSync(finalPath)) {
+            console.error(`[Suggestion Engine] Model not found at: ${finalPath}`);
+            return null;
+        }
+
+        return new Promise((resolve) => {
+            const isPackaged = __dirname.includes('app.asar');
+            const rootDir = isPackaged 
+                ? process.resourcesPath 
+                : fs.existsSync(path.join(__dirname, '..', 'bin')) 
+                    ? path.join(__dirname, '..') 
+                    : path.join(__dirname, '..', '..');
+
+            const exePath = process.platform === 'win32' ? 'llama-server.exe' : 'llama-server';
+            const serverCmd = path.join(rootDir, 'bin', exePath);
+
+            const args = [
+                '--model', finalPath,
+                '--port', String(this.suggestionPort),
+                '--ctx-size', '512', // حجم صغير جداً فقط للاقتراحات
+                '--n-gpu-layers', '10', // طبقات قليلة للسرعة
+                '--threads', '2'
+            ];
+
+            this.suggestionProcess = spawn(fs.existsSync(serverCmd) ? serverCmd : exePath, args);
+            
+            let ready = false;
+            this.suggestionProcess.stdout?.on('data', (data) => {
+                if (data.toString().toLowerCase().includes('listening')) {
+                    ready = true;
+                    resolve(`http://127.0.0.1:${this.suggestionPort}`);
+                }
+            });
+
+            setTimeout(() => {
+                if (!ready) resolve(null);
+            }, 10000); // 10 ثواني كحد أقصى للتشغيل
+        });
+    }
+
     public async getSmartSuggestions(modelId: string): Promise<SmartSuggestions | null> {
         const model = this.models.get(modelId);
         if (!model) return null;
 
         const resources = await this.getSystemResources();
+        const logs = this.serverLogs.slice(-15).join('\n'); // آخر 15 سطر من اللوقات
+        
+        const suggestionUrl = await this.startSuggestionModel();
+        
+        if (!suggestionUrl) {
+            // Fallback to basic heuristics if suggestion model fails to start
+            return this.getFallbackSuggestions(model, resources);
+        }
+
+        try {
+            const prompt = `System Specs: RAM ${resources.totalRamGb}GB, CPU Cores ${resources.cpuCores}, GPUs identified: ${JSON.stringify(resources.gpus)}. 
+Target Model: ${model.name} (${model.fileSizeMB / 1024} GB, Quant: ${model.quantization}).
+Current Logs/Errors: 
+${logs}
+
+Task: Suggest optimal settings for this model on this PC. Return ONLY JSON in this format:
+{"contextLength": 4096, "nGpuLayers": 20, "ramGb": 8, "vramGb": 4, "evalBatch": 512, "temperature": 0.7, "topK": 40, "topP": 0.9, "repeatPenalty": 1.1, "cpuThreads": 4, "reasoning": "summary in Arabic"}`;
+
+            const response = await fetch(`${suggestionUrl}/v1/chat/completions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.1
+                })
+            });
+
+            const data = await response.json();
+            const aiContent = data.choices[0].message.content;
+            const cleanJson = aiContent.substring(aiContent.indexOf('{'), aiContent.lastIndexOf('}') + 1);
+            return JSON.parse(cleanJson);
+        } catch (err) {
+            console.error('[Suggestion Engine] API Error:', err);
+            return this.getFallbackSuggestions(model, resources);
+        }
+    }
+
+    private getFallbackSuggestions(model: any, resources: any): SmartSuggestions {
         const modelSizeMB = model.fileSizeMB;
         const ramGb = resources.totalRamGb;
-        const hasGpu = resources.gpus.some(g => g.vramMb > 1000);
-        const maxVramGb = Math.max(...resources.gpus.map(g => g.vramMb / 1024), 0);
-
-        // Heuristics based on model size and RAM
-        let contextLength = 4096;
-        let nGpuLayers = 0;
-        let suggestedRamGb = Math.min(Math.ceil(modelSizeMB / 1024) + 2, ramGb - 2);
-        let suggestedVramGb = 0;
-        let evalBatch = 512;
-        let temperature = 0.7;
-        let topK = 40;
-        let topP = 0.9;
-        let repeatPenalty = 1.1;
-        let cpuThreads = Math.max(Math.floor(resources.cpuCores * 0.75), 1);
-
-        if (modelSizeMB < 4000) {        // ~3B models
-            contextLength = 8192;
-        } else if (modelSizeMB < 8000) { // ~7B models
-            contextLength = 4096;
-        } else if (modelSizeMB < 20000) {// ~13B models
-            contextLength = 2048;
-            evalBatch = 256;
-        } else {                          // 30B+
-            contextLength = 1024;
-            evalBatch = 128;
-        }
-
-        if (hasGpu) {
-            nGpuLayers = maxVramGb >= 12 ? 35 : maxVramGb >= 8 ? 20 : 10;
-            suggestedVramGb = Math.min(Math.floor(maxVramGb * 0.8), 16);
-        }
-
-        const quant = model.quantization;
-        if (quant.includes('Q8') || quant.includes('F16') || quant.includes('F32') || quant === 'بدون ضغط') {
-            temperature = 0.5;
-            // If it's uncompressed, we need much more RAM
-            if (quant === 'بدون ضغط' || quant === 'F16' || quant === 'F32') {
-                suggestedRamGb = Math.max(suggestedRamGb, Math.ceil(modelSizeMB / 1024) + 4);
-            }
-        }
-
-        const reasoning = `النموذج حجمه ${Math.round(modelSizeMB / 1024)} GB، النظام يملك ${ramGb} GB RAM ${hasGpu ? `و GPU بـ ${Math.round(maxVramGb)} GB VRAM` : 'بدون GPU مخصص'}. الإعدادات مُحسَّنة للأداء الأمثل.`;
-
+        const maxVramGb = Math.max(...resources.gpus.map((g: any) => g.vramMb / 1024), 0);
+        
+        let contextLength = modelSizeMB < 8000 ? 4096 : 2048;
+        let nGpuLayers = maxVramGb >= 8 ? 30 : 10;
+        
         return {
             contextLength, nGpuLayers,
-            ramGb: suggestedRamGb,
-            vramGb: suggestedVramGb,
-            evalBatch, temperature, topK, topP,
-            repeatPenalty, cpuThreads, reasoning
+            ramGb: Math.min(Math.ceil(modelSizeMB / 1024) + 2, ramGb),
+            vramGb: Math.min(Math.floor(maxVramGb * 0.7), 16),
+            evalBatch: 512, temperature: 0.7, topK: 40, topP: 0.9,
+            repeatPenalty: 1.1, cpuThreads: Math.max(resources.cpuCores - 2, 1),
+            reasoning: "اقتراحات مبنية على قواعد ثابتة (النموذج الذكي غير متاح حالياً)."
         };
     }
 

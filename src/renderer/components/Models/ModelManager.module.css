@@ -907,3 +907,128 @@
 }
 
 .btnImprove:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Consolidated Intelligent Suggestions ────────────────────── */
+.consolidatedSuggestionContainer {
+    margin-block-start: var(--space-lg);
+    border-block-start: 1px solid var(--color-border);
+    padding-block-start: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.suggestionBarFullWidth {
+    inline-size: 100%;
+}
+
+.smartBtnIntelligent {
+    inline-size: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 14px;
+    background: linear-gradient(135deg, rgba(0, 196, 167, 0.15) 0%, rgba(82, 209, 220, 0.1) 100%);
+    color: #00C4A7;
+    border: 1px solid rgba(0, 196, 167, 0.4);
+    border-radius: var(--radius-lg);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.smartBtnIntelligent:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(0, 196, 167, 0.25) 0%, rgba(82, 209, 220, 0.2) 100%);
+    border-color: #00C4A7;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 196, 167, 0.2);
+}
+
+.intelligentPanel {
+    background: linear-gradient(180deg, rgba(0, 196, 167, 0.08) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border: 1px solid rgba(0, 196, 167, 0.3);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    animation: slideUpIntelligent 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpIntelligent {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.suggestionHeader {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    margin-block-end: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.suggestionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-block-end: var(--space-md);
+}
+
+.suggestionItem {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.suggestionKey {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    font-weight: 600;
+}
+
+.suggestionVal {
+    font-size: 0.85rem;
+    color: #00C4A7;
+    font-weight: 700;
+}
+
+.suggestionNoteIntelligent {
+    background: rgba(0, 0, 0, 0.3);
+    border-inline-start: 3px solid #00C4A7;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: #e5e7eb;
+    margin-block-end: var(--space-md);
+    line-height: 1.5;
+}
+
+.btnApplyIntelligent {
+    inline-size: 100%;
+    background: linear-gradient(135deg, #00C4A7 0%, #52D1DC 100%);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btnApplyIntelligent:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
