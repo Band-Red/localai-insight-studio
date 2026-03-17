@@ -301,55 +301,58 @@ const ModelManager: React.FC<ModelManagerProps> = ({ onActiveModelChange }) => {
     };
 
     /**
-     * تطبيق الاقتراحات المعلقة على حالة النموذج
+     * تطبيق كافة الاقتراحات الذكية على إعدادات الخادم ومعاملات النموذج معاً
      */
     const handleApplySuggestions = () => {
         if (!pendingSuggestions) return;
-        if (activeTab === 'server') {
-            setServerConfig(prev => ({
-                ...prev,
-                port:              pendingSuggestions.port              ?? prev.port,
-                ramGb:             pendingSuggestions.ramGb             ?? prev.ramGb,
-                vramGb:            pendingSuggestions.vramGb            ?? prev.vramGb,
-                nGpuLayers:        pendingSuggestions.nGpuLayers        ?? prev.nGpuLayers,
-                contextLength:     pendingSuggestions.contextLength     ?? prev.contextLength,
-                evalBatch:         pendingSuggestions.evalBatch         ?? prev.evalBatch,
-                ropeFreqBase:      pendingSuggestions.ropeFreqBase      ?? prev.ropeFreqBase,
-                ropeFreqScale:     pendingSuggestions.ropeFreqScale     ?? prev.ropeFreqScale,
-                keepInMemory:      pendingSuggestions.keepInMemory      ?? prev.keepInMemory,
-                useMmap:           pendingSuggestions.useMmap           ?? prev.useMmap,
-                maxIdleTtl:        pendingSuggestions.maxIdleTtl        ?? prev.maxIdleTtl,
-                requireAuth:       pendingSuggestions.requireAuth       ?? prev.requireAuth,
-                serveOnLan:        pendingSuggestions.serveOnLan        ?? prev.serveOnLan,
-                enableCors:        pendingSuggestions.enableCors        ?? prev.enableCors,
-                allowPerRequestMcp:pendingSuggestions.allowPerRequestMcp?? prev.allowPerRequestMcp,
-                allowMcpJson:      pendingSuggestions.allowMcpJson      ?? prev.allowMcpJson,
-                jitLoading:        pendingSuggestions.jitLoading        ?? prev.jitLoading,
-                autoUnloadJit:     pendingSuggestions.autoUnloadJit     ?? prev.autoUnloadJit,
-                onlyLastJit:       pendingSuggestions.onlyLastJit       ?? prev.onlyLastJit,
-            }));
-        } else {
-            setModelParams(prev => ({
-                ...prev,
-                temperature:        pendingSuggestions.temperature        ?? prev.temperature,
-                topK:               pendingSuggestions.topK               ?? prev.topK,
-                topP:               pendingSuggestions.topP               ?? prev.topP,
-                minP:               pendingSuggestions.minP               ?? prev.minP,
-                repeatPenalty:      pendingSuggestions.repeatPenalty      ?? prev.repeatPenalty,
-                cpuThreads:         pendingSuggestions.cpuThreads         ?? prev.cpuThreads,
-                contextOverflow:    pendingSuggestions.contextOverflow    ?? prev.contextOverflow,
-                stopStrings:        pendingSuggestions.stopStrings        ?? prev.stopStrings,
-                structuredOutput:   pendingSuggestions.structuredOutput   ?? prev.structuredOutput,
-                draftingCutoff:     pendingSuggestions.draftingCutoff     ?? prev.draftingCutoff,
-                minDraftSize:       pendingSuggestions.minDraftSize       ?? prev.minDraftSize,
-                maxDraftSize:       pendingSuggestions.maxDraftSize       ?? prev.maxDraftSize,
-                visualizeDraftTokens: pendingSuggestions.visualizeDraftTokens ?? prev.visualizeDraftTokens,
-            }));
-        }
+
+        // 1. تحديث إعدادات الخادم (Server Config)
+        setServerConfig(prev => ({
+            ...prev,
+            port:               pendingSuggestions.port               ?? prev.port,
+            ramGb:              pendingSuggestions.ramGb              ?? prev.ramGb,
+            vramGb:             pendingSuggestions.vramGb             ?? prev.vramGb,
+            nGpuLayers:         pendingSuggestions.nGpuLayers         ?? prev.nGpuLayers,
+            contextLength:      pendingSuggestions.contextLength      ?? prev.contextLength,
+            evalBatch:          pendingSuggestions.evalBatch          ?? prev.evalBatch,
+            ropeFreqBase:       pendingSuggestions.ropeFreqBase       ?? prev.ropeFreqBase,
+            ropeFreqScale:      pendingSuggestions.ropeFreqScale      ?? prev.ropeFreqScale,
+            keepInMemory:       pendingSuggestions.keepInMemory       ?? prev.keepInMemory,
+            useMmap:            pendingSuggestions.useMmap            ?? prev.useMmap,
+            maxIdleTtl:         pendingSuggestions.maxIdleTtl         ?? prev.maxIdleTtl,
+            requireAuth:        pendingSuggestions.requireAuth        ?? prev.requireAuth,
+            serveOnLan:         pendingSuggestions.serveOnLan         ?? prev.serveOnLan,
+            enableCors:         pendingSuggestions.enableCors         ?? prev.enableCors,
+            allowPerRequestMcp: pendingSuggestions.allowPerRequestMcp ?? prev.allowPerRequestMcp,
+            allowMcpJson:       pendingSuggestions.allowMcpJson       ?? prev.allowMcpJson,
+            jitLoading:         pendingSuggestions.jitLoading         ?? prev.jitLoading,
+            autoUnloadJit:      pendingSuggestions.autoUnloadJit      ?? prev.autoUnloadJit,
+            onlyLastJit:        pendingSuggestions.onlyLastJit        ?? prev.onlyLastJit,
+        }));
+
+        // 2. تحديث معاملات النموذج (Model Parameters)
+        setModelParams(prev => ({
+            ...prev,
+            temperature:        pendingSuggestions.temperature        ?? prev.temperature,
+            topK:               pendingSuggestions.topK               ?? prev.topK,
+            topP:               pendingSuggestions.topP               ?? prev.topP,
+            minP:               pendingSuggestions.minP               ?? prev.minP,
+            repeatPenalty:      pendingSuggestions.repeatPenalty      ?? prev.repeatPenalty,
+            cpuThreads:         pendingSuggestions.cpuThreads         ?? prev.cpuThreads,
+            contextOverflow:    pendingSuggestions.contextOverflow    ?? prev.contextOverflow,
+            stopStrings:        pendingSuggestions.stopStrings        ?? prev.stopStrings,
+            structuredOutput:   pendingSuggestions.structuredOutput   ?? prev.structuredOutput,
+            draftingCutoff:     pendingSuggestions.draftingCutoff     ?? prev.draftingCutoff,
+            minDraftSize:       pendingSuggestions.minDraftSize       ?? prev.minDraftSize,
+            maxDraftSize:       pendingSuggestions.maxDraftSize       ?? prev.maxDraftSize,
+            visualizeDraftTokens: pendingSuggestions.visualizeDraftTokens ?? prev.visualizeDraftTokens,
+        }));
+
         setPendingSuggestions(null);
         setRestartNeeded(!!activeModelId);
+
         window.dispatchEvent(new CustomEvent('app:toast', {
-            detail: { msg: '✅ تم تطبيق الاقتراحات الذكية', type: 'success' }
+            detail: { msg: '✨ تم تطبيق كافة الإعدادات الذكية بنجاح (الخادم + المعاملات)', type: 'success' }
         }));
     };
 
