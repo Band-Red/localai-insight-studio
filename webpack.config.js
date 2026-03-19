@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 
 const commonConfig = {
-  mode: 'development',
+  mode: 'production',
   module: {
     rules: [
       {
@@ -63,7 +63,7 @@ module.exports = [
       filename: '[name].js',
     },
   }),
-  // إعدادات واجهة المستخدم (Renderer)
+  // إعدادات واجهة المستخدم للإلكترون (Electron Renderer)
   Object.assign({}, commonConfig, {
     target: 'electron-renderer',
     entry: './src/renderer/index.tsx',
@@ -73,6 +73,22 @@ module.exports = [
     },
     plugins: [
       new HtmlWebpackPlugin({ template: './index.html' }),
+    ],
+  }),
+  // إعدادات الويب للعرض على GitHub Pages (Web Preview)
+  Object.assign({}, commonConfig, {
+    target: 'web',
+    entry: './src/renderer/index.tsx',
+    output: {
+      path: path.resolve(__dirname, 'dist-web'),
+      filename: 'bundle.js',
+      publicPath: './',
+    },
+    plugins: [
+      new HtmlWebpackPlugin({ 
+        template: './index.html',
+        filename: 'index.html'
+      }),
     ],
   }),
 ];

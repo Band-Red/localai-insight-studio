@@ -6,6 +6,7 @@
     overflow: hidden;
     box-shadow: 0 4px 12px hsl(0 0% 0% / 0.2);
     position: relative;
+    direction: ltr; /* Force LTR for the whole container */
 }
 
 .codeHeader {
@@ -76,6 +77,7 @@
     background: hsl(var(--h-bg) var(--s-bg) 1%);
     scrollbar-width: none;
     -ms-overflow-style: none;
+    direction: ltr; /* Force LTR for content */
 }
 
 .codeContent::-webkit-scrollbar {
@@ -88,4 +90,5 @@
     white-space: pre-wrap;
     word-break: break-all;
     color: #e4e4e7;
+    direction: ltr; /* Force LTR for text specifically */
 }
