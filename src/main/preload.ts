@@ -19,6 +19,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     dbSaveChat: (messages: any[]) => ipcRenderer.invoke('db:save-chat', messages),
     dbGetChat: () => ipcRenderer.invoke('db:get-chat'),
     dbClearChat: () => ipcRenderer.invoke('db:clear-chat'),
+    dbSaveNewSession: (title: string, messages: any[]) => ipcRenderer.invoke('db:save-new-session', title, messages),
+    dbListSessions: () => ipcRenderer.invoke('db:list-sessions'),
+    dbGetSessionById: (id: string) => ipcRenderer.invoke('db:get-session-by-id', id),
 
     // وظائف التصدير
     exportChat: (session: any, vaultPath?: string) => ipcRenderer.invoke('export:chat', session, vaultPath),

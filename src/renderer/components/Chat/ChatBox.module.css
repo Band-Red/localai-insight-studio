@@ -148,34 +148,17 @@
   width: 100%;
 }
 
-.messageRow.user {
-  align-self: flex-start; /* Right in RTL */
-  flex-direction: row; /* Avatar on right */
+.messageRow.user { 
+  flex-direction: row; /* Avatar on right in RTL */
+  justify-content: flex-start;
+  align-self: flex-start; /* Sticks to the right side in RTL */
 }
 
 .messageRow.ai {
-  align-self: flex-end; /* Left in RTL */
-  flex-direction: row-reverse; /* Avatar on left */
-  margin-inline-end: auto; /* Extra force to stay left */
-}
-
-.avatar {
-  inline-size: 32px;
-  block-size: 32px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: hsl(240 20% 12%);
-  color: var(--color-text-dim);
-  flex-shrink: 0;
-  border: 1px solid var(--color-border);
-}
-
-.ai .avatar {
-  background: var(--color-accent-glow);
-  color: var(--color-accent);
-  border-color: var(--color-accent);
+  flex-direction: row-reverse; /* Avatar on left in RTL */
+  justify-content: flex-start;
+  align-self: flex-end; /* Sticks to the left side in RTL */
+  margin-inline-end: auto;
 }
 
 .messageContent {
@@ -183,13 +166,15 @@
   flex-direction: column;
   gap: 0;
   min-inline-size: 60px;
-  max-inline-size: 100%;
+  max-inline-size: 85%; /* Respect the bubble design */
+  width: auto; /* Fit to content */
   padding: 10px 14px;
   border-radius: var(--radius-md);
   text-align: right;
   direction: rtl;
   position: relative;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .user .messageContent {
@@ -244,6 +229,9 @@
   border-radius: 4px;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 0.85em;
+  direction: ltr;
+  display: inline-block;
+  unicode-bidi: embed;
 }
 
 
