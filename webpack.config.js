@@ -2,8 +2,12 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 
+// Bug #5 Fix: determine build mode dynamically from NODE_ENV
+const isProduction = process.env.NODE_ENV === 'production';
+const buildMode = isProduction ? 'production' : 'development';
+
 const commonConfig = {
-  mode: 'production',
+  mode: buildMode,
   module: {
     rules: [
       {
@@ -78,6 +82,7 @@ module.exports = [
   // إعدادات الويب للعرض على GitHub Pages (Web Preview)
   Object.assign({}, commonConfig, {
     target: 'web',
+    mode: 'production', // Web preview always production for smaller bundle
     entry: './src/renderer/index.tsx',
     output: {
       path: path.resolve(__dirname, 'dist-web'),

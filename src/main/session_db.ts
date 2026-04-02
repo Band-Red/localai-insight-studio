@@ -25,6 +25,10 @@ export class SessionMemoryDB {
      * Saves the entire conversation array for the active session.
      */
     public async saveConversation(messages: any[]) {
+        if (!Array.isArray(messages)) {
+            console.warn('[SessionDB] saveConversation: invalid messages data (not an array)');
+            return { success: false, error: 'Invalid messages format' };
+        }
         try {
             await this.db.update(
                 { _id: 'current_session' },
@@ -42,6 +46,13 @@ export class SessionMemoryDB {
      * Saves a completed conversation as a historical session with a title.
      */
     public async saveNewSession(title: string, messages: any[]) {
+        if (!Array.isArray(messages) || messages.length === 0) {
+            console.warn('[SessionDB] saveNewSession: invalid or empty messages');
+            return { success: false, error: 'Messages must be a non-empty array' };
+        }
+        if (!title || typeof title !== 'string') {
+            title = 'محادثة بدون عنوان';
+        }
         try {
             const sessionId = `session_${Date.now()}`;
             await this.db.insert({

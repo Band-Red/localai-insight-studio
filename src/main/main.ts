@@ -113,18 +113,20 @@ class MainApp {
                 let promptPayload;
                 // If input is an array, it's our new context-aware history
                 if (Array.isArray(input)) {
-                    // Inject RAG context as a system message at the beginning if not already present
+                    // Inject RAG context as a system message — use spread to avoid mutating input (Bug #3 Fix)
                     if (contextStr) {
-                        const hasContext = input.some(m => m.role === 'system' && m.content.includes(contextStr));
+                        const hasContext = input.some((m: any) => m.role === 'system' && m.content.includes(contextStr));
                         if (!hasContext) {
-                            // Put it at the very top
-                            input.unshift({ 
-                                role: 'system', 
-                                content: `سياق إضافي من الملفات المرفقة:\n${contextStr}\nاستخدم هذه المعلومات للإجابة بدقة.` 
-                            });
+                            promptPayload = [
+                                { role: 'system', content: `سياق إضافي من الملفات المرفقة:\n${contextStr}\nاستخدم هذه المعلومات للإجابة بدقة.` },
+                                ...input
+                            ];
+                        } else {
+                            promptPayload = input;
                         }
+                    } else {
+                        promptPayload = input;
                     }
-                    promptPayload = input;
                 } else {
                     // Backward compatibility - if it's just a string, simulate it as user message
                     const msgString = String(input);
