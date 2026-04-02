@@ -34,7 +34,9 @@ export class LoggerManager {
     public addLog(entry: Omit<LogEntry, 'timestamp'>) {
         try {
             const timestamp = new Date().toISOString();
-            const row = `${timestamp},${entry.event},${entry.cpuUsage},${entry.ramUsage},${entry.latency},${entry.status}\n`;
+            // Sanitize event string to avoid CSV breakage
+            const safeEvent = entry.event.replace(/,/g, ';');
+            const row = `${timestamp},${safeEvent},${entry.cpuUsage},${entry.ramUsage},${entry.latency},${entry.status}\n`;
             fs.appendFileSync(this.logFilePath, row, 'utf-8');
             return { success: true };
         } catch (error) {
@@ -59,6 +61,8 @@ export class LoggerManager {
                     status: status as any
                 };
             });
+            // Sort to ensure chronological order, then slice
+            entries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
             return entries.slice(-limit);
         } catch (error) {
             console.error('Failed to read logs:', error);

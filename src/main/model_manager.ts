@@ -119,14 +119,18 @@ export class ModelManager {
                     this.models.set(m.id, m);
                 });
             }
-        } catch { /* ignore corrupt file */ }
+        } catch (error) { 
+            console.error('[ModelManager] Error loading models from disk:', error);
+        }
     }
 
     private saveToDisk() {
         try {
             const data = Array.from(this.models.values());
             fs.writeFileSync(this.storageFile, JSON.stringify(data, null, 2), 'utf8');
-        } catch { /* ignore */ }
+        } catch (error) { 
+            console.error('[ModelManager] Error saving models to disk:', error);
+        }
     }
 
     // ----------------------------------------------------------------
