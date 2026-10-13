@@ -26,9 +26,13 @@ export class RagManager {
         return { success: true, fileCount: this.context.length };
     }
 
-    public async indexMultiplePaths(targetPaths: string[]) {
-        this.context = []; // Clear previous context
+    public async indexMultiplePaths(targetPaths: string[], append = false) {
+        // Bug #1 Fix: support 'append' mode so existing context is not always cleared
+        if (!append) {
+            this.context = [];
+        }
         for (const p of targetPaths) {
+            if (this.context.length >= this.maxFiles) break; // Bug #2 Fix: honour maxFiles in outer loop too
             if (!fs.existsSync(p)) continue;
             const stats = fs.statSync(p);
             if (stats.isDirectory()) {
@@ -43,6 +47,9 @@ export class RagManager {
     private async indexDirectory(dirPath: string) {
         const files = fs.readdirSync(dirPath);
         for (const file of files) {
+            // Bug #2 Fix: check maxFiles BEFORE descending into subdirectories
+            if (this.context.length >= this.maxFiles) return;
+
             const fullPath = path.join(dirPath, file);
             const stats = fs.statSync(fullPath);
 
@@ -52,7 +59,7 @@ export class RagManager {
                     await this.indexDirectory(fullPath);
                 }
             } else {
-                if (this.context.length >= this.maxFiles) break;
+                if (this.context.length >= this.maxFiles) return;
                 await this.indexSingleFile(fullPath);
             }
         }
