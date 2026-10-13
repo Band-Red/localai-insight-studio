@@ -241,8 +241,7 @@
 
 .markdownContent table {
   inline-size: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   font-size: 0.9rem;
   text-align: right;
   direction: rtl;
@@ -251,6 +250,7 @@
   overflow: hidden;
   border: 1px solid var(--color-border);
   background: hsl(240 18% 7%);
+  box-shadow: 0 4px 14px hsl(0 0% 0% / 0.4);
 }
 
 .markdownContent thead {
@@ -259,22 +259,41 @@
 }
 
 .markdownContent th {
-  padding: 10px 14px;
+  padding: 10px 16px;
   color: var(--color-accent);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   letter-spacing: 0.02em;
-  border-block-end: 1px solid hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.3);
+  border-block-end: 2px solid var(--color-accent);
+  border-inline-end: 1px solid hsl(240 6% 16%);
   background: hsl(240 20% 10%);
-  white-space: nowrap;
+  text-shadow: 0 0 10px var(--color-accent-glow);
+}
+
+.markdownContent th:last-child {
+  border-inline-end: none;
 }
 
 .markdownContent td {
-  padding: 10px 14px;
+  padding: 9px 16px;
   color: #e4e4e7;
-  border-block-end: 1px solid hsl(240 6% 14%);
+  border-block-end: 1px solid hsl(240 6% 13%);
+  border-inline-end: 1px solid hsl(240 6% 12%);
   line-height: 1.5;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.markdownContent td:last-child {
+  border-inline-end: none;
+}
+
+/* تنسيق عمود الرقم / التسلسل ليكون ممركزاً ومحدداً */
+.markdownContent th:first-child,
+.markdownContent td:first-child {
+  inline-size: 60px;
+  text-align: center;
+  color: var(--color-accent);
+  font-weight: 600;
 }
 
 .markdownContent tbody tr:last-child td {

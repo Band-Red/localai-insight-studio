@@ -245,8 +245,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
   /**
    * معالجة وتحسين تنسيقات الماركداون للجداول والقوائم:
-   * 1. تحويل الجداول الناقصة (رؤوس أعمدة متبوعة بقائمة مرقمة) إلى جداول ماركداون قياسية.
-   * 2. ضمان وجود فاصل الأعمدة (| --- | --- |) إذا نسيه نموذج الذكاء الاصطناعي.
+   * 1. تحويل الجداول المشوهة أو الناقصة (رؤوس أعمدة متبوعة بقائمة مرقمة أو سطور منفصلة) إلى جداول Markdown متكاملة.
+   * 2. ضمان وجود سطر الفواصل القياسي (| --- | --- |) بشكل متناسق.
+   * 3. استيعاب كامل عناصر القائمة حتى لو فصلت بينها أسطر فارغة أو صفوف بصيغة بايب.
    */
   const preprocessMarkdown = (rawText: string): string => {
     if (!rawText) return '';
@@ -258,11 +259,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
       const line = lines[i];
       const trimmed = line.trim();
 
-      // حالة 1: ترويسة جدول مثل "| رقم | اسم المدينة |" متبوعة بقائمة مرقمة مباشرة دون خط الفاصل
+      // حالة ترويسة جدول مثل "| الرقم | اسم المدينة |" بدون خط فاصل
       if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---')) {
         let nextIdx = i + 1;
         while (nextIdx < lines.length && !lines[nextIdx].trim()) nextIdx++;
 
+        // فحص هل ما يليها قائمة مرقمة أو سطور جدول
         if (nextIdx < lines.length && /^\d+[\.\)]\s+/.test(lines[nextIdx].trim())) {
           const colCells = trimmed.split('|').filter(c => c.trim().length > 0);
           const colCount = Math.max(colCells.length, 2);
@@ -272,19 +274,38 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           result.push(separator);
 
           i = nextIdx;
-          while (i < lines.length && /^\d+[\.\)]\s+/.test(lines[i].trim())) {
-            const listMatch = lines[i].trim().match(/^(\d+)[\.\)]\s+(.*)$/);
-            if (listMatch) {
-              result.push(`| ${listMatch[1]} | ${listMatch[2]} |`);
+          while (i < lines.length) {
+            const rowTrim = lines[i].trim();
+            if (!rowTrim) {
+              // تخطي الأسطر الفارغة طالما السطر التالي لا يزال ضمن القائمة أو الجدول
+              let peek = i + 1;
+              while (peek < lines.length && !lines[peek].trim()) peek++;
+              if (peek < lines.length && (/^\d+[\.\)]\s+/.test(lines[peek].trim()) || (lines[peek].trim().startsWith('|') && lines[peek].trim().endsWith('|')))) {
+                i++;
+                continue;
+              } else {
+                break;
+              }
+            }
+
+            if (/^\d+[\.\)]\s+/.test(rowTrim)) {
+              const listMatch = rowTrim.match(/^(\d+)[\.\)]\s+(.*)$/);
+              if (listMatch) {
+                result.push(`| ${listMatch[1]} | ${listMatch[2]} |`);
+              } else {
+                result.push(lines[i]);
+              }
+            } else if (rowTrim.startsWith('|') && rowTrim.endsWith('|')) {
+              result.push(rowTrim);
             } else {
-              result.push(lines[i]);
+              break;
             }
             i++;
           }
           continue;
         }
 
-        // حالة 2: سطر جدول متبوع بأسطر جدول أخرى لكن ينقصه سطر الفواصل |---|---|
+        // حالة سطر جدول متبوع بأسطر جدول أخرى بدون خط فاصل
         if (nextIdx < lines.length && lines[nextIdx].trim().startsWith('|') && !lines[nextIdx].trim().includes('---')) {
           const colCells = trimmed.split('|').filter(c => c.trim().length > 0);
           const colCount = Math.max(colCells.length, 2);
