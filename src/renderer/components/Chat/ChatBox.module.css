@@ -207,13 +207,90 @@
   margin-block-end: 0;
 }
 
-.markdownContent ul, .markdownContent ol {
+.markdownContent ul {
   margin-block-end: 1rem;
   padding-inline-start: 1.5rem;
+  list-style-type: disc;
+}
+
+.markdownContent ol {
+  margin-block-end: 1rem;
+  padding-inline-start: 1.5rem;
+  list-style-type: decimal;
 }
 
 .markdownContent li {
-  margin-block-end: 0.5rem;
+  margin-block-end: 0.4rem;
+  line-height: 1.6;
+}
+
+.markdownContent li::marker {
+  color: var(--color-accent);
+}
+
+/* ── Modern Table Styling matching Welcome Screen Neon Cyberpunk Theme ── */
+.tableContainer {
+  inline-size: 100%;
+  overflow-x: auto;
+  margin-block: 1rem 1.2rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 16px hsl(0 0% 0% / 0.35);
+  background: var(--color-bg-card);
+}
+
+.markdownContent table {
+  inline-size: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  text-align: right;
+  direction: rtl;
+  margin-block: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: hsl(240 18% 7%);
+}
+
+.markdownContent thead {
+  background: hsl(240 20% 11%);
+  border-block-end: 2px solid var(--color-accent);
+}
+
+.markdownContent th {
+  padding: 10px 14px;
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  border-block-end: 1px solid hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.3);
+  background: hsl(240 20% 10%);
+  white-space: nowrap;
+}
+
+.markdownContent td {
+  padding: 10px 14px;
+  color: #e4e4e7;
+  border-block-end: 1px solid hsl(240 6% 14%);
+  line-height: 1.5;
+  transition: background-color 0.15s ease;
+}
+
+.markdownContent tbody tr:last-child td {
+  border-block-end: none;
+}
+
+.markdownContent tbody tr:nth-child(even) {
+  background: hsl(240 16% 9%);
+}
+
+.markdownContent tbody tr:hover {
+  background: hsl(var(--h-cyan) var(--s-cyan) var(--l-cyan) / 0.07);
+}
+
+.markdownContent tbody tr:hover td {
+  color: #ffffff;
 }
 
 .markdownContent h1, .markdownContent h2, .markdownContent h3 {

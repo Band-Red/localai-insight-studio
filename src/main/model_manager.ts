@@ -498,15 +498,27 @@ export class ModelManager {
             try {
                 let messages = [];
                 if (Array.isArray(messagePayload)) {
-                    // It's already the full history from NoSQL frontend
+                    // It's already the full history from frontend / main IPC
                     messages = messagePayload.map(m => ({
-                        role: m.sender === 'user' ? 'user' : 'assistant',
-                        content: m.text || m.content
+                        role: m.role || (m.sender === 'user' ? 'user' : 'assistant'),
+                        content: m.text || m.content || ''
                     }));
                 } else {
                     // Backward compatibility single user message
-                    messages = [{ role: 'user', content: messagePayload }];
+                    messages = [{ role: 'user', content: String(messagePayload) }];
                 }
+
+                // Inject system instruction for proper Markdown tables and formatting
+                const configuredSystemPrompt = this.activeServerConfig?.systemPrompt?.trim();
+                const defaultFormatInstruction = 'عند طلب عرض بيانات في جدول، استخدم دائماً تنسيق جداول Markdown القياسي مع سطر الفواصل (مثل: | العمود 1 | العمود 2 |\\n| --- | --- |\\n| القيمة 1 | القيمة 2 |). وعند طلب قوائم، استخدم القوائم النقطية أو المرقمة بشكل منظم.';
+                const systemContent = configuredSystemPrompt 
+                    ? `${configuredSystemPrompt}\n\n${defaultFormatInstruction}`
+                    : defaultFormatInstruction;
+
+                if (!messages.some(m => m.role === 'system')) {
+                    messages.unshift({ role: 'system', content: systemContent });
+                }
+
                 const penalty = this.activeServerConfig?.repeatPenalty || 1.1;
                 // Typically frequency/presence penalty are expected to be between 0.0 and 2.0 in compatible APIs
                 const compatiblePenalty = penalty >= 1.0 ? Math.min(penalty - 1.0, 2.0) : 0.0;

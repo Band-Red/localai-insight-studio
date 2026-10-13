@@ -243,6 +243,67 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     setIsLoading(false);
   };
 
+  /**
+   * معالجة وتحسين تنسيقات الماركداون للجداول والقوائم:
+   * 1. تحويل الجداول الناقصة (رؤوس أعمدة متبوعة بقائمة مرقمة) إلى جداول ماركداون قياسية.
+   * 2. ضمان وجود فاصل الأعمدة (| --- | --- |) إذا نسيه نموذج الذكاء الاصطناعي.
+   */
+  const preprocessMarkdown = (rawText: string): string => {
+    if (!rawText) return '';
+    const lines = rawText.split('\n');
+    const result: string[] = [];
+    let i = 0;
+
+    while (i < lines.length) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      // حالة 1: ترويسة جدول مثل "| رقم | اسم المدينة |" متبوعة بقائمة مرقمة مباشرة دون خط الفاصل
+      if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---')) {
+        let nextIdx = i + 1;
+        while (nextIdx < lines.length && !lines[nextIdx].trim()) nextIdx++;
+
+        if (nextIdx < lines.length && /^\d+[\.\)]\s+/.test(lines[nextIdx].trim())) {
+          const colCells = trimmed.split('|').filter(c => c.trim().length > 0);
+          const colCount = Math.max(colCells.length, 2);
+          const separator = '| ' + Array(colCount).fill('---').join(' | ') + ' |';
+
+          result.push(trimmed);
+          result.push(separator);
+
+          i = nextIdx;
+          while (i < lines.length && /^\d+[\.\)]\s+/.test(lines[i].trim())) {
+            const listMatch = lines[i].trim().match(/^(\d+)[\.\)]\s+(.*)$/);
+            if (listMatch) {
+              result.push(`| ${listMatch[1]} | ${listMatch[2]} |`);
+            } else {
+              result.push(lines[i]);
+            }
+            i++;
+          }
+          continue;
+        }
+
+        // حالة 2: سطر جدول متبوع بأسطر جدول أخرى لكن ينقصه سطر الفواصل |---|---|
+        if (nextIdx < lines.length && lines[nextIdx].trim().startsWith('|') && !lines[nextIdx].trim().includes('---')) {
+          const colCells = trimmed.split('|').filter(c => c.trim().length > 0);
+          const colCount = Math.max(colCells.length, 2);
+          const separator = '| ' + Array(colCount).fill('---').join(' | ') + ' |';
+
+          result.push(trimmed);
+          result.push(separator);
+          i++;
+          continue;
+        }
+      }
+
+      result.push(line);
+      i++;
+    }
+
+    return result.join('\n');
+  };
+
   const renderMessageText = (text: string) => {
     if (!text) return null;
 
@@ -264,8 +325,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         );
       }
       
-      // إذا كان النص فارغاً أو مجرد مسافات لا نضيفه كـ div مستقل
-      const renderedHtml = md.render(part).trim();
+      // معالجة وتحسين تنسيق الجداول والقوائم
+      const processedPart = preprocessMarkdown(part);
+      const renderedHtml = md.render(processedPart).trim();
       if (!renderedHtml) return null;
 
       return (
