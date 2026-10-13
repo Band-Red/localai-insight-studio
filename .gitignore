@@ -23,24 +23,51 @@
 *.onnx
 *.safetensors
 
-# Secrets, Credentials & Environment
+# Secrets, Credentials & Environment (Checklist Item 1)
 .env
 .env.*
+.env.local
+.env.development
+.env.test
+.env.production
 !.env.example
+
+# Secrets & Credentials Files
+secrets/
+secrets.*
+credentials/
+credentials.*
+config.*.secret
+serviceAccount*.json
+firebase-config*.js
+google-services*.json
+local.settings.json
+appsettings.Development.json
+
+# Certificates, Keys & Cloud Credentials
 *.pem
 *.key
-*.cert
-*.crt
-*.pfx
 *.p12
+*.pfx
+*.crt
+*.cer
+*.der
 id_rsa*
+id_dsa*
+*.ppk
 *.keystore
+.aws/
+.ssh/
+.gnupg/
 
-# Local databases & runtime caches
+# Local databases, dumps & runtime caches
 *.db
 *.sqlite
 *.sqlite3
 *.nedb
+*.sql
+*.dump
+*.bak
 data/
 logs/
 *.log
@@ -48,9 +75,7 @@ logs/
 # System & IDE artifacts
 .DS_Store
 Thumbs.db
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
+.vscode/
 .idea/
 
 # Package manager debug logs
