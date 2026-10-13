@@ -86,8 +86,38 @@ module.exports = [
     entry: './src/renderer/index.tsx',
     output: {
       path: path.resolve(__dirname, 'dist-web'),
-      filename: 'bundle.js',
+      filename: '[name].[contenthash:8].js',
+      clean: true,
       publicPath: './',
+    },
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        maxInitialRequests: 10,
+        minSize: 20000,
+        cacheGroups: {
+          defaultVendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name(module) {
+              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
+              const name = packageName ? packageName[1].replace('@', '') : 'vendor';
+              return `vendor-${name}`;
+            },
+            priority: -10,
+            reuseExistingChunk: true,
+          },
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+        },
+      },
+    },
+    performance: {
+      maxAssetSize: 1024000,
+      maxEntrypointSize: 1024000,
+      hints: false,
     },
     plugins: [
       new HtmlWebpackPlugin({ 
