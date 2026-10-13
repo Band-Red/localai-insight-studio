@@ -1,34 +1,59 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /venv
 /.pnp
 .pnp.js
 /Doc
 
-# testing
+# Testing & Coverage
 /coverage
+*.lcov
 
-# production
+# Production & Build outputs
 /build
 /dist
 /release
+/dist-web
 
-# bin & models
+# Binaries, models & large assets
 /bin
 *.gguf
+*.bin
+*.pt
+*.onnx
+*.safetensors
 
-# secret
+# Secrets, Credentials & Environment
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+id_rsa*
+*.keystore
 
-# misc
+# Local databases & runtime caches
+*.db
+*.sqlite
+*.sqlite3
+*.nedb
+data/
+logs/
+*.log
+
+# System & IDE artifacts
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
 
+# Package manager debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
