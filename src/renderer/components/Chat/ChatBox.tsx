@@ -245,26 +245,29 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
   /**
    * معالجة وتحسين تنسيقات الماركداون للجداول والقوائم:
-   * 1. تحويل الجداول المشوهة أو الناقصة (رؤوس أعمدة متبوعة بقائمة مرقمة أو سطور منفصلة) إلى جداول Markdown متكاملة.
-   * 2. ضمان وجود سطر الفواصل القياسي (| --- | --- |) بشكل متناسق.
-   * 3. استيعاب كامل عناصر القائمة حتى لو فصلت بينها أسطر فارغة أو صفوف بصيغة بايب.
+   * 1. إزالة الأسطر الفارغة الفاصلة داخل نفس الجدول (مثل سطر فارغ قبل "| 10 | جازان |") لمنع انكسار الجدول وخروجه كنص عادي.
+   * 2. تحويل الجداول الناقصة (ترويسة متبوعة بقائمة مرقمة) إلى جداول Markdown متكاملة.
+   * 3. ضمان وجود سطر الفواصل القياسي (| --- | --- |) دائماً.
    */
   const preprocessMarkdown = (rawText: string): string => {
     if (!rawText) return '';
     const lines = rawText.split('\n');
     const result: string[] = [];
+    let inTable = false;
     let i = 0;
 
     while (i < lines.length) {
       const line = lines[i];
       const trimmed = line.trim();
 
-      // حالة ترويسة جدول مثل "| الرقم | اسم المدينة |" بدون خط فاصل
-      if (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.includes('---')) {
+      // فحص هل السطر يمثل صف جدول بصيغة بايب
+      const isTableRow = trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.length > 2;
+
+      // ── حالة 1: ترويسة جدول متبوعة بقائمة مرقمة مباشرة ──
+      if (isTableRow && !trimmed.includes('---')) {
         let nextIdx = i + 1;
         while (nextIdx < lines.length && !lines[nextIdx].trim()) nextIdx++;
 
-        // فحص هل ما يليها قائمة مرقمة أو سطور جدول
         if (nextIdx < lines.length && /^\d+[\.\)]\s+/.test(lines[nextIdx].trim())) {
           const colCells = trimmed.split('|').filter(c => c.trim().length > 0);
           const colCount = Math.max(colCells.length, 2);
@@ -272,12 +275,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
           result.push(trimmed);
           result.push(separator);
+          inTable = true;
 
           i = nextIdx;
           while (i < lines.length) {
             const rowTrim = lines[i].trim();
             if (!rowTrim) {
-              // تخطي الأسطر الفارغة طالما السطر التالي لا يزال ضمن القائمة أو الجدول
               let peek = i + 1;
               while (peek < lines.length && !lines[peek].trim()) peek++;
               if (peek < lines.length && (/^\d+[\.\)]\s+/.test(lines[peek].trim()) || (lines[peek].trim().startsWith('|') && lines[peek].trim().endsWith('|')))) {
@@ -302,10 +305,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
             }
             i++;
           }
+          inTable = false;
           continue;
         }
 
-        // حالة سطر جدول متبوع بأسطر جدول أخرى بدون خط فاصل
+        // سطر جدول ترويسة متبوع بأسطر جدول أخرى بدون سطر الفواصل
         if (nextIdx < lines.length && lines[nextIdx].trim().startsWith('|') && !lines[nextIdx].trim().includes('---')) {
           const colCells = trimmed.split('|').filter(c => c.trim().length > 0);
           const colCount = Math.max(colCells.length, 2);
@@ -313,9 +317,29 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
           result.push(trimmed);
           result.push(separator);
+          inTable = true;
           i++;
           continue;
         }
+      }
+
+      // ── حالة 2: سطر فارغ يفصل صفاً تابعاً للجدول الحالي (مثل سطر فارغ قبل "| 10 | جازان |") ──
+      if (inTable && !trimmed) {
+        let peek = i + 1;
+        while (peek < lines.length && !lines[peek].trim()) peek++;
+        if (peek < lines.length && lines[peek].trim().startsWith('|') && lines[peek].trim().endsWith('|')) {
+          // نتخطى السطر الفارغ حتى لا ينقطع الجدول إلى فقرة نصية عادية
+          i++;
+          continue;
+        } else {
+          inTable = false;
+        }
+      }
+
+      if (isTableRow) {
+        inTable = true;
+      } else if (trimmed) {
+        inTable = false;
       }
 
       result.push(line);
