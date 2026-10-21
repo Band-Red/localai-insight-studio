@@ -114,6 +114,8 @@
 - **ADR 1: File-based instead of SQL**: Portability, privacy, and Obsidian integration without a DB server.
 - **ADR 2: Python for Monitoring**: `psutil` provides more accurate hardware metrics than Node.js native tools.
 
+---
+
 ### Quick Start Commands After Downloading the Project
 
 Run the following commands in the project folder after downloading it:
@@ -258,6 +260,8 @@ npm run deploy
 
 - **القرار الأول: نظام الملفات بدلاً من SQL**: لضمان سيادة البيانات وسهولة النقل والتكامل مع Obsidian.
 - **القرار الثاني: بايثون للمراقبة**: نظراً لتفوق مكتبة `psutil` في جلب بيانات العتاد العميقة بدقة.
+
+---
 
 ### الأوامر السريعة بعد تنزيل المشروع
 
