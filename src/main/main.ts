@@ -172,6 +172,14 @@ class MainApp {
             return { success: true, data: session };
         });
 
+        ipcMain.handle('db:delete-session', async (_e, id: string) => {
+            return await this.sessionDb.deleteSession(id);
+        });
+
+        ipcMain.handle('db:update-session-title', async (_e, id: string, newTitle: string) => {
+            return await this.sessionDb.updateSessionTitle(id, newTitle);
+        });
+
 
 
         // ── GGUF Model Management ────────────────────────────────────────

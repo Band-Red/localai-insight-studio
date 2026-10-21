@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History, Plus, Edit2, Check, X, Folder, FileText } from 'lucide-react';
+import { Send, Bot, User, Loader2, Paperclip, Eraser, BookOpen, Zap, History, Plus, Edit2, Check, X, Folder, FileText, Trash2 } from 'lucide-react';
 import CodeSandbox from './CodeSandbox';
 import ConfirmModal from '../UI/ConfirmModal';
 import styles from './ChatBox.module.css';
@@ -54,6 +54,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
 
   const [showHistoryList, setShowHistoryList] = useState(false);
   const [historySessions, setHistorySessions] = useState<any[]>([]);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingSessionTitle, setEditingSessionTitle] = useState('');
 
   const showConfirm = (title: string, message: string, onConfirm: () => void) => {
     setConfirmModal({
@@ -535,6 +537,52 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     }
   };
 
+  const handleDeleteSession = (e: React.MouseEvent, id: string, title: string) => {
+    e.stopPropagation();
+    showConfirm('حذف المحادثة', `هل أنت متأكد من حذف "${title}" نهائياً من السجل؟`, async () => {
+      const electron = (window as any).electronAPI;
+      if (electron?.dbDeleteSession) {
+        const res = await electron.dbDeleteSession(id);
+        if (res.success) {
+          setHistorySessions(prev => prev.filter(s => s.id !== id));
+          window.dispatchEvent(new CustomEvent('app:toast', {
+            detail: { msg: '🗑 تم حذف المحادثة بنجاح.', type: 'info' }
+          }));
+        }
+      }
+    });
+  };
+
+  const handleStartEditSession = (e: React.MouseEvent, session: any) => {
+    e.stopPropagation();
+    setEditingSessionId(session.id);
+    setEditingSessionTitle(session.title);
+  };
+
+  const handleSaveSessionTitle = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const newTitle = editingSessionTitle.trim();
+    if (!newTitle) return;
+
+    const electron = (window as any).electronAPI;
+    if (electron?.dbUpdateSessionTitle) {
+      const res = await electron.dbUpdateSessionTitle(id, newTitle);
+      if (res.success) {
+        setHistorySessions(prev => prev.map(s => s.id === id ? { ...s, title: newTitle } : s));
+        setEditingSessionId(null);
+        window.dispatchEvent(new CustomEvent('app:toast', {
+          detail: { msg: '✏️ تم تحديث اسم المحادثة بنجاح.', type: 'success' }
+        }));
+      }
+    }
+  };
+
+  const handleCancelEditSession = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingSessionId(null);
+    setEditingSessionTitle('');
+  };
+
   const handleAttachFiles = async () => {
     try {
       const electron = (window as any).electronAPI;
@@ -782,10 +830,75 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
                 <p className={styles.newChatMsg}>لا توجد محادثات محفوظة بعد.</p>
               ) : (
                 historySessions.map(s => (
-                  <div key={s.id} className={styles.historyItem} onClick={() => loadSession(s.id)}>
-                    <div className={styles.historyTitle}>{s.title}</div>
-                    <div className={styles.historyMeta}>
-                      {new Date(s.createdAt).toLocaleDateString('ar-SA')} • {s.messageCount} رسائل
+                  <div 
+                    key={s.id} 
+                    className={styles.historyItem} 
+                    onClick={() => {
+                      if (editingSessionId !== s.id) {
+                        loadSession(s.id);
+                      }
+                    }}
+                  >
+                    <div className={styles.historyMainContent}>
+                      {editingSessionId === s.id ? (
+                        <div onClick={e => e.stopPropagation()}>
+                          <input
+                            type="text"
+                            className={styles.historyEditInput}
+                            value={editingSessionTitle}
+                            onChange={e => setEditingSessionTitle(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') handleSaveSessionTitle(e as any, s.id);
+                              if (e.key === 'Escape') handleCancelEditSession(e as any);
+                            }}
+                            autoFocus
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <div className={styles.historyTitle} title={s.title}>{s.title}</div>
+                          <div className={styles.historyMeta}>
+                            {new Date(s.createdAt).toLocaleDateString('ar-SA')} • {s.messageCount} رسائل
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <div className={styles.historyActions} onClick={e => e.stopPropagation()}>
+                      {editingSessionId === s.id ? (
+                        <>
+                          <button
+                            className={styles.historyActionBtn}
+                            onClick={e => handleSaveSessionTitle(e, s.id)}
+                            title="حفظ التعديل"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            className={styles.historyActionBtn}
+                            onClick={handleCancelEditSession}
+                            title="إلغاء التعديل"
+                          >
+                            <X size={14} />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            className={styles.historyActionBtn}
+                            onClick={e => handleStartEditSession(e, s)}
+                            title="تعديل اسم المحادثة"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                          <button
+                            className={`${styles.historyActionBtn} ${styles.historyActionDeleteBtn}`}
+                            onClick={e => handleDeleteSession(e, s.id, s.title)}
+                            title="حذف المحادثة نهائياً"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))

@@ -33,6 +33,8 @@ if (!(window as any).electronAPI) {
     dbSaveNewSession: async (title: string) => { console.log('[Mock] dbSaveNewSession', title); return { success: true }; },
     dbListSessions: async () => ({ success: true, data: [] }),
     dbGetSessionById: async () => ({ success: true, data: null }),
+    dbDeleteSession: async () => ({ success: true }),
+    dbUpdateSessionTitle: async () => ({ success: true }),
 
     // GGUF
     listModels: async () => [],

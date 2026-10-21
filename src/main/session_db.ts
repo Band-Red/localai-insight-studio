@@ -127,4 +127,33 @@ export class SessionMemoryDB {
             return { success: false, error: error.message };
         }
     }
+
+    /**
+     * Deletes a specific historical session by ID.
+     */
+    public async deleteSession(id: string) {
+        try {
+            await this.db.remove({ _id: id });
+            return { success: true };
+        } catch (error: any) {
+            console.error('[SessionDB] Error deleting session:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Updates the title of a specific historical session.
+     */
+    public async updateSessionTitle(id: string, newTitle: string) {
+        try {
+            await this.db.update(
+                { _id: id },
+                { $set: { title: newTitle } }
+            );
+            return { success: true };
+        } catch (error: any) {
+            console.error('[SessionDB] Error updating session title:', error);
+            return { success: false, error: error.message };
+        }
+    }
 }
