@@ -120,7 +120,7 @@ export class SessionMemoryDB {
      */
     public async clearConversation() {
         try {
-            await this.db.remove({ _id: 'current_session' });
+            await this.db.remove({ _id: 'current_session' }, { multi: false });
             return { success: true };
         } catch (error: any) {
             console.error('[SessionDB] Error clearing conversation:', error);
@@ -133,7 +133,13 @@ export class SessionMemoryDB {
      */
     public async deleteSession(id: string) {
         try {
-            await this.db.remove({ _id: id });
+            console.log('[SessionDB] Attempting to delete session with _id:', id);
+            const numRemoved = await this.db.remove({ _id: id }, { multi: false });
+            console.log('[SessionDB] numRemoved:', numRemoved);
+            if (numRemoved === 0) {
+                console.warn('[SessionDB] No document found with _id:', id);
+                return { success: false, error: 'Session not found' };
+            }
             return { success: true };
         } catch (error: any) {
             console.error('[SessionDB] Error deleting session:', error);
