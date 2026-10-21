@@ -254,17 +254,24 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
     const lines = rawText.split('\n');
     const result: string[] = [];
     let inTable = false;
+    let headerSeparatorFound = false;
     let i = 0;
+
+    const isSeparatorOrHyphenRow = (str: string): boolean => {
+      const t = str.trim();
+      if (!t.startsWith('|') || !t.endsWith('|')) return false;
+      const cells = t.split('|').slice(1, -1);
+      if (cells.length === 0) return false;
+      return cells.every(c => /^[\s\-:—–]+$/.test(c) && /[\-:—–]/.test(c));
+    };
 
     while (i < lines.length) {
       const line = lines[i];
       const trimmed = line.trim();
-
-      // فحص هل السطر يمثل صف جدول بصيغة بايب
       const isTableRow = trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.length > 2;
 
-      // ── حالة 1: ترويسة جدول متبوعة بقائمة مرقمة مباشرة ──
-      if (isTableRow && !trimmed.includes('---')) {
+      // 1. ترويسة جدول متبوعة بقائمة مرقمة
+      if (isTableRow && !isSeparatorOrHyphenRow(trimmed)) {
         let nextIdx = i + 1;
         while (nextIdx < lines.length && !lines[nextIdx].trim()) nextIdx++;
 
@@ -276,6 +283,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           result.push(trimmed);
           result.push(separator);
           inTable = true;
+          headerSeparatorFound = true;
 
           i = nextIdx;
           while (i < lines.length) {
@@ -294,23 +302,27 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
             if (/^\d+[\.\)]\s+/.test(rowTrim)) {
               const listMatch = rowTrim.match(/^(\d+)[\.\)]\s+(.*)$/);
               if (listMatch) {
-                result.push(`| ${listMatch[1]} | ${listMatch[2]} |`);
+                result.push('| ' + listMatch[1] + ' | ' + listMatch[2] + ' |');
               } else {
                 result.push(lines[i]);
               }
             } else if (rowTrim.startsWith('|') && rowTrim.endsWith('|')) {
-              result.push(rowTrim);
+              // تخطي أي صفوف فواصل إضافية داخل جسم الجدول
+              if (!isSeparatorOrHyphenRow(rowTrim)) {
+                result.push(rowTrim);
+              }
             } else {
               break;
             }
             i++;
           }
           inTable = false;
+          headerSeparatorFound = false;
           continue;
         }
 
         // سطر جدول ترويسة متبوع بأسطر جدول أخرى بدون سطر الفواصل
-        if (nextIdx < lines.length && lines[nextIdx].trim().startsWith('|') && !lines[nextIdx].trim().includes('---')) {
+        if (nextIdx < lines.length && lines[nextIdx].trim().startsWith('|') && !isSeparatorOrHyphenRow(lines[nextIdx].trim())) {
           const colCells = trimmed.split('|').filter(c => c.trim().length > 0);
           const colCount = Math.max(colCells.length, 2);
           const separator = '| ' + Array(colCount).fill('---').join(' | ') + ' |';
@@ -318,21 +330,40 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
           result.push(trimmed);
           result.push(separator);
           inTable = true;
+          headerSeparatorFound = true;
           i++;
           continue;
         }
       }
 
-      // ── حالة 2: سطر فارغ يفصل صفاً تابعاً للجدول الحالي (مثل سطر فارغ قبل "| 10 | جازان |") ──
+      // 2. سطر فاصل يحتوي فقط على '-'
+      if (isTableRow && isSeparatorOrHyphenRow(trimmed)) {
+        if (inTable && !headerSeparatorFound) {
+          headerSeparatorFound = true;
+          result.push(line);
+        } else if (inTable && headerSeparatorFound) {
+          // سطر فواصل متكرر بين الصفوف: نتخطاه تماماً ولا ندرجه كصف قيم
+          i++;
+          continue;
+        } else {
+          headerSeparatorFound = true;
+          inTable = true;
+          result.push(line);
+        }
+        i++;
+        continue;
+      }
+
+      // 3. سطر فارغ يفصل صفاً تابعاً للجدول الحالي
       if (inTable && !trimmed) {
         let peek = i + 1;
         while (peek < lines.length && !lines[peek].trim()) peek++;
         if (peek < lines.length && lines[peek].trim().startsWith('|') && lines[peek].trim().endsWith('|')) {
-          // نتخطى السطر الفارغ حتى لا ينقطع الجدول إلى فقرة نصية عادية
           i++;
           continue;
         } else {
           inTable = false;
+          headerSeparatorFound = false;
         }
       }
 
@@ -340,6 +371,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onCodeGenerated, onRunCode, activeMod
         inTable = true;
       } else if (trimmed) {
         inTable = false;
+        headerSeparatorFound = false;
       }
 
       result.push(line);
