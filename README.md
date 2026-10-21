@@ -8,7 +8,7 @@
 
 # 🚀 LocalAI Insight Studio: Sovereign Local AI IDE
 
-**LocalAI Insight Studio** is an All-in-One Local AI Development Ecosystem. It enables developers to build, test, and monitor local AI models with absolute privacy. No clouds, no databases—just you and your machine.
+**LocalAI Insight Studio** is an All-in-One Local AI Development Ecosystem. It enables developers to build, test, and monitor local AI models with absolute privacy. No clouds, no databases—just local tools and workflow automation.
 
 ---
 
@@ -114,6 +114,37 @@
 - **ADR 1: File-based instead of SQL**: Portability, privacy, and Obsidian integration without a DB server.
 - **ADR 2: Python for Monitoring**: `psutil` provides more accurate hardware metrics than Node.js native tools.
 
+### Quick Start Commands After Downloading the Project
+
+Run the following commands in the project folder after downloading it:
+
+```bash
+npm install
+pip install psutil
+npm run dev
+```
+
+Useful commands:
+
+```bash
+npm start
+npm run build
+npm run build:web
+npm run dist
+npm run pack
+npm run deploy
+```
+
+- `npm install`: installs all project dependencies.
+- `pip install psutil`: installs the Python dependency used for hardware monitoring.
+- `npm run dev`: runs the app in development mode with live rebuilds.
+- `npm start`: launches the Electron app without watch mode.
+- `npm run build`: creates the desktop app bundle.
+- `npm run build:web`: builds the web preview version for GitHub Pages.
+- `npm run dist`: packages the app into an installer.
+- `npm run pack`: creates an unpacked package for testing.
+- `npm run deploy`: publishes the web preview to GitHub Pages.
+
 </div>
 
 ---
@@ -122,7 +153,7 @@
 
 # 🚀 LocalAI Insight Studio: المحرك السيادي المحلي للذكاء الاصطناعي
 
-**LocalAI Insight Studio** هو نظام بيئي متكامل ومعزول لإدارة الذكاء الاصطناعي محلياً، مصمم خصيصاً للمطورين. يمنحك القدرة على بناء واختبار ومراقبة النماذج المحلية بخصوصية مطلقة. لا سحابة، لا قواعد بيانات—فقط أنت وجهازك.
+**LocalAI Insight Studio** هو نظام بيئي متكامل ومعزول لإدارة الذكاء الاصطناعي محلياً، مصمم خصيصاً للمطورين. يمنحك القدرة على بناء واختبار ومراقبة النماذج المحلية بشكل كامل مع الحفاظ على الخصوصية. لا ��حب إلى السحابة، لا قواعد بيانات، فقط أدوات محلية.
 
 ---
 
@@ -152,7 +183,7 @@
   1.  **العملية الرئيسية (Electron)**: إدارة النظام والملفات.
   2.  **عملية العرض (React)**: واجهة المستخدم.
   3.  **جسر بايثون (Python Bridge)**: جلب إحصائيات النظام بدقة عبر `psutil`.
-- **تخزين البيانات**: لا توجد قواعد بيانات تقليدية. يتم استخدام `config.json` للإعدادات، `models.json` للبيانات الوصفية، وملفات `Markdown` للمحادثات (متوافقة مع Obsidian).
+- **تخزين البيانات**: لا توجد قواعد بيانات تقليدية. يتم استخدام `config.json` للإعدادات، `models.json` للبيانات الوصفية، وMarkdown لسجلات المحادثات (متوافق مع Obsidian).
 - **الواجهة (UI/UX)**: نمط نيون داكن (Cyberpunk)، خطوط Inter و Segoe UI، شريط جانبي ثابت للتنقل.
 
 ---
@@ -228,6 +259,37 @@
 - **القرار الأول: نظام الملفات بدلاً من SQL**: لضمان سيادة البيانات وسهولة النقل والتكامل مع Obsidian.
 - **القرار الثاني: بايثون للمراقبة**: نظراً لتفوق مكتبة `psutil` في جلب بيانات العتاد العميقة بدقة.
 
+### الأوامر السريعة بعد تنزيل المشروع
+
+قم بتشغيل الأوامر التالية داخل مجلد المشروع بعد تنزيله:
+
+```bash
+npm install
+pip install psutil
+npm run dev
+```
+
+الأوامر المفيدة:
+
+```bash
+npm start
+npm run build
+npm run build:web
+npm run dist
+npm run pack
+npm run deploy
+```
+
+- `npm install`: يقوم بتثبيت جميع مكتبات المشروع.
+- `pip install psutil`: يقوم بتثبيت مكتبة Python اللازمة لمراقبة موارد الجهاز.
+- `npm run dev`: يقوم بتشغيل التطبيق في وضع التطوير مع إعادة البناء التلقائية.
+- `npm start`: يقوم بتشغيل التطبيق مباشرة دون وضع المراقبة.
+- `npm run build`: ينشئ نسخة التطبيق المكتبية.
+- `npm run build:web`: ينشئ نسخة المعاينة على الويب لـ GitHub Pages.
+- `npm run dist`: يقوم بتغليف التطبيق إلى ملف تثبيت.
+- `npm run pack`: ينشئ حزمة غير مثبتة لاختبارها.
+- `npm run deploy`: ينشر معاينة الويب إلى GitHub Pages.
+
 </div>
 
 ---
@@ -239,5 +301,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 © 2026 The Developer of Local AI Insight Studio
-
-
